@@ -64,6 +64,7 @@ export default function AdminPage() {
         body: JSON.stringify({ password }),
       });
       if (res.ok) {
+        localStorage.setItem('au.quiz.admin.password', password);
         setAuthenticated(true);
         loadData(password);
       } else {
@@ -211,6 +212,13 @@ export default function AdminPage() {
           </p>
         </div>
         <div className="flex gap-3 flex-wrap">
+          <a
+            className="au-btn-secondary text-sm"
+            href="/admin/quizzes"
+            style={{ padding: '0.5rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+          >
+            🎛 Live Quizzes
+          </a>
           <button
             className="au-btn-secondary text-sm"
             onClick={() => loadData()}
