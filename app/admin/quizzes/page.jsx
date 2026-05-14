@@ -11,6 +11,19 @@ function statusTone(status) {
   return 'quiz-pill-lavender';
 }
 
+function groupByWeek(quizzes) {
+  const byWeek = new Map();
+  for (const quiz of quizzes) {
+    const week = quiz.weekNumber || 0;
+    if (!byWeek.has(week)) byWeek.set(week, []);
+    byWeek.get(week).push(quiz);
+  }
+  return [...byWeek.entries()].sort(([a], [b]) => a - b).map(([weekNumber, weekQuizzes]) => ({
+    weekNumber,
+    quizzes: weekQuizzes.sort((left, right) => String(left.phase).localeCompare(String(right.phase))),
+  }));
+}
+
 export default function AdminQuizzesPage() {
   const admin = useAdminPassword();
   const [quizzes, setQuizzes] = useState([]);
@@ -66,11 +79,13 @@ export default function AdminQuizzesPage() {
         onLogin={admin.login}
         authError={admin.authError}
         loading={admin.verifying}
-        title="Live quiz admin"
-        subtitle="Author quizzes, open them during workshops, and control what students can see."
+        title="Quiz control room"
+        subtitle="Quiz definitions live in lib/quizzes.js. This dashboard controls visibility and shows live aggregates."
       />
     );
   }
+
+  const grouped = groupByWeek(quizzes);
 
   return (
     <div className="quiz-shell">
@@ -78,55 +93,55 @@ export default function AdminQuizzesPage() {
         <div>
           <p className="quiz-kicker">Lecturer layer</p>
           <h1 className="quiz-title" style={{ fontSize: 'clamp(2rem, 4vw, 2.9rem)' }}>Quiz control room</h1>
-          <p className="quiz-subtitle">Phase 1 ships authoring, live polling, manual releases, and projector-friendly distributions.</p>
+          <p className="quiz-subtitle">All quizzes are defined in <code>lib/quizzes.js</code>. Use the schedule, or force-open during the workshop.</p>
         </div>
         <div className="quiz-button-row">
-          <Link href="/admin" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Assignment 2 dashboard</Link>
+          <Link href="/" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Course hub</Link>
+          <Link href="/admin" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Group formation</Link>
           <Link href="/admin/students" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Students</Link>
           <Link href="/admin/export" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Exports</Link>
-          <Link href="/admin/quizzes/new" className="au-btn-primary" style={{ textDecoration: 'none' }}>Create quiz</Link>
           <button type="button" className="au-btn-secondary" onClick={admin.logout}>Sign out</button>
         </div>
-      </div>
-
-      <div className="quiz-note" style={{ marginBottom: '1rem' }}>
-        Trajectory export, student drill-down, and cohort split views land in later phases. This screen is the operational surface for Week 9.
       </div>
 
       {loading && <div className="quiz-empty-state">Loading quizzes...</div>}
       {error && <div className="quiz-note" style={{ color: '#8a1c12' }}>{error}</div>}
 
-      {!loading && quizzes.length === 0 && (
+      {!loading && grouped.length === 0 && (
         <div className="quiz-panel" style={{ padding: '1.35rem' }}>
-          <div className="quiz-empty-state">No quizzes yet. Create one to start the live workshop flow.</div>
+          <div className="quiz-empty-state">No quizzes defined. Edit lib/quizzes.js to add them.</div>
         </div>
       )}
 
-      <div className="quiz-grid quiz-grid-2">
-        {quizzes.map((quiz) => (
-          <div key={quiz.quizId} className="quiz-panel quiz-panel-soft" style={{ padding: '1.25rem' }}>
-            <div className="quiz-panel-header" style={{ marginBottom: '0.8rem' }}>
-              <div>
+      {grouped.map(({ weekNumber, quizzes: weekQuizzes }) => (
+        <div key={weekNumber} className="quiz-panel" style={{ padding: '1.25rem', marginBottom: '1rem' }}>
+          <h2 className="quiz-question-title" style={{ fontSize: '1.25rem', marginBottom: '0.75rem' }}>
+            Week {weekNumber}
+          </h2>
+          <div className="quiz-grid quiz-grid-2">
+            {weekQuizzes.map((quiz) => (
+              <div key={quiz.quizId} className="quiz-panel quiz-panel-soft" style={{ padding: '1.1rem' }}>
                 <div className="quiz-pill-row" style={{ marginBottom: '0.55rem' }}>
                   <span className={`quiz-pill ${statusTone(quiz.status)}`}>{quiz.status}</span>
-                  <span className="quiz-pill quiz-pill-sand">Week {quiz.weekNumber}</span>
-                  <span className="quiz-pill quiz-pill-navy">{quiz.cohort}</span>
+                  <span className="quiz-pill quiz-pill-sand">{quiz.phase || 'poll'}</span>
+                  {quiz.statusOverride && (
+                    <span className="quiz-pill quiz-pill-blue">Override</span>
+                  )}
                 </div>
-                <h2 className="quiz-question-title" style={{ fontSize: '1.35rem' }}>{quiz.title}</h2>
+                <h3 className="quiz-question-title" style={{ fontSize: '1.05rem' }}>{quiz.title}</h3>
+                <div className="quiz-stat-row" style={{ marginTop: '0.5rem' }}>
+                  <span className="quiz-stat-chip">Responses: {quiz.responseCount}</span>
+                  <span className="quiz-stat-chip">Questions: {quiz.questions?.length || 0}</span>
+                </div>
+                <div className="quiz-button-row" style={{ marginTop: '0.85rem' }}>
+                  <Link href={`/admin/quizzes/${quiz.quizId}`} className="au-btn-secondary" style={{ textDecoration: 'none' }}>Status / preview</Link>
+                  <Link href={`/admin/quizzes/${quiz.quizId}/live`} className="au-btn-primary" style={{ textDecoration: 'none' }}>Live view</Link>
+                </div>
               </div>
-            </div>
-            <div className="quiz-stat-row" style={{ marginTop: 0 }}>
-              <span className="quiz-stat-chip">Responses: {quiz.responseCount}</span>
-              <span className="quiz-stat-chip">Released: {quiz.releaseCount}</span>
-              <span className="quiz-stat-chip">Questions: {quiz.questions?.length || 0}</span>
-            </div>
-            <div className="quiz-button-row" style={{ marginTop: '1rem' }}>
-              <Link href={`/admin/quizzes/${quiz.quizId}`} className="au-btn-secondary" style={{ textDecoration: 'none' }}>Edit quiz</Link>
-              <Link href={`/admin/quizzes/${quiz.quizId}/live`} className="au-btn-primary" style={{ textDecoration: 'none' }}>Project live view</Link>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }

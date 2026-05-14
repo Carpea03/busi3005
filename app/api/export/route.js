@@ -29,16 +29,16 @@ export async function GET(request) {
 
     const headers = [
       'fullName',
+      'format',
       'workshop',
       'aiExperience',
       'aiTools',
-      'skills',
-      'preferredRole',
+      'buildSkills',
       'availability',
       'deadlineApproach',
       'meetingPreference',
-      'industryInterest',
-      'aiApplicationInterests',
+      'hustleDirection',
+      'hustleConcept',
       'peerPreference',
       'submittedAt',
     ];

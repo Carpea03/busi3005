@@ -29,55 +29,67 @@ export async function POST(request) {
       })
       .filter(Boolean);
 
-    if (submissions.length < 3) {
-      return NextResponse.json({ error: 'Not enough submissions to form groups (minimum 3)' }, { status: 400 });
+    if (submissions.length < 2) {
+      return NextResponse.json({ error: 'Not enough submissions to form groups (minimum 2).' }, { status: 400 });
     }
 
     const profiles = submissions.map((s, i) => ({
       index: i + 1,
       name: s.fullName,
+      format: s.format,
       workshop: s.workshop,
       aiExperience: s.aiExperience,
-      preferredRole: s.preferredRole,
-      skills: s.skills,
-      industryInterest: s.industryInterest,
-      aiApplicationInterests: s.aiApplicationInterests,
+      buildSkills: s.buildSkills,
+      aiTools: s.aiTools,
+      hustleDirection: s.hustleDirection,
+      hustleConcept: s.hustleConcept,
       availability: s.availability,
       deadlineApproach: s.deadlineApproach,
+      meetingPreference: s.meetingPreference,
       peerPreference: s.peerPreference || null,
     }));
 
-    const totalStudents = profiles.length;
-    const targetGroupSize = 4;
-    const numGroups = Math.round(totalStudents / targetGroupSize);
+    const soloCount = profiles.filter((p) => p.format === 'solo').length;
+    const groupingPool = profiles.length - soloCount;
 
-    const prompt = `You are helping a university lecturer form balanced project groups for an "AI for Business Transformation" course. There are ${totalStudents} students who need to be placed into approximately ${numGroups} groups of 3–4 students each.
+    const prompt = `You are helping a university lecturer confirm rosters for Assignment 2 of BUSI3005 (AI for Business Transformation). The assignment is "AI Side Hustle Launch": each submission produces a real artefact, a founder narrative video, an AI process log, and a peer review. The brief is founder-honest, not pitch-polished.
 
-Here are the student profiles:
+Group constraints:
+- Maximum group size is 3. Smaller is fine.
+- Solo is a valid format. Any student whose "format" is "solo" must be returned as a one-person group; do not pair them with anyone.
+- Students whose format is "pair" want a group of 2. Students whose format is "trio" want a group of 3. Honour the requested size where roster math allows; if it does not, prefer the closest size and flag it in flaggedConsiderations.
+- Never mix students from different workshops (Wednesday 2–5pm vs Friday 8–11am) into the same group.
+
+There are ${profiles.length} students total — ${soloCount} solo, ${groupingPool} seeking a group.
+
+Profiles:
 ${JSON.stringify(profiles, null, 2)}
 
-Your task is to create balanced groups following these priorities (in order):
-1. Keep students in the same workshop together (Wednesday 2–5pm or Friday 8–11am)
-2. Mix AI experience levels — avoid placing all Beginners or all Experts together
-3. Balance preferred roles — each group ideally has at least one Coordinator and one Researcher/Creative
-4. Align on availability — group members should have overlapping available times
-5. Match industry interests where possible — students with similar industry interests work better together
-6. Respect peer preferences — honour any stated preferences/exclusions where feasible
+When matching non-solo students, prioritise (in order):
+1. Same workshop (hard requirement).
+2. Complementary build skills — avoid groups where everyone has the same single skill.
+3. Compatible hustle direction — students with overlapping or clearly complementary hustleDirection / hustleConcept fields.
+4. Overlapping availability windows.
+5. Stated peer preferences and exclusions, where feasible.
+
+Do not optimise for "balanced experience levels" as a primary criterion — small groups can work with similar experience profiles. Do not invent industry interests not present in the data. Do not produce a leaderboard or any gamified language.
 
 Return ONLY a valid JSON object with this exact structure:
 {
   "groups": [
     {
       "groupNumber": 1,
+      "format": "solo|pair|trio",
+      "workshop": "Wednesday 2–5pm|Friday 8–11am",
       "members": [
-        { "name": "...", "role": "...", "aiExperience": "..." }
+        { "name": "...", "aiExperience": "...", "hustleDirection": "..." }
       ],
-      "rationale": "Brief 1–2 sentence explanation of why this group works well",
-      "industryFocus": "Suggested industry focus based on member interests"
+      "rationale": "1–2 sentence explanation grounded in the actual profiles.",
+      "hustleAlignmentNotes": "Brief note on how their hustle directions fit together (or 'solo' for solo groups)."
     }
   ],
-  "summary": "2–3 sentence overview of the grouping strategy used",
-  "flaggedConsiderations": ["Any peer preferences or potential conflicts the lecturer should review"]
+  "summary": "2–3 sentence overview of how the matching went.",
+  "flaggedConsiderations": ["Any peer preferences, mismatched sizes, or other issues for the lecturer to review."]
 }
 
 Do not include any text outside the JSON object.`;
@@ -119,11 +131,11 @@ Do not include any text outside the JSON object.`;
       JSON.stringify({
         groups,
         generatedAt: new Date().toISOString(),
-        totalStudents,
-      })
+        totalStudents: profiles.length,
+      }),
     );
 
-    return NextResponse.json({ success: true, ...groups, generatedAt: new Date().toISOString(), totalStudents });
+    return NextResponse.json({ success: true, ...groups, generatedAt: new Date().toISOString(), totalStudents: profiles.length });
   } catch (error) {
     console.error('Generate groups error:', error);
     return NextResponse.json({ error: 'Server error — please try again.' }, { status: 500 });

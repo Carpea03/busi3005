@@ -1,30 +1,44 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const SKILLS = [
-  'Research and information gathering',
-  'Business analysis and strategy',
-  'Presentation design (PowerPoint, Canva, etc.)',
-  'Writing and editing',
-  'Public speaking and presenting',
-  'Technical skills (data analysis, coding)',
-  'Creative thinking and brainstorming',
-  'Project management and organisation',
+// Survey for Assignment 2 (AI Side Hustle Launch). Groups are 1 (solo), 2, or 3.
+// Wording reframed away from the old polished-pitch format.
+
+const HUSTLE_DIRECTIONS = [
+  'E-commerce (store, product listing, marketplace)',
+  'Delivered freelance service (writing, design, research, automation)',
+  'Content channel (newsletter, YouTube, social) built with AI tools',
+  'AI-powered tool, workflow, or template for real users',
+  'Client project for a real business (pro bono counts)',
+  'Prototype with documented user testing',
+  'Not sure yet — open to suggestions',
 ];
 
-const AI_INTERESTS = [
-  'Marketing and content creation',
-  'Customer service and chatbots',
-  'Data analysis and insights',
-  'Process automation',
-  'Product development and innovation',
-  'Finance and business intelligence',
-  'Healthcare applications',
-  'Sustainability and social impact',
-  'Education and learning',
-  'Retail and e-commerce',
+const BUILD_SKILLS = [
+  'Customer / user research and conversations',
+  'Writing and content production',
+  'Visual design and image generation',
+  'Video, audio, or AI-avatar production',
+  'Light coding / no-code automation',
+  'Spreadsheet and data work',
+  'Outreach, sales, and DMs',
+  'Project coordination and decision-making',
+];
+
+const AI_TOOLS = [
+  'ChatGPT',
+  'Claude',
+  'Google Gemini',
+  'Microsoft Copilot',
+  'Perplexity',
+  'Image generators (Midjourney, DALL-E, etc.)',
+  'Video / avatar generators (HeyGen, Synthesia, etc.)',
+  'Coding assistants (GitHub Copilot, Cursor, etc.)',
+  'No-code automation (n8n, Make, Zapier with AI)',
+  'None yet — new to AI tools',
 ];
 
 const AVAILABILITY = [
@@ -36,28 +50,21 @@ const AVAILABILITY = [
   'Very flexible — most times work for me',
 ];
 
-const WORKSHOPS = [
-  'Wednesday 2–5pm',
-  'Friday 8–11am',
-];
+const WORKSHOPS = ['Wednesday 2–5pm', 'Friday 8–11am'];
 
-const AI_TOOLS = [
-  'ChatGPT',
-  'Claude',
-  'Google Gemini',
-  'Microsoft Copilot',
-  'Perplexity',
-  'DALL-E or Midjourney (image generation)',
-  'GitHub Copilot or other coding assistants',
-  'None — I\'m new to AI tools',
-];
-
-const STEPS = [
-  { number: 1, label: 'About You' },
-  { number: 2, label: 'AI Background' },
-  { number: 3, label: 'Working Style' },
-  { number: 4, label: 'Project Preferences' },
-];
+const STEPS_BY_FORMAT = {
+  solo: [
+    { number: 1, label: 'About you' },
+    { number: 2, label: 'AI fluency' },
+    { number: 3, label: 'Hustle direction' },
+  ],
+  group: [
+    { number: 1, label: 'About you' },
+    { number: 2, label: 'AI fluency' },
+    { number: 3, label: 'Working style' },
+    { number: 4, label: 'Hustle direction' },
+  ],
+};
 
 function CheckboxGroup({ options, selected, onChange, cols = 1 }) {
   const toggle = (opt) => {
@@ -94,33 +101,38 @@ function CheckboxGroup({ options, selected, onChange, cols = 1 }) {
 function RadioGroup({ options, selected, onChange }) {
   return (
     <div className="grid gap-2">
-      {options.map((opt) => (
-        <label
-          key={opt.value || opt}
-          className="flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors"
-          style={{
-            backgroundColor: selected === (opt.value || opt) ? 'rgba(133,107,255,0.1)' : 'rgba(248,239,224,0.6)',
-            border: selected === (opt.value || opt) ? '1.5px solid #856BFF' : '1.5px solid #E0D9F5',
-          }}
-        >
-          <input
-            type="radio"
-            className="au-radio shrink-0"
-            checked={selected === (opt.value || opt)}
-            onChange={() => onChange(opt.value || opt)}
-          />
-          <div>
-            <span style={{ fontFamily: 'Georgia, serif', fontSize: '0.9rem', color: '#140F50', fontWeight: selected === (opt.value || opt) ? '600' : '400' }}>
-              {opt.label || opt}
-            </span>
-            {opt.description && (
-              <p style={{ fontFamily: 'Georgia, serif', fontSize: '0.8rem', color: '#6B6490', marginTop: '2px' }}>
-                {opt.description}
-              </p>
-            )}
-          </div>
-        </label>
-      ))}
+      {options.map((opt) => {
+        const value = opt.value || opt;
+        const label = opt.label || opt;
+        const isSelected = selected === value;
+        return (
+          <label
+            key={value}
+            className="flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors"
+            style={{
+              backgroundColor: isSelected ? 'rgba(133,107,255,0.1)' : 'rgba(248,239,224,0.6)',
+              border: isSelected ? '1.5px solid #856BFF' : '1.5px solid #E0D9F5',
+            }}
+          >
+            <input
+              type="radio"
+              className="au-radio shrink-0"
+              checked={isSelected}
+              onChange={() => onChange(value)}
+            />
+            <div>
+              <span style={{ fontFamily: 'Georgia, serif', fontSize: '0.9rem', color: '#140F50', fontWeight: isSelected ? '600' : '400' }}>
+                {label}
+              </span>
+              {opt.description && (
+                <p style={{ fontFamily: 'Georgia, serif', fontSize: '0.8rem', color: '#6B6490', marginTop: '2px' }}>
+                  {opt.description}
+                </p>
+              )}
+            </div>
+          </label>
+        );
+      })}
     </div>
   );
 }
@@ -155,54 +167,69 @@ function LikertScale({ value, onChange, lowLabel, highLabel }) {
   );
 }
 
-export default function SurveyPage() {
+export default function GroupFormationSurvey() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
+    // Step 0 — format choice (shown above the steps; not a navigated step)
+    format: '', // 'solo' | 'pair' | 'trio'
     // Step 1
     fullName: '',
     workshop: '',
     // Step 2
     aiExperience: '',
     aiTools: [],
-    skills: [],
-    // Step 3
-    preferredRole: '',
+    buildSkills: [],
+    // Step 3 (group only)
     availability: [],
     deadlineApproach: null,
     meetingPreference: null,
-    // Step 4
-    industryInterest: '',
-    aiApplicationInterests: [],
+    // Step 4 (or Step 3 if solo)
+    hustleDirection: '',
+    hustleConcept: '',
     peerPreference: '',
   });
+
+  const isSolo = form.format === 'solo';
+  const steps = isSolo ? STEPS_BY_FORMAT.solo : STEPS_BY_FORMAT.group;
+  const finalStep = steps.length;
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
+  function pickFormat(format) {
+    setForm((prev) => ({ ...prev, format }));
+    setStep(1);
+    setErrors({});
+  }
+
   const validateStep = () => {
     const newErrors = {};
+    if (!form.format) {
+      newErrors.format = 'Please choose solo, pair, or trio.';
+      setErrors(newErrors);
+      return false;
+    }
+
     if (step === 1) {
       if (!form.fullName.trim()) newErrors.fullName = 'Please enter your full name.';
       if (!form.workshop) newErrors.workshop = 'Please select your workshop.';
     }
     if (step === 2) {
-      if (!form.aiExperience) newErrors.aiExperience = 'Please select your experience level.';
-      if (form.skills.length === 0) newErrors.skills = 'Please select at least one skill.';
+      if (!form.aiExperience) newErrors.aiExperience = 'Please select your AI experience level.';
+      if (form.buildSkills.length === 0) newErrors.buildSkills = 'Please pick at least one build skill.';
     }
-    if (step === 3) {
-      if (!form.preferredRole) newErrors.preferredRole = 'Please select your preferred role.';
+    if (!isSolo && step === 3) {
       if (form.availability.length === 0) newErrors.availability = 'Please select at least one availability window.';
       if (!form.deadlineApproach) newErrors.deadlineApproach = 'Please rate your deadline approach.';
     }
-    if (step === 4) {
-      if (!form.industryInterest.trim()) newErrors.industryInterest = 'Please describe your industry interest.';
-      if (form.aiApplicationInterests.length === 0) newErrors.aiApplicationInterests = 'Please select at least one area.';
+    if (step === finalStep) {
+      if (!form.hustleDirection) newErrors.hustleDirection = 'Please pick a hustle direction.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -211,7 +238,6 @@ export default function SurveyPage() {
   const handleNext = () => {
     if (validateStep()) setStep((s) => s + 1);
   };
-
   const handleBack = () => setStep((s) => s - 1);
 
   const handleSubmit = async () => {
@@ -225,7 +251,7 @@ export default function SurveyPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        router.push('/success');
+        router.push('/group-formation/success');
       } else {
         alert(data.error || 'Something went wrong. Please try again.');
       }
@@ -236,23 +262,65 @@ export default function SurveyPage() {
     }
   };
 
-  const progress = ((step - 1) / (STEPS.length - 1)) * 100;
+  // Format choice gate
+  if (!form.format) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <p className="quiz-kicker">Assignment 2 — AI Side Hustle Launch</p>
+          <h1 className="text-3xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>
+            Group formation
+          </h1>
+          <p style={{ fontFamily: 'Georgia, serif', color: '#6B6490', fontSize: '1rem' }}>
+            Assignment 2 can be done individually or in groups of up to three. We use this form to confirm rosters in the Week 4 workshop. Takes about 4 minutes.
+          </p>
+        </div>
+
+        <div className="card">
+          <h2 className="text-xl mb-3" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>
+            How are you doing Assignment 2?
+          </h2>
+          <RadioGroup
+            selected={form.format}
+            onChange={pickFormat}
+            options={[
+              { value: 'solo', label: 'Solo', description: 'Just me. Skip the group-matching questions.' },
+              { value: 'pair', label: 'Pair', description: 'Two of us. The other person submits separately.' },
+              { value: 'trio', label: 'Trio', description: 'Three of us. Each member submits separately.' },
+            ]}
+          />
+          {errors.format && <p className="text-red-500 text-xs mt-2">{errors.format}</p>}
+
+          <div className="mt-6 text-xs" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
+            <p style={{ marginBottom: '0.4rem' }}>
+              <strong>Reminder:</strong> the brief is founder-honest, not pitch-polished. A real but unsuccessful attempt counts.
+            </p>
+            <p>
+              <Link href="/" style={{ color: '#1449FF' }}>Back to course hub</Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const progress = ((step - 1) / (finalStep - 1)) * 100;
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Page title */}
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl mb-2" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>
-          Group Formation Survey
+      <div className="mb-6 text-center">
+        <p className="quiz-kicker">Assignment 2 — AI Side Hustle Launch · {form.format}</p>
+        <h1 className="text-3xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>
+          Group formation
         </h1>
-        <p style={{ fontFamily: 'Georgia, serif', color: '#6B6490', fontSize: '1rem' }}>
-          Assignment 2: AI Business Pitch &nbsp;·&nbsp; Takes about 5–7 minutes
-        </p>
+        <button type="button" onClick={() => pickFormat('')} className="text-xs underline" style={{ color: '#6B6490' }}>
+          change format
+        </button>
       </div>
 
       {/* Step indicators */}
       <div className="flex items-center justify-between mb-3">
-        {STEPS.map((s, i) => (
+        {steps.map((s, i) => (
           <div key={s.number} className="flex items-center flex-1">
             <div className="flex flex-col items-center flex-1">
               <div
@@ -270,28 +338,24 @@ export default function SurveyPage() {
                 {s.label}
               </span>
             </div>
-            {i < STEPS.length - 1 && (
+            {i < steps.length - 1 && (
               <div className="flex-none w-8 h-0.5 mx-1 mb-4" style={{ backgroundColor: step > s.number ? '#856BFF' : '#E0D9F5' }} />
             )}
           </div>
         ))}
       </div>
 
-      {/* Progress bar */}
       <div className="progress-bar mb-8">
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Card */}
       <div className="card">
-        {/* Step 1: About You */}
         {step === 1 && (
           <div>
-            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>About You</h2>
+            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>About you</h2>
             <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-              Please provide your name. No student ID or email is collected in this form.
+              Your name and workshop. No student ID or email collected here.
             </p>
-
             <div className="space-y-5">
               <div>
                 <label className="block mb-1.5 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
@@ -306,7 +370,6 @@ export default function SurveyPage() {
                 />
                 {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
               </div>
-
               <div>
                 <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
                   Which workshop are you in? <span style={{ color: '#856BFF' }}>*</span>
@@ -318,37 +381,35 @@ export default function SurveyPage() {
                 />
                 {errors.workshop && <p className="text-red-500 text-xs mt-1">{errors.workshop}</p>}
               </div>
-
             </div>
           </div>
         )}
 
-        {/* Step 2: AI Background */}
         {step === 2 && (
           <div>
-            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Your AI Background</h2>
+            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>
+              Your AI fluency
+            </h2>
             <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-              We use this to ensure every group has a mix of experience levels — beginners and experienced students both contribute real value.
+              We use this to match complementary skills and ensure no group is stranded without AI experience.
             </p>
-
             <div className="space-y-6">
               <div>
                 <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  How would you describe your current experience with AI tools? <span style={{ color: '#856BFF' }}>*</span>
+                  Current experience with AI tools? <span style={{ color: '#856BFF' }}>*</span>
                 </label>
                 <RadioGroup
                   selected={form.aiExperience}
                   onChange={(v) => update('aiExperience', v)}
                   options={[
-                    { value: 'Beginner', label: 'Beginner', description: "I've just started exploring AI tools" },
-                    { value: 'Intermediate', label: 'Intermediate', description: 'I use AI tools occasionally for specific tasks' },
-                    { value: 'Advanced', label: 'Advanced', description: 'I regularly use AI and experiment with different approaches' },
-                    { value: 'Expert', label: 'Expert', description: "I'm very comfortable with AI and have explored multiple tools in depth" },
+                    { value: 'Beginner', label: 'Beginner', description: 'Just starting to explore AI tools.' },
+                    { value: 'Intermediate', label: 'Intermediate', description: 'Use AI tools occasionally for specific tasks.' },
+                    { value: 'Advanced', label: 'Advanced', description: 'Regular user; experiment with prompts and tools.' },
+                    { value: 'Expert', label: 'Expert', description: 'Comfortable across multiple tools and workflows.' },
                   ]}
                 />
                 {errors.aiExperience && <p className="text-red-500 text-xs mt-1">{errors.aiExperience}</p>}
               </div>
-
               <div>
                 <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
                   Which AI tools have you used before? (Select all that apply)
@@ -360,53 +421,32 @@ export default function SurveyPage() {
                   cols={2}
                 />
               </div>
-
               <div>
                 <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  What skills can you contribute to your group? <span style={{ color: '#856BFF' }}>*</span>
+                  Which build skills can you bring to a hustle? <span style={{ color: '#856BFF' }}>*</span>
                 </label>
                 <CheckboxGroup
-                  options={SKILLS}
-                  selected={form.skills}
-                  onChange={(v) => update('skills', v)}
+                  options={BUILD_SKILLS}
+                  selected={form.buildSkills}
+                  onChange={(v) => update('buildSkills', v)}
                   cols={2}
                 />
-                {errors.skills && <p className="text-red-500 text-xs mt-1">{errors.skills}</p>}
+                {errors.buildSkills && <p className="text-red-500 text-xs mt-1">{errors.buildSkills}</p>}
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 3: Working Style */}
-        {step === 3 && (
+        {!isSolo && step === 3 && (
           <div>
-            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Your Working Style</h2>
+            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Working style</h2>
             <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-              Understanding how you work best helps us create groups with complementary styles and compatible schedules.
+              Helps us pair you with people whose schedule and deadline habits overlap with yours.
             </p>
-
             <div className="space-y-6">
               <div>
                 <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  Which role do you naturally gravitate towards in group projects? <span style={{ color: '#856BFF' }}>*</span>
-                </label>
-                <RadioGroup
-                  selected={form.preferredRole}
-                  onChange={(v) => update('preferredRole', v)}
-                  options={[
-                    { value: 'Leader/Coordinator', label: 'Leader / Coordinator', description: 'I like organising the team and keeping everyone on track' },
-                    { value: 'Researcher/Analyst', label: 'Researcher / Analyst', description: 'I enjoy gathering information and analysing data' },
-                    { value: 'Creative/Designer', label: 'Creative / Designer', description: 'I focus on presentation and visual elements' },
-                    { value: 'Technical/Builder', label: 'Technical / Builder', description: 'I like working with tools and implementation' },
-                    { value: 'Flexible', label: 'Flexible', description: "I'm happy to take on whatever role the team needs" },
-                  ]}
-                />
-                {errors.preferredRole && <p className="text-red-500 text-xs mt-1">{errors.preferredRole}</p>}
-              </div>
-
-              <div>
-                <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  When are you generally available for group meetings? <span style={{ color: '#856BFF' }}>*</span>
+                  When can you generally meet? <span style={{ color: '#856BFF' }}>*</span>
                 </label>
                 <CheckboxGroup
                   options={AVAILABILITY}
@@ -415,10 +455,9 @@ export default function SurveyPage() {
                 />
                 {errors.availability && <p className="text-red-500 text-xs mt-1">{errors.availability}</p>}
               </div>
-
               <div>
                 <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  I prefer to complete assignments well before the deadline rather than closer to the due date. <span style={{ color: '#856BFF' }}>*</span>
+                  I prefer to finish well before the deadline rather than close to it. <span style={{ color: '#856BFF' }}>*</span>
                 </label>
                 <LikertScale
                   value={form.deadlineApproach}
@@ -428,10 +467,9 @@ export default function SurveyPage() {
                 />
                 {errors.deadlineApproach && <p className="text-red-500 text-xs mt-1">{errors.deadlineApproach}</p>}
               </div>
-
               <div>
                 <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  I prefer to meet in person rather than online for group work.
+                  I prefer to meet in person rather than online.
                 </label>
                 <LikertScale
                   value={form.meetingPreference}
@@ -444,77 +482,68 @@ export default function SurveyPage() {
           </div>
         )}
 
-        {/* Step 4: Project Preferences */}
-        {step === 4 && (
+        {step === finalStep && (
           <div>
-            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Your Project Preferences</h2>
+            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Hustle direction</h2>
             <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-              Where possible, we'll group students with shared industry interests so your pitch genuinely excites your whole team.
+              Rough direction is enough — you’ll confirm the concept by Week 5.
             </p>
-
             <div className="space-y-6">
               <div>
+                <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
+                  Closest hustle direction <span style={{ color: '#856BFF' }}>*</span>
+                </label>
+                <RadioGroup
+                  selected={form.hustleDirection}
+                  onChange={(v) => update('hustleDirection', v)}
+                  options={HUSTLE_DIRECTIONS}
+                />
+                {errors.hustleDirection && <p className="text-red-500 text-xs mt-1">{errors.hustleDirection}</p>}
+              </div>
+              <div>
                 <label className="block mb-1.5 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  What industry or business area would you like to focus your AI Business Pitch on? <span style={{ color: '#856BFF' }}>*</span>
+                  Concept sketch (optional)
                 </label>
                 <p className="text-xs mb-2" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-                  Be as specific as you like — e.g. "aged care technology", "sustainable fashion retail", "fintech for small business".
+                  One or two sentences. e.g. “Etsy store selling AI-generated dog-breed prints to Adelaide pet owners.”
                 </p>
                 <textarea
                   className="au-input"
                   rows={3}
-                  placeholder="Describe the industry or business area you're most interested in..."
-                  value={form.industryInterest}
-                  onChange={(e) => update('industryInterest', e.target.value)}
-                  style={{ resize: 'vertical' }}
-                />
-                {errors.industryInterest && <p className="text-red-500 text-xs mt-1">{errors.industryInterest}</p>}
-              </div>
-
-              <div>
-                <label className="block mb-3 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  Which AI application areas interest you most? <span style={{ color: '#856BFF' }}>*</span>
-                </label>
-                <CheckboxGroup
-                  options={AI_INTERESTS}
-                  selected={form.aiApplicationInterests}
-                  onChange={(v) => update('aiApplicationInterests', v)}
-                  cols={2}
-                />
-                {errors.aiApplicationInterests && <p className="text-red-500 text-xs mt-1">{errors.aiApplicationInterests}</p>}
-              </div>
-
-              <div>
-                <label className="block mb-1.5 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                  Is there anyone you would particularly like to work with, or prefer not to work with? (Optional)
-                </label>
-                <p className="text-xs mb-2" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-                  This is entirely optional and will be considered — but cannot always be guaranteed.
-                </p>
-                <textarea
-                  className="au-input"
-                  rows={2}
-                  placeholder="Optional — only include if relevant..."
-                  value={form.peerPreference}
-                  onChange={(e) => update('peerPreference', e.target.value)}
+                  placeholder="Optional — what do you imagine building?"
+                  value={form.hustleConcept}
+                  onChange={(e) => update('hustleConcept', e.target.value)}
                   style={{ resize: 'vertical' }}
                 />
               </div>
+              {!isSolo && (
+                <div>
+                  <label className="block mb-1.5 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
+                    Anyone you’d especially like to work with, or prefer not to? (Optional)
+                  </label>
+                  <p className="text-xs mb-2" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
+                    Considered where feasible. Not guaranteed.
+                  </p>
+                  <textarea
+                    className="au-input"
+                    rows={2}
+                    placeholder="Optional — names only if relevant…"
+                    value={form.peerPreference}
+                    onChange={(e) => update('peerPreference', e.target.value)}
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Navigation */}
         <div className={`mt-8 flex ${step > 1 ? 'justify-between' : 'justify-end'}`}>
           {step > 1 && (
-            <button type="button" className="au-btn-secondary" onClick={handleBack}>
-              ← Back
-            </button>
+            <button type="button" className="au-btn-secondary" onClick={handleBack}>← Back</button>
           )}
-          {step < 4 ? (
-            <button type="button" className="au-btn-primary" onClick={handleNext}>
-              Continue →
-            </button>
+          {step < finalStep ? (
+            <button type="button" className="au-btn-primary" onClick={handleNext}>Continue →</button>
           ) : (
             <button
               type="button"
@@ -523,15 +552,14 @@ export default function SurveyPage() {
               disabled={submitting}
               style={{ opacity: submitting ? 0.7 : 1 }}
             >
-              {submitting ? 'Submitting...' : 'Submit Survey ✓'}
+              {submitting ? 'Submitting…' : 'Submit ✓'}
             </button>
           )}
         </div>
       </div>
 
-      {/* Privacy note */}
       <p className="text-center text-xs mt-6" style={{ fontFamily: 'Georgia, serif', color: '#9E97C4' }}>
-        Your responses are only used to form balanced project groups. They will not be shared with other students.
+        Your responses are used only to confirm Assignment 2 rosters. They are not shared with other students.
       </p>
     </div>
   );

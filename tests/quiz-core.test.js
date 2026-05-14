@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   buildStoredResponse,
+  computeEffectiveStatus,
   computeQuizAggregates,
   createRecoveryCode,
   createResponseId,
@@ -578,4 +579,74 @@ test('trajectory and response exports produce stable Phase 2 output shapes', () 
   assert.equal(riverFoxRow['spine.career-confidence__week_4'], 'High');
   const blueFinchRow = trajectoryTable.rows.find((row) => row.keyword === 'blue-finch');
   assert.equal(blueFinchRow['spine.career-confidence__week_1'], '');
+});
+test('computeEffectiveStatus — manual override wins regardless of dates', () => {
+  const now = new Date('2026-08-03T14:00:00+09:30');
+  assert.equal(
+    computeEffectiveStatus({ releaseAt: null, closeAt: null, override: 'open', now }),
+    'open',
+  );
+  assert.equal(
+    computeEffectiveStatus({
+      releaseAt: '2026-08-03T14:00:00+09:30',
+      closeAt: '2026-08-03T15:00:00+09:30',
+      override: 'closed',
+      now,
+    }),
+    'closed',
+  );
+});
+
+test('computeEffectiveStatus — null releaseAt with no override stays draft', () => {
+  assert.equal(
+    computeEffectiveStatus({ releaseAt: null, closeAt: null, override: null, now: new Date() }),
+    'draft',
+  );
+});
+
+test('computeEffectiveStatus — date gate transitions draft → open → closed', () => {
+  const releaseAt = '2026-08-03T14:00:00+09:30';
+  const closeAt = '2026-08-03T17:00:00+09:30';
+
+  assert.equal(
+    computeEffectiveStatus({ releaseAt, closeAt, override: null, now: new Date('2026-08-03T13:00:00+09:30') }),
+    'draft',
+    'before release window = draft',
+  );
+
+  assert.equal(
+    computeEffectiveStatus({ releaseAt, closeAt, override: null, now: new Date('2026-08-03T15:00:00+09:30') }),
+    'open',
+    'inside release window = open',
+  );
+
+  assert.equal(
+    computeEffectiveStatus({ releaseAt, closeAt, override: null, now: new Date('2026-08-03T18:00:00+09:30') }),
+    'closed',
+    'after close = closed',
+  );
+});
+
+test('computeEffectiveStatus — no closeAt keeps open after releaseAt', () => {
+  assert.equal(
+    computeEffectiveStatus({
+      releaseAt: '2026-08-03T14:00:00+09:30',
+      closeAt: null,
+      override: null,
+      now: new Date('2026-12-01T00:00:00Z'),
+    }),
+    'open',
+  );
+});
+
+test('computeEffectiveStatus — invalid override value falls through to date gate', () => {
+  assert.equal(
+    computeEffectiveStatus({
+      releaseAt: '2026-08-03T14:00:00+09:30',
+      closeAt: null,
+      override: 'banana',
+      now: new Date('2026-08-04T00:00:00Z'),
+    }),
+    'open',
+  );
 });

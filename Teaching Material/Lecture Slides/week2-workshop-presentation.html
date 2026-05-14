@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 Workshop: Multimodal AI | Adelaide University</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --au-navy:      #140F50;
+  --au-blue:      #1448FF;
+  --au-sandstone: #F8EFE0;
+  --au-lavender:  #836BFF;
+  --au-mid-blue:  #3B67FF;
+  --au-slate:     #284150;
+  --au-pale-teal: #DAEDEF;
+  --au-white:     #FFFFFF;
+  --font-h: "Franklin Gothic Demi Cond","Franklin Gothic Medium","Arial Narrow",Arial,sans-serif;
+  --font-b: Georgia,"Times New Roman",serif;
+}
+html,body { width:100%; height:100%; background:#0b0928; font-family:var(--font-b); overflow:hidden; }
+
+/* ── Slideshow ── */
+.ss { width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; }
+.slide { display:none; width:960px; height:540px; position:relative; overflow:hidden; flex-shrink:0; flex-direction:column; }
+.slide.active { display:flex; }
+
+/* ── Cover Dark ── */
+.s-cover { background:var(--au-navy); padding:44px 52px; justify-content:flex-end; }
+.s-cover .logo { position:absolute; top:26px; left:34px; height:46px; width:auto; filter:brightness(0) invert(1); opacity:.9; }
+.s-cover .acc { position:absolute; top:0; right:0; width:280px; height:100%; overflow:hidden; pointer-events:none; }
+.s-cover .acc::before { content:""; position:absolute; top:-5%; right:44px; width:3px; height:120%; background:var(--au-lavender); transform:rotate(-12deg); transform-origin:top center; opacity:.65; }
+.s-cover .acc::after  { content:""; position:absolute; top:-5%; right:74px; width:1px; height:120%; background:var(--au-lavender); transform:rotate(-12deg); transform-origin:top center; opacity:.25; }
+.s-cover .label { font-family:var(--font-h); font-size:.8rem; font-weight:700; letter-spacing:.13em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:12px; }
+.s-cover .title { font-family:var(--font-h); font-size:2.85rem; font-weight:700; color:#fff; line-height:1.05; margin-bottom:16px; max-width:62%; letter-spacing:-.01em; }
+.s-cover .sub   { font-family:var(--font-b); font-size:1rem; color:rgba(255,255,255,.65); line-height:1.6; max-width:56%; }
+
+/* ── Content White ── */
+.s-white { background:#fff; }
+.s-white .hdr { background:var(--au-navy); padding:15px 38px; flex-shrink:0; display:flex; align-items:center; gap:12px; }
+.s-white .hdr h2 { font-family:var(--font-h); font-size:1.5rem; font-weight:700; color:#fff; letter-spacing:.01em; }
+.s-white .hdr .tag { font-family:var(--font-h); font-size:.65rem; font-weight:700; letter-spacing:.1em; background:var(--au-lavender); color:#fff; padding:2px 8px; border-radius:3px; text-transform:uppercase; white-space:nowrap; }
+.s-white .body { flex:1; padding:20px 38px 48px; display:flex; flex-direction:column; }
+.s-white .body p, .s-white .body li { font-family:var(--font-b); font-size:1.05rem; line-height:1.65; color:var(--au-navy); margin-bottom:8px; }
+.s-white .body ul { padding-left:1.3em; list-style:disc; }
+.s-white .body ul ul { list-style:circle; margin-top:3px; padding-left:1.2em; }
+.s-white .body ul ul li { font-size:.95rem; }
+.s-white .body strong { color:var(--au-navy); }
+.s-white .body .accent { color:var(--au-blue); font-weight:bold; }
+.s-white .body .cols  { display:flex; gap:20px; flex:1; }
+.s-white .body .col   { flex:1; }
+.s-white .body .col-label { font-family:var(--font-h); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--au-lavender); font-weight:700; margin-bottom:6px; }
+.s-white .body .def   { background:var(--au-sandstone); border-left:3px solid var(--au-lavender); padding:9px 13px; margin-bottom:10px; border-radius:0 4px 4px 0; }
+.s-white .body .def p { font-size:.96rem; margin-bottom:0; }
+
+/* Modality cards */
+.s-white .body .mod-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:6px; }
+.s-white .body .mc { border-radius:8px; padding:14px 12px; display:flex; flex-direction:column; gap:6px; }
+.s-white .body .mc-icon { font-size:1.8rem; }
+.s-white .body .mc-title { font-family:var(--font-h); font-size:.95rem; font-weight:700; color:#fff; }
+.s-white .body .mc-tools { font-family:var(--font-b); font-size:.72rem; color:rgba(255,255,255,.7); line-height:1.45; }
+.s-white .body .mc.m1 { background:var(--au-navy); }
+.s-white .body .mc.m2 { background:var(--au-mid-blue); }
+.s-white .body .mc.m3 { background:var(--au-slate); }
+.s-white .body .mc.m4 { background:#1a3a50; }
+
+/* Activity brief */
+.s-white .body .act-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin-top:6px; }
+.s-white .body .ac { border-radius:7px; padding:11px 14px; }
+.s-white .body .ac.a1 { background:var(--au-navy); }
+.s-white .body .ac.a2 { background:var(--au-mid-blue); }
+.s-white .body .ac.a3 { background:var(--au-slate); }
+.s-white .body .ac.a4 { background:#1a3a50; }
+.s-white .body .ac-num { font-family:var(--font-h); font-size:1.2rem; font-weight:700; color:var(--au-lavender); }
+.s-white .body .ac-title { font-family:var(--font-h); font-size:.85rem; font-weight:700; color:#fff; margin:2px 0 4px; }
+.s-white .body .ac-task { font-family:var(--font-b); font-size:.74rem; color:rgba(255,255,255,.8); line-height:1.45; }
+
+/* Agenda blocks */
+.s-white .body .hbs { display:flex; gap:9px; margin-top:4px; }
+.s-white .body .hb  { flex:1; border-radius:6px; padding:13px; }
+.s-white .body .hb.h1 { background:var(--au-navy); }
+.s-white .body .hb.h2 { background:var(--au-mid-blue); }
+.s-white .body .hb.h3 { background:var(--au-slate); }
+.s-white .body .hnum { font-family:var(--font-h); font-size:1.45rem; font-weight:700; color:var(--au-lavender); }
+.s-white .body .htit { font-family:var(--font-h); font-size:.82rem; font-weight:700; color:#fff; margin:2px 0 5px; line-height:1.2; }
+.s-white .body .hitems { font-family:var(--font-b); font-size:.72rem; color:rgba(255,255,255,.8); line-height:1.5; }
+
+/* RCTF boxes */
+.s-white .body .rctf { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:4px; }
+.s-white .body .ri   { background:var(--au-navy); border-radius:6px; padding:9px 13px; display:flex; align-items:flex-start; gap:9px; }
+.s-white .body .rl   { font-family:var(--font-h); font-size:1.9rem; font-weight:700; color:var(--au-lavender); line-height:1; flex-shrink:0; }
+.s-white .body .rtt  { font-family:var(--font-h); font-size:.82rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.05em; }
+.s-white .body .rtd  { font-family:var(--font-b); font-size:.77rem; color:rgba(255,255,255,.7); margin-top:2px; }
+
+/* Example box */
+.s-white .body .ex   { background:var(--au-pale-teal); border-radius:6px; padding:9px 15px; margin-top:9px; }
+.s-white .body .ex p { font-size:.85rem; color:var(--au-slate); font-style:italic; margin:0; }
+.s-white .body .ex strong { color:var(--au-navy); font-style:normal; }
+
+/* MVP grid */
+.s-white .body .mvp-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px; }
+.s-white .body .mvp-card { border-radius:8px; padding:13px 15px; }
+.s-white .body .mvp-card.v1 { background:var(--au-navy); }
+.s-white .body .mvp-card.v2 { background:var(--au-mid-blue); }
+.s-white .body .mvp-card.v3 { background:var(--au-slate); }
+.s-white .body .mvp-card.v4 { background:#2d1f6e; }
+.s-white .body .mvp-icon { font-size:1.4rem; margin-bottom:4px; }
+.s-white .body .mvp-title { font-family:var(--font-h); font-size:.88rem; font-weight:700; color:#fff; margin-bottom:4px; }
+.s-white .body .mvp-desc  { font-family:var(--font-b); font-size:.72rem; color:rgba(255,255,255,.78); line-height:1.45; }
+.s-white .body .mvp-tool  { font-family:var(--font-h); font-size:.65rem; font-weight:700; color:var(--au-lavender); text-transform:uppercase; letter-spacing:.07em; margin-top:5px; }
+
+/* Doc list */
+.s-white .body .doc-row { display:flex; gap:10px; margin-top:6px; }
+.s-white .body .doc-box { flex:1; background:var(--au-sandstone); border-radius:7px; padding:11px 14px; border-left:3px solid var(--au-lavender); }
+.s-white .body .doc-title { font-family:var(--font-h); font-size:.82rem; font-weight:700; color:var(--au-navy); margin-bottom:4px; }
+.s-white .body .doc-items { font-family:var(--font-b); font-size:.74rem; color:var(--au-slate); line-height:1.55; }
+
+/* Assignment connections */
+.s-white .body .asgn-row { display:flex; gap:9px; margin-top:8px; }
+.s-white .body .asgn { flex:1; border-radius:7px; padding:12px 14px; border:2px solid var(--au-pale-teal); }
+.s-white .body .asgn-num { font-family:var(--font-h); font-size:1.1rem; font-weight:700; color:var(--au-lavender); }
+.s-white .body .asgn-name { font-family:var(--font-h); font-size:.82rem; font-weight:700; color:var(--au-navy); margin:2px 0 5px; }
+.s-white .body .asgn-desc { font-family:var(--font-b); font-size:.74rem; color:var(--au-slate); line-height:1.5; }
+
+.s-white .rule { height:3px; background:var(--au-lavender); position:absolute; bottom:26px; left:38px; right:38px; border-radius:2px; }
+.s-white .snum { position:absolute; bottom:7px; right:38px; font-family:var(--font-b); font-size:.67rem; color:#aaa; }
+
+/* ── Divider ── */
+.s-div { background:var(--au-navy); flex-direction:row; align-items:center; padding:44px 52px; }
+.s-div .sn { font-family:var(--font-h); font-size:5.8rem; font-weight:700; color:var(--au-blue); line-height:1; margin-right:42px; flex-shrink:0; letter-spacing:-.04em; }
+.s-div .sc { flex:1; }
+.s-div .sr { width:58px; height:3px; background:var(--au-lavender); margin-bottom:13px; border-radius:2px; }
+.s-div .sl { font-family:var(--font-h); font-size:.75rem; font-weight:700; letter-spacing:.13em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:5px; }
+.s-div .st { font-family:var(--font-h); font-size:2.2rem; font-weight:700; color:#fff; line-height:1.1; }
+.s-div .ss2 { font-family:var(--font-b); font-size:.96rem; color:rgba(255,255,255,.55); margin-top:11px; line-height:1.5; }
+
+/* ── Statement ── */
+.s-stmt { background:var(--au-navy); align-items:center; justify-content:center; padding:60px; }
+.s-stmt blockquote { font-family:var(--font-h); font-size:2.4rem; font-weight:700; color:#fff; text-align:center; line-height:1.2; max-width:790px; }
+.s-stmt .hl { color:var(--au-lavender); }
+.s-stmt .attr { font-family:var(--font-b); font-size:.9rem; color:rgba(255,255,255,.45); margin-top:18px; font-style:italic; text-align:center; }
+
+/* ── Timer Slide ── */
+.s-timer { background:var(--au-navy); align-items:center; justify-content:center; flex-direction:column; gap:0; }
+.s-timer .t-label   { font-family:var(--font-h); font-size:.78rem; font-weight:700; letter-spacing:.14em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:6px; }
+.s-timer .t-act     { font-family:var(--font-h); font-size:1.6rem; font-weight:700; color:#fff; text-align:center; line-height:1.15; margin-bottom:18px; max-width:700px; }
+.s-timer .t-display { font-family:var(--font-h); font-size:7rem; font-weight:700; color:#fff; line-height:1; letter-spacing:-.02em; transition:color .5s; }
+.s-timer .t-display.warn  { color:#f5c518; }
+.s-timer .t-display.alert { color:#ff4444; animation:pulse 1s infinite; }
+.s-timer .t-display.done  { color:var(--au-lavender); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+.s-timer .t-bar-wrap { width:500px; height:6px; background:rgba(255,255,255,.15); border-radius:3px; margin:14px 0; }
+.s-timer .t-bar { height:6px; background:var(--au-lavender); border-radius:3px; transition:width .9s linear, background .5s; }
+.s-timer .t-bar.warn  { background:#f5c518; }
+.s-timer .t-bar.alert { background:#ff4444; }
+.s-timer .t-btns { display:flex; gap:12px; margin-top:16px; }
+.s-timer .t-btn  { font-family:var(--font-h); font-size:.85rem; font-weight:700; letter-spacing:.06em; border:none; cursor:pointer; padding:8px 22px; border-radius:20px; transition:opacity .2s; }
+.s-timer .t-btn:hover { opacity:.8; }
+.s-timer .t-btn.start { background:var(--au-lavender); color:#fff; }
+.s-timer .t-btn.pause { background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3); }
+.s-timer .t-btn.reset { background:transparent; color:rgba(255,255,255,.5); border:1px solid rgba(255,255,255,.2); }
+.s-timer .t-note { font-family:var(--font-b); font-size:.8rem; color:rgba(255,255,255,.35); margin-top:12px; font-style:italic; }
+.s-timer .t-sub  { font-family:var(--font-b); font-size:.88rem; color:rgba(255,255,255,.5); margin-top:8px; text-align:center; max-width:580px; }
+
+/* ── Break Slide ── */
+.s-break { background:var(--au-slate); align-items:center; justify-content:center; flex-direction:column; gap:0; }
+.s-break .b-icon  { font-size:3rem; margin-bottom:6px; }
+.s-break .b-head  { font-family:var(--font-h); font-size:2.5rem; font-weight:700; color:#fff; margin-bottom:4px; }
+.s-break .b-sub   { font-family:var(--font-b); font-size:1rem; color:rgba(255,255,255,.6); margin-bottom:16px; }
+.s-break .t-display { font-family:var(--font-h); font-size:6.5rem; font-weight:700; color:var(--au-pale-teal); line-height:1; letter-spacing:-.02em; transition:color .5s; }
+.s-break .t-display.warn  { color:#f5c518; }
+.s-break .t-display.alert { color:#ff4444; animation:pulse 1s infinite; }
+.s-break .t-bar-wrap { width:420px; height:5px; background:rgba(255,255,255,.15); border-radius:3px; margin:12px 0; }
+.s-break .t-bar   { height:5px; background:var(--au-pale-teal); border-radius:3px; transition:width .9s linear; }
+.s-break .t-bar.warn  { background:#f5c518; }
+.s-break .t-bar.alert { background:#ff4444; }
+.s-break .t-btns  { display:flex; gap:10px; margin-top:12px; }
+.s-break .t-btn   { font-family:var(--font-h); font-size:.82rem; font-weight:700; letter-spacing:.06em; border:none; cursor:pointer; padding:7px 20px; border-radius:18px; }
+.s-break .t-btn.start { background:var(--au-pale-teal); color:var(--au-slate); }
+.s-break .t-btn.pause { background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3); }
+.s-break .t-btn.reset { background:transparent; color:rgba(255,255,255,.4); border:1px solid rgba(255,255,255,.2); }
+.s-break .b-back  { font-family:var(--font-b); font-size:.85rem; color:rgba(255,255,255,.45); margin-top:14px; }
+
+/* ── End ── */
+.s-end { background:var(--au-navy); align-items:center; justify-content:center; flex-direction:column; gap:15px; }
+.s-end .el { height:86px; width:auto; filter:brightness(0) invert(1); opacity:.88; }
+.s-end .er { width:76px; height:3px; background:var(--au-lavender); border-radius:2px; }
+.s-end .et { font-family:var(--font-h); font-size:2.15rem; font-weight:700; color:#fff; text-align:center; }
+.s-end .es { font-family:var(--font-b); font-size:.98rem; color:var(--au-lavender); text-align:center; }
+.s-end .ec { font-family:var(--font-b); font-size:.75rem; color:rgba(255,255,255,.3); text-align:center; margin-top:2px; }
+
+/* ── Nav ── */
+.nav { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:9px; align-items:center; background:rgba(20,15,80,.92); padding:6px 16px; border-radius:22px; z-index:100; backdrop-filter:blur(8px); }
+.nav button { background:none; border:1px solid rgba(255,255,255,.22); color:rgba(255,255,255,.82); padding:4px 13px; border-radius:13px; cursor:pointer; font-size:.8rem; font-family:var(--font-h); letter-spacing:.04em; transition:background .2s; }
+.nav button:hover { background:rgba(255,255,255,.14); }
+.nav .ctr { color:rgba(255,255,255,.48); font-size:.75rem; min-width:54px; text-align:center; font-family:var(--font-b); }
+.progress { position:fixed; top:0; left:0; height:3px; background:var(--au-lavender); transition:width .3s ease; z-index:200; }
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="ss" id="ss">
+
+<!-- ╔══ 1: COVER ══╗ -->
+<div class="slide s-cover active">
+  <span class="logo">Adelaide University</span>
+  <div class="acc"></div>
+  <div class="label">AI for Business Transformation &nbsp;·&nbsp; Week 2 Workshop</div>
+  <div class="title">Multimodal AI</div>
+  <div class="sub">From single-modality user to multimodal orchestrator — images, video, code, and synthetic data for business transformation.</div>
+</div>
+
+<!-- ╔══ 2: WEEK 1 RECAP ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Where We've Come From</h2><span class="tag">Week 1 Recap</span></div>
+  <div class="body">
+    <p style="margin-bottom:12px;">Last week you built the foundation of <strong>Collaborative Intelligence</strong> — working with AI as a partner rather than commanding it as a tool. You left with three key capabilities:</p>
+    <div class="rctf">
+      <div class="ri">
+        <div class="rl">1</div>
+        <div class="rt">
+          <div class="rtt">RCTF Framework</div>
+          <div class="rtd">Role, Context, Task, Format — your consistent approach to getting high-quality AI outputs for business writing tasks</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">2</div>
+        <div class="rt">
+          <div class="rtt">Critical Evaluation</div>
+          <div class="rtd">Spotting hallucinations, verifying claims, and assessing AI outputs for business appropriateness</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">3</div>
+        <div class="rt">
+          <div class="rtt">Tool Comparison</div>
+          <div class="rtd">Comparing ChatGPT, Claude, Perplexity, and Copilot to select the right tool for the right task</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">4</div>
+        <div class="rt">
+          <div class="rtt">AI Prompt Log</div>
+          <div class="rtd">Documenting your AI collaboration process — the habit that feeds Assignment 3</div>
+        </div>
+      </div>
+    </div>
+    <div class="ex" style="margin-top:10px;"><p><strong>Today's leap:</strong> That same RCTF framework you mastered with text now applies across images, video, code, and data. One core skill — four new outputs.</p></div>
+  </div>
+  <div class="rule"></div><div class="snum">2</div>
+</div>
+
+<!-- ╔══ 3: LEARNING OUTCOMES ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Today's Learning Outcomes</h2></div>
+  <div class="body">
+    <ul>
+      <li>Apply the <strong>RCTF framework across multiple modalities</strong> to generate professional-quality images, videos, code, and synthetic datasets</li>
+      <li>Evaluate and select <strong>appropriate free AI tools</strong> for specific business scenarios from 30+ options across four modalities</li>
+      <li><strong>Integrate multiple modalities strategically</strong> to create comprehensive business deliverables in the Minimum Viable Launch Kit capstone</li>
+      <li>Critically assess AI outputs for <strong>quality, business appropriateness, and ethical considerations</strong> across all four modality types</li>
+      <li>Document multimodal experiments in your <strong>AI Prompt Log</strong> to build evidence for Assignment 3</li>
+    </ul>
+  </div>
+  <div class="rule"></div><div class="snum">3</div>
+</div>
+
+<!-- ╔══ 4: AGENDA ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Today's 3-Hour Workshop</h2></div>
+  <div class="body">
+    <div class="hbs">
+      <div class="hb h1">
+        <div class="hnum">01</div>
+        <div class="htit">Multimodal Foundations &amp; Tool Sprint</div>
+        <div class="hitems">10 min — What is multimodal AI?<br>10 min — RCTF applied to new modalities<br>4 × 10 min — Hands-on modality sprints<br>⏱ Timers on activity slides</div>
+      </div>
+      <div class="hb" style="background:#2a1f6e; flex:0 0 auto; width:42px; display:flex; align-items:center; justify-content:center; border-radius:6px;">
+        <span style="font-family:var(--font-h); font-size:.8rem; font-weight:700; color:var(--au-pale-teal); writing-mode:vertical-rl; letter-spacing:.08em; transform:rotate(180deg);">BREAK</span>
+      </div>
+      <div class="hb h2">
+        <div class="hnum">02</div>
+        <div class="htit">Minimum Viable Launch Kit</div>
+        <div class="hitems">Group capstone challenge<br>Integrate all 4 modalities<br>Pitch-ready deliverable<br>⏱ 60 min timer</div>
+      </div>
+      <div class="hb h3">
+        <div class="hnum">03</div>
+        <div class="htit">Critical Evaluation &amp; Documentation</div>
+        <div class="hitems">Quality evaluation frameworks<br>AI Prompt Log completion<br>Assignment connections<br>⏱ 20 min timer</div>
+      </div>
+    </div>
+    <p style="margin-top:10px; font-size:.82rem; color:var(--au-slate); font-style:italic;">Keep your AI Prompt Log open from now — document every experiment across all four modalities as you go.</p>
+  </div>
+  <div class="rule"></div><div class="snum">4</div>
+</div>
+
+<!-- ╔══ 5: SECTION 01 ══╗ -->
+<div class="slide s-div">
+  <div class="sn">01</div>
+  <div class="sc">
+    <div class="sl">Hour One</div>
+    <div class="sr"></div>
+    <div class="st">Multimodal Foundations<br>&amp; Tool Sprint</div>
+    <div class="ss2">Building breadth of awareness across images, video, code, and synthetic data</div>
+  </div>
+</div>
+
+<!-- ╔══ 6: WHAT IS MULTIMODAL AI? ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>What is Multimodal AI?</h2></div>
+  <div class="body">
+    <div class="def">
+      <p>AI systems that work with and generate <strong>multiple types of content beyond text</strong> — including images, video, code, and structured data. In business, combining modalities enables professionals to create deliverables that previously required specialised expertise in design, videography, programming, or data science.</p>
+    </div>
+    <div class="mod-grid" style="margin-top:10px;">
+      <div class="mc m1">
+        <div class="mc-icon">🖼️</div>
+        <div class="mc-title">Visual AI</div>
+        <div class="mc-tools">Professional images from text descriptions. No Photoshop, no photographer.<br><br><strong style="color:var(--au-lavender);">Tools:</strong> Gemini (Nano Banana), ChatGPT image gen, Reve Image, Adobe Firefly</div>
+      </div>
+      <div class="mc m2">
+        <div class="mc-icon">🎬</div>
+        <div class="mc-title">Video AI</div>
+        <div class="mc-tools">Dynamic video content &amp; AI presenters from scripts. No production crew needed.<br><br><strong style="color:var(--au-lavender);">Tools:</strong> HeyGen (Avatar III — free), Kling, Runway</div>
+      </div>
+      <div class="mc m3">
+        <div class="mc-icon">💻</div>
+        <div class="mc-title">Code AI</div>
+        <div class="mc-tools">Functional automations from plain English. No programming degree required.<br><br><strong style="color:var(--au-lavender);">Tools:</strong> GitHub Copilot, ChatGPT, Claude</div>
+      </div>
+      <div class="mc m4">
+        <div class="mc-icon">📊</div>
+        <div class="mc-title">Synthetic Data</div>
+        <div class="mc-tools">Realistic datasets without privacy risk. Perfect for prototyping &amp; dashboards.<br><br><strong style="color:var(--au-lavender);">Tools:</strong> Mockaroo, ChatGPT, Claude</div>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">6</div>
+</div>
+
+<!-- ╔══ 7: PACE OF CHANGE ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>This Landscape Changed — Just This Week</h2><span class="tag">Context</span></div>
+  <div class="body">
+    <p style="margin-bottom:10px; font-size:.94rem;">The tools on the previous slide weren't all available last semester. Several major changes landed in the <strong>last 8–12 weeks alone</strong>:</p>
+    <div class="act-grid">
+      <div class="ac a1">
+        <div class="ac-num">🖼️ Image</div>
+        <div class="ac-title">DALL·E 3 retired — GPT Image 1 launched</div>
+        <div class="ac-task">OpenAI's image engine changed entirely in late 2025. ChatGPT now uses GPT Image 1, which is significantly better at following complex instructions and rendering text accurately. "DALL·E 3" is already outdated terminology.<br><br>Reve Image also emerged from nowhere in early 2025 and immediately topped global benchmarks for prompt accuracy.</div>
+      </div>
+      <div class="ac a2">
+        <div class="ac-num">🎬 Video</div>
+        <div class="ac-title">HeyGen Avatar IV — uncanny valley largely solved</div>
+        <div class="ac-task">HeyGen's November 2025 update to Avatar IV eliminated most of the artificial, stilted look of earlier AI presenters. The same tool you'd have used 6 months ago now produces noticeably more natural results — though Avatar IV costs premium credits on the free plan.</div>
+      </div>
+      <div class="ac a3">
+        <div class="ac-num">💻 Code</div>
+        <div class="ac-title">Copilot Free tier launched — no student account needed</div>
+        <div class="ac-task">GitHub introduced a permanently free tier of Copilot in late 2025 — 2,000 code completions per month with no credit card or student verification required. This removes the previous barrier for students whose Student Pack application hadn't been approved yet.</div>
+      </div>
+      <div class="ac a4">
+        <div class="ac-num">⚡ Velocity</div>
+        <div class="ac-title">Expect the same again before Week 10</div>
+        <div class="ac-task">The tools on this slide will likely be superseded or significantly updated before this course ends. <strong>This is the skill:</strong> staying current, evaluating new tools critically against existing ones, and knowing when to switch. The adaptability matters more than any single tool.</div>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">7</div>
+</div>
+
+<!-- ╔══ 8: RCTF ACROSS MODALITIES ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>RCTF Still Works — Across Every Modality</h2><span class="tag">Framework</span></div>
+  <div class="body">
+    <p style="margin-bottom:10px; font-size:.96rem;">The prompting framework you mastered in Week 1 transfers directly. The <em>output type</em> changes; the <em>thinking</em> does not.</p>
+    <div class="rctf">
+      <div class="ri">
+        <div class="rl">R</div>
+        <div class="rt">
+          <div class="rtt">Role</div>
+          <div class="rtd"><strong style="color:rgba(255,255,255,.9);">Image:</strong> "expert product photographer"<br><strong style="color:rgba(255,255,255,.9);">Code:</strong> "senior Python developer"<br><strong style="color:rgba(255,255,255,.9);">Video:</strong> "professional scriptwriter"<br><strong style="color:rgba(255,255,255,.9);">Data:</strong> "business analyst"</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">C</div>
+        <div class="rt">
+          <div class="rtt">Context</div>
+          <div class="rtd">Who the audience is, what platform the output will appear on, and what business problem you're solving</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">T</div>
+        <div class="rt">
+          <div class="rtt">Task</div>
+          <div class="rtd">The specific deliverable — "generate a product hero shot", "write an Excel macro", "create a 30-second welcome video script"</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">F</div>
+        <div class="rt">
+          <div class="rtt">Format</div>
+          <div class="rtd"><strong style="color:rgba(255,255,255,.9);">Image:</strong> "16:9, white background, soft lighting"<br><strong style="color:rgba(255,255,255,.9);">Code:</strong> "Python, with comments, no dependencies"<br><strong style="color:rgba(255,255,255,.9);">Data:</strong> "CSV, 50 rows, realistic Australian names"</div>
+        </div>
+      </div>
+    </div>
+    <div class="ex"><p><strong>Key insight:</strong> You're not learning four new skills — you're applying one core skill (effective AI collaboration) to four different output types.</p></div>
+  </div>
+  <div class="rule"></div><div class="snum">8</div>
+</div>
+
+<!-- ╔══ 9: THE 4 MODALITY SPRINT (BRIEF) ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>The 4-Modality Sprint</h2><span class="tag">Activity — Hour 1</span></div>
+  <div class="body">
+    <p style="margin-bottom:10px; font-size:.94rem;">You have <strong>10 minutes per modality</strong> to experiment, iterate, and document. Each timer slide shows your task. Work individually — document everything in your Prompt Log.</p>
+    <div class="act-grid">
+      <div class="ac a1">
+        <div class="ac-num">01 — Image</div>
+        <div class="ac-title">Generate 3 product shots</div>
+        <div class="ac-task">Use Gemini (gemini.google.com) or ChatGPT image generation (chatgpt.com — now powered by GPT Image 1, not DALL·E 3). Try the same prompt across both and compare. Note which tool handled your brief more accurately.</div>
+      </div>
+      <div class="ac a2">
+        <div class="ac-num">02 — Video</div>
+        <div class="ac-title">Create a 15-second founder intro</div>
+        <div class="ac-task">Use HeyGen (heygen.com) — select <strong>Avatar III</strong> (free tier). ⚠️ The free trial gives only 1 minute of generation — script carefully before hitting generate. Avatar IV and Sora B-roll cost premium credits. Note the improvement in lip sync vs older AI video.</div>
+      </div>
+      <div class="ac a3">
+        <div class="ac-num">03 — Code</div>
+        <div class="ac-title">Build a business calculator</div>
+        <div class="ac-task">Use GitHub Copilot (free for students via education.github.com/pack) or the Copilot Free tier (2,000 completions/month — no student verification needed) or Claude/ChatGPT as backup. Write a profit margin or loan repayment calculator. Test whether it actually works.</div>
+      </div>
+      <div class="ac a4">
+        <div class="ac-num">04 — Data</div>
+        <div class="ac-title">Generate a synthetic customer dataset</div>
+        <div class="ac-task">Use Mockaroo (mockaroo.com) or Claude/ChatGPT. Create 50 rows of realistic Australian customer data with name, email, state, purchase amount, and product category. Export as CSV.</div>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">9</div>
+</div>
+
+<!-- ╔══ 10: TIMER — IMAGE GENERATION ══╗ -->
+<div class="slide s-timer" data-id="t1" data-duration="600">
+  <div class="t-label">Sprint 01 — Visual AI</div>
+  <div class="t-act">🖼️ Image Generation<br>Generate 3 product shots using Gemini or ChatGPT image generation (GPT Image 1)</div>
+  <div class="t-display" id="t1-disp">10:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t1-bar" style="width:100%"></div></div>
+  <div class="t-btns">
+    <button class="t-btn start" onclick="timerStart('t1')">▶ Start</button>
+    <button class="t-btn pause" onclick="timerPause('t1')">⏸ Pause</button>
+    <button class="t-btn reset" onclick="timerReset('t1')">↺ Reset</button>
+  </div>
+  <div class="t-note">Document: Which tool? What prompt worked best? What artefacts did you spot?</div>
+</div>
+
+<!-- ╔══ 10: TIMER — VIDEO AI ══╗ -->
+<div class="slide s-timer" data-id="t2" data-duration="600">
+  <div class="t-label">Sprint 02 — Video AI</div>
+  <div class="t-act">🎬 Founder Introduction Video<br>Create a 15-second AI presenter welcome using HeyGen — select Avatar III (free tier)</div>
+  <div class="t-display" id="t2-disp">10:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t2-bar" style="width:100%"></div></div>
+  <div class="t-btns">
+    <button class="t-btn start" onclick="timerStart('t2')">▶ Start</button>
+    <button class="t-btn pause" onclick="timerPause('t2')">⏸ Pause</button>
+    <button class="t-btn reset" onclick="timerReset('t2')">↺ Reset</button>
+  </div>
+  <div class="t-note">⚠️ Free trial = 1 minute of generation only — finalise your script before hitting generate. Avatar IV &amp; Sora B-roll cost premium credits.</div>
+</div>
+
+<!-- ╔══ 11: TIMER — CODE AI ══╗ -->
+<div class="slide s-timer" data-id="t3" data-duration="600">
+  <div class="t-label">Sprint 03 — Code AI</div>
+  <div class="t-act">💻 Business Calculator<br>Generate a working profit margin or loan calculator — no coding knowledge needed</div>
+  <div class="t-display" id="t3-disp">10:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t3-bar" style="width:100%"></div></div>
+  <div class="t-btns">
+    <button class="t-btn start" onclick="timerStart('t3')">▶ Start</button>
+    <button class="t-btn pause" onclick="timerPause('t3')">⏸ Pause</button>
+    <button class="t-btn reset" onclick="timerReset('t3')">↺ Reset</button>
+  </div>
+  <div class="t-note">No Student Pack yet? Use Copilot Free (github.com/features/copilot — 2,000 completions/month, no verification needed) or Claude/ChatGPT as backup.</div>
+</div>
+
+<!-- ╔══ 12: TIMER — SYNTHETIC DATA ══╗ -->
+<div class="slide s-timer" data-id="t4" data-duration="600">
+  <div class="t-label">Sprint 04 — Synthetic Data</div>
+  <div class="t-act">📊 Customer Dataset<br>Generate 50 rows of realistic Australian customer data using Mockaroo or Claude</div>
+  <div class="t-display" id="t4-disp">10:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t4-bar" style="width:100%"></div></div>
+  <div class="t-btns">
+    <button class="t-btn start" onclick="timerStart('t4')">▶ Start</button>
+    <button class="t-btn pause" onclick="timerPause('t4')">⏸ Pause</button>
+    <button class="t-btn reset" onclick="timerReset('t4')">↺ Reset</button>
+  </div>
+  <div class="t-note">Critical reminder: Synthetic data is for practice &amp; prototyping only — always disclose to stakeholders.</div>
+</div>
+
+<!-- ╔══ 14: STATEMENT — REFLECTION ══╗ -->
+<div class="slide s-stmt">
+  <blockquote>The companies disrupting industries aren't using AI for images <span class="hl">or</span> video <span class="hl">or</span> code <span class="hl">or</span> data — they're <span class="hl">integrating all capabilities</span> to move faster than competitors imagined possible.</blockquote>
+  <div class="attr">— AI for Business Transformation, Week 2</div>
+</div>
+
+<!-- ╔══ 15: BREAK ══╗ -->
+<div class="slide s-break" data-id="t5" data-duration="600">
+  <div class="b-icon">☕</div>
+  <div class="b-head">Break Time</div>
+  <div class="b-sub">10 minutes — stretch, recharge, and think about which modality surprised you most</div>
+  <div class="t-display" id="t5-disp">10:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t5-bar" style="width:100%"></div></div>
+  <div class="t-btns">
+    <button class="t-btn start" onclick="timerStart('t5')">▶ Start</button>
+    <button class="t-btn pause" onclick="timerPause('t5')">⏸ Pause</button>
+    <button class="t-btn reset" onclick="timerReset('t5')">↺ Reset</button>
+  </div>
+  <div class="b-back">Back at — use the time to save your outputs from Hour 1 into your dedicated folder</div>
+</div>
+
+<!-- ╔══ 16: SECTION 02 ══╗ -->
+<div class="slide s-div">
+  <div class="sn">02</div>
+  <div class="sc">
+    <div class="sl">Hour Two</div>
+    <div class="sr"></div>
+    <div class="st">Minimum Viable<br>Launch Kit Challenge</div>
+    <div class="ss2">Integrate all four modalities to rapidly prototype a business concept — the way real companies actually build</div>
+  </div>
+</div>
+
+<!-- ╔══ 17: MVL KIT CHALLENGE EXPLAINED ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>The Minimum Viable Launch Kit</h2><span class="tag">Group Challenge</span></div>
+  <div class="body">
+    <p style="margin-bottom:8px;">Working in your groups, choose <strong>one business concept</strong> (real or hypothetical) and build a rapid-prototype launch package using all four modalities. You have 60 minutes to produce four deliverables.</p>
+    <div class="mvp-grid">
+      <div class="mvp-card v1">
+        <div class="mvp-icon">🖼️</div>
+        <div class="mvp-title">Product Visual Pack</div>
+        <div class="mvp-desc">3 hero images for your product or service — suitable for a pitch deck, social media, or website header.</div>
+        <div class="mvp-tool">Tool: Gemini / ChatGPT image gen / Reve Image</div>
+      </div>
+      <div class="mvp-card v2">
+        <div class="mvp-icon">🎬</div>
+        <div class="mvp-title">Founder Introduction Video</div>
+        <div class="mvp-desc">30-second AI presenter video introducing your business concept and value proposition.</div>
+        <div class="mvp-tool">Tool: HeyGen</div>
+      </div>
+      <div class="mvp-card v3">
+        <div class="mvp-icon">💻</div>
+        <div class="mvp-title">Business Tool or Automation</div>
+        <div class="mvp-desc">A working calculator, pricing tool, or automation script relevant to your business (e.g. ROI calculator, lead qualifier).</div>
+        <div class="mvp-tool">Tool: Claude / ChatGPT / Copilot</div>
+      </div>
+      <div class="mvp-card v4">
+        <div class="mvp-icon">📊</div>
+        <div class="mvp-title">Market Data Snapshot</div>
+        <div class="mvp-desc">A synthetic customer dataset of 100+ rows with realistic demographics, purchase behaviour, and regional breakdown for your concept.</div>
+        <div class="mvp-tool">Tool: Mockaroo / Claude</div>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">17</div>
+</div>
+
+<!-- ╔══ 18: GROUP ROLES ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Divide &amp; Conquer</h2><span class="tag">Group Roles</span></div>
+  <div class="body">
+    <p style="margin-bottom:10px;">Allocate roles within your group based on interest — everyone documents their own contributions in their AI Prompt Log for Assignment 3.</p>
+    <div class="cols">
+      <div class="col">
+        <div class="col-label">Suggested Division</div>
+        <ul>
+          <li><strong>Visual Lead</strong> — drives image generation, manages prompt iterations, selects final outputs</li>
+          <li><strong>Video Lead</strong> — writes the video script using RCTF, manages HeyGen export</li>
+          <li><strong>Tech Lead</strong> — works with code AI to build the business tool, tests whether it runs correctly</li>
+          <li><strong>Data Lead</strong> — designs the dataset schema, generates data, checks for realistic distribution</li>
+          <li><strong>Pitch Compiler</strong> — assembles the four outputs into a cohesive 2-minute group share-back</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-label">Group Norms</div>
+        <div class="def"><p>Everyone participates in <strong>at least two modalities</strong> — roles rotate so no one is locked into only one area of learning.</p></div>
+        <div class="def" style="margin-top:6px;"><p>Treat your launch kit as <strong>real</strong>. The quality you produce today is a direct preview of Assignment 2 (AI Business Pitch).</p></div>
+        <div class="def" style="margin-top:6px;"><p><strong>Document as you go</strong>, not at the end. Capture each prompt, the result, and what you'd change in your Prompt Log.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">18</div>
+</div>
+
+<!-- ╔══ 19: TIMER — MVL KIT ══╗ -->
+<div class="slide s-timer" data-id="t6" data-duration="3600">
+  <div class="t-label">Hour Two — Group Challenge</div>
+  <div class="t-act">🚀 Minimum Viable Launch Kit<br>Build all four deliverables — Product Visual, Founder Video, Business Tool, Market Data</div>
+  <div class="t-display" id="t6-disp">60:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t6-bar" style="width:100%"></div></div>
+  <div class="t-btns">
+    <button class="t-btn start" onclick="timerStart('t6')">▶ Start</button>
+    <button class="t-btn pause" onclick="timerPause('t6')">⏸ Pause</button>
+    <button class="t-btn reset" onclick="timerReset('t6')">↺ Reset</button>
+  </div>
+  <div class="t-sub">At 15 minutes remaining — begin assembling your 2-minute share-back presentation</div>
+</div>
+
+<!-- ╔══ 20: SHARE-BACK ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Gallery Share-Back</h2><span class="tag">Group Presentations</span></div>
+  <div class="body">
+    <p style="margin-bottom:10px;">Each group has <strong>2 minutes</strong> to present their Minimum Viable Launch Kit. Cover these four points:</p>
+    <div class="rctf">
+      <div class="ri">
+        <div class="rl">1</div>
+        <div class="rt">
+          <div class="rtt">The Business Concept</div>
+          <div class="rtd">What did you build and for whom? What problem does it solve?</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">2</div>
+        <div class="rt">
+          <div class="rtt">Your Best Output</div>
+          <div class="rtd">Show the deliverable you're most proud of. What made your RCTF prompt effective?</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">3</div>
+        <div class="rt">
+          <div class="rtt">Biggest Challenge</div>
+          <div class="rtd">Where did AI fall short of what you needed? What would you do differently with more time?</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">4</div>
+        <div class="rt">
+          <div class="rtt">Surprise Insight</div>
+          <div class="rtd">What genuinely surprised you about using AI across multiple modalities for a real business deliverable?</div>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:10px; font-size:.82rem; color:var(--au-slate);">Listen actively — each group's share-back is evidence of where AI currently excels and where human expertise remains essential. This is the raw material for your Assignment 3 critical reflections.</p>
+  </div>
+  <div class="rule"></div><div class="snum">20</div>
+</div>
+
+<!-- ╔══ 21: SECTION 03 ══╗ -->
+<div class="slide s-div">
+  <div class="sn">03</div>
+  <div class="sc">
+    <div class="sl">Hour Three</div>
+    <div class="sr"></div>
+    <div class="st">Critical Evaluation<br>&amp; Documentation</div>
+    <div class="ss2">Developing the professional judgement to evaluate AI outputs rigorously — not just "does it look good?"</div>
+  </div>
+</div>
+
+<!-- ╔══ 22: QUALITY EVALUATION FRAMEWORK ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Is It Actually Good Enough?</h2><span class="tag">Evaluation Framework</span></div>
+  <div class="body">
+    <p style="margin-bottom:8px; font-size:.94rem;">For each AI output you produce today, apply this four-question test before calling it done:</p>
+    <div class="doc-row">
+      <div class="doc-box" style="border-left-color:var(--au-navy);">
+        <div class="doc-title">🖼️ Images — Check For</div>
+        <div class="doc-items">
+          · Distorted or inconsistent features (hands, text, logos)<br>
+          · Lighting inconsistencies or unrealistic shadows<br>
+          · Brand appropriateness for your specific audience<br>
+          · Whether it communicates the intended message
+        </div>
+      </div>
+      <div class="doc-box" style="border-left-color:var(--au-mid-blue);">
+        <div class="doc-title">🎬 Video — Check For</div>
+        <div class="doc-items">
+          · Uncanny valley effect in avatar expressions<br>
+          · Lip sync accuracy with the script<br>
+          · Whether the script sounds natural when spoken<br>
+          · Watermarks on free-tier exports
+        </div>
+      </div>
+    </div>
+    <div class="doc-row" style="margin-top:8px;">
+      <div class="doc-box" style="border-left-color:var(--au-slate);">
+        <div class="doc-title">💻 Code — Check For</div>
+        <div class="doc-items">
+          · Does it actually run? (Test it — don't assume)<br>
+          · Does the output match expected results?<br>
+          · Are there security or privacy risks?<br>
+          · Could you explain the logic to a colleague?
+        </div>
+      </div>
+      <div class="doc-box" style="border-left-color:#1a3a50;">
+        <div class="doc-title">📊 Data — Check For</div>
+        <div class="doc-items">
+          · Is the distribution realistic? (Not all customers aged 25)<br>
+          · Are Australian formats used? (Postcodes, state codes, phone numbers)<br>
+          · Always disclose: "This is synthetic data for illustration only"<br>
+          · Never use for actual business decisions
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">22</div>
+</div>
+
+<!-- ╔══ 23: WHAT TO DOCUMENT ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Completing Your AI Prompt Log</h2><span class="tag">Documentation — 20 min</span></div>
+  <div class="body">
+    <p style="margin-bottom:9px; font-size:.94rem;">For each of your 5+ experiments today, capture these five elements in your Prompt Log:</p>
+    <div class="rctf">
+      <div class="ri">
+        <div class="rl" style="font-size:1.2rem;">Tool &amp;<br>Modal</div>
+        <div class="rt">
+          <div class="rtt">Which tool, which modality</div>
+          <div class="rtd">e.g. "Gemini — Image Generation" or "Claude — Synthetic Data"</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl" style="font-size:1.2rem;">Your<br>Prompt</div>
+        <div class="rt">
+          <div class="rtt">Exact RCTF prompt used</div>
+          <div class="rtd">Copy the full prompt — including what you refined after the first iteration</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl" style="font-size:1.2rem;">Output<br>Quality</div>
+        <div class="rt">
+          <div class="rtt">Honest evaluation (1–5) with reason</div>
+          <div class="rtd">What worked well? What artefacts, errors, or limitations did you encounter?</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl" style="font-size:1.2rem;">Business<br>Insight</div>
+        <div class="rt">
+          <div class="rtt">Real-world application observation</div>
+          <div class="rtd">When would a business use this? When would human expertise still be essential? What's the ethical consideration?</div>
+        </div>
+      </div>
+    </div>
+    <div class="ex" style="margin-top:8px;"><p><strong>For Assignment 3:</strong> These logged experiments are your primary evidence. Document 5–6 meaningful experiments this week — quality of reflection matters more than quantity of attempts.</p></div>
+  </div>
+  <div class="rule"></div><div class="snum">23</div>
+</div>
+
+<!-- ╔══ 24: TIMER — DOCUMENTATION ══╗ -->
+<div class="slide s-timer" data-id="t7" data-duration="1200">
+  <div class="t-label">Hour Three — Documentation</div>
+  <div class="t-act">📝 AI Prompt Log Completion<br>Document all experiments from today — prompts, quality ratings, and business insights</div>
+  <div class="t-display" id="t7-disp">20:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t7-bar" style="width:100%"></div></div>
+  <div class="t-btns">
+    <button class="t-btn start" onclick="timerStart('t7')">▶ Start</button>
+    <button class="t-btn pause" onclick="timerPause('t7')">⏸ Pause</button>
+    <button class="t-btn reset" onclick="timerReset('t7')">↺ Reset</button>
+  </div>
+  <div class="t-note">Aim for at least 5 entries — one per modality sprint plus your best contribution from the group challenge.</div>
+</div>
+
+<!-- ╔══ 25: ASSIGNMENT CONNECTIONS ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>How Today Connects to Your Assessments</h2></div>
+  <div class="body">
+    <div class="asgn-row">
+      <div class="asgn">
+        <div class="asgn-num">A1 — 30%</div>
+        <div class="asgn-name">Staged Case Study</div>
+        <div class="asgn-desc">Use <strong>image AI</strong> to create visual representations of business concepts. Use <strong>code AI</strong> to automate repetitive analytical tasks. Your multimodal experiments this week strengthen your reflective component.</div>
+      </div>
+      <div class="asgn">
+        <div class="asgn-num">A2 — 30%</div>
+        <div class="asgn-name">AI Business Pitch</div>
+        <div class="asgn-desc">Your group pitch benefits directly from this week. Generate <strong>professional visuals</strong> for your deck, create a <strong>founder video</strong>, build a <strong>proof-of-concept tool</strong> with code AI, and demonstrate market potential with <strong>synthetic data</strong>.</div>
+      </div>
+      <div class="asgn">
+        <div class="asgn-num">A3 — 40%</div>
+        <div class="asgn-name">Critical Reflective Analysis</div>
+        <div class="asgn-desc">Today's Prompt Log entries are primary evidence. Document at least <strong>5–6 multimodal experiments</strong> — what worked, what didn't, which tools won, and how your thinking about AI's business applications evolved.</div>
+      </div>
+    </div>
+    <div class="ex" style="margin-top:10px;"><p><strong>Next week — Week 3: AI Agents &amp; Autonomous Systems.</strong> You'll move from AI that responds to prompts to AI that proactively accomplishes goals. Pre-read is on Canvas — complete it before the workshop.</p></div>
+  </div>
+  <div class="rule"></div><div class="snum">25</div>
+</div>
+
+<!-- ╔══ 26: END ══╗ -->
+<div class="slide s-end">
+  <span class="el">Adelaide University</span>
+  <div class="er"></div>
+  <div class="et">Great Work Today</div>
+  <div class="es">Week 3: AI Agents &amp; Autonomous Systems</div>
+  <div class="ec">AI for Business Transformation &nbsp;·&nbsp; Adelaide University &nbsp;·&nbsp; 2026</div>
+</div>
+
+</div><!-- /ss -->
+
+<div class="nav">
+  <button onclick="go(-1)">&#8592; Prev</button>
+  <span class="ctr" id="ctr">1 / 26</span>
+  <button onclick="go(1)">Next &#8594;</button>
+</div>
+
+<script>
+// ── Slide Navigation ──
+const slides = document.querySelectorAll(".slide");
+let cur = 0;
+function show(n) {
+  slides[cur].classList.remove("active");
+  cur = (n + slides.length) % slides.length;
+  slides[cur].classList.add("active");
+  document.getElementById("ctr").textContent = (cur+1) + " / " + slides.length;
+  document.getElementById("prog").style.width = ((cur+1)/slides.length*100)+"%";
+}
+function go(d) { show(cur+d); }
+document.addEventListener("keydown", e => {
+  if(["ArrowRight","ArrowDown"," "].includes(e.key)){ e.preventDefault(); go(1); }
+  if(["ArrowLeft","ArrowUp"].includes(e.key)){ e.preventDefault(); go(-1); }
+  if(e.key==="Home") show(0);
+  if(e.key==="End") show(slides.length-1);
+});
+function scale() {
+  const s = Math.min(window.innerWidth/960, window.innerHeight/540)*0.96;
+  slides.forEach(sl => sl.style.transform = "scale("+s+")");
+}
+window.addEventListener("resize", scale);
+scale();
+document.getElementById("prog").style.width = (1/slides.length*100)+"%";
+document.getElementById("ctr").textContent = "1 / " + slides.length;
+
+// ── Timer Engine ──
+const timers = {};
+
+function timerInit(id) {
+  const slide = document.querySelector(".slide[data-id='" + id + "']");
+  if (!slide || timers[id]) return;
+  const dur = parseInt(slide.dataset.duration);
+  timers[id] = { dur: dur, rem: dur, running: false, iv: null };
+}
+
+function fmtTime(s) {
+  const m = Math.floor(s/60), sec = s%60;
+  return String(m).padStart(2,"0") + ":" + String(sec).padStart(2,"0");
+}
+
+function timerRender(id) {
+  const t = timers[id];
+  const disp = document.getElementById(id+"-disp");
+  const bar  = document.getElementById(id+"-bar");
+  if (!disp || !bar || !t) return;
+  const pct = t.rem / t.dur;
+  disp.textContent = fmtTime(t.rem);
+  bar.style.width = (pct*100)+"%";
+  disp.classList.remove("warn","alert","done");
+  bar.classList.remove("warn","alert");
+  if (t.rem === 0) {
+    disp.classList.add("done");
+    disp.textContent = "TIME!";
+  } else if (pct < 0.15) {
+    disp.classList.add("alert"); bar.classList.add("alert");
+  } else if (pct < 0.33) {
+    disp.classList.add("warn"); bar.classList.add("warn");
+  }
+}
+
+function timerStart(id) {
+  timerInit(id);
+  const t = timers[id];
+  if (t.running || t.rem === 0) return;
+  t.running = true;
+  t.iv = setInterval(() => {
+    if (t.rem > 0) { t.rem--; timerRender(id); }
+    else { clearInterval(t.iv); t.running = false; }
+  }, 1000);
+}
+
+function timerPause(id) {
+  timerInit(id);
+  const t = timers[id];
+  t.running = false;
+  clearInterval(t.iv);
+}
+
+function timerReset(id) {
+  timerInit(id);
+  const t = timers[id];
+  clearInterval(t.iv);
+  t.running = false;
+  t.rem = t.dur;
+  timerRender(id);
+}
+
+// Init all timers on load
+["t1","t2","t3","t4","t5","t6","t7"].forEach(id => { timerInit(id); timerRender(id); });
+</script>
+</body>
+</html>

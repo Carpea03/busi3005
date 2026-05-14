@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 5 Workshop: Startup AI Strategy Lab | Adelaide University</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --au-navy:      #140F50;
+  --au-blue:      #1448FF;
+  --au-sandstone: #F8EFE0;
+  --au-lavender:  #836BFF;
+  --au-mid-blue:  #3B67FF;
+  --au-slate:     #284150;
+  --au-pale-teal: #DAEDEF;
+  --au-white:     #FFFFFF;
+  --au-green:     #28A745;
+  --au-red:       #DC3545;
+  --au-amber:     #F5C518;
+  --font-h: "Franklin Gothic Demi Cond","Franklin Gothic Medium","Arial Narrow",Arial,sans-serif;
+  --font-b: Georgia,"Times New Roman",serif;
+}
+html,body { width:100%; height:100%; background:#0b0928; font-family:var(--font-b); overflow:hidden; }
+
+/* ── Slideshow ── */
+.ss { width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; }
+.slide { display:none; width:960px; height:540px; position:relative; overflow:hidden; flex-shrink:0; flex-direction:column; }
+.slide.active { display:flex; }
+
+/* ── Cover Dark ── */
+.s-cover { background:var(--au-navy); padding:44px 52px; justify-content:flex-end; }
+.s-cover .acc { position:absolute; top:0; right:0; width:280px; height:100%; overflow:hidden; pointer-events:none; }
+.s-cover .acc::before { content:""; position:absolute; top:-5%; right:44px; width:3px; height:120%; background:var(--au-lavender); transform:rotate(-12deg); transform-origin:top center; opacity:.65; }
+.s-cover .acc::after  { content:""; position:absolute; top:-5%; right:74px; width:1px; height:120%; background:var(--au-lavender); transform:rotate(-12deg); transform-origin:top center; opacity:.25; }
+.s-cover .label { font-family:var(--font-h); font-size:.8rem; font-weight:700; letter-spacing:.13em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:12px; }
+.s-cover .title { font-family:var(--font-h); font-size:2.85rem; font-weight:700; color:#fff; line-height:1.05; margin-bottom:16px; max-width:62%; letter-spacing:-.01em; }
+.s-cover .sub   { font-family:var(--font-b); font-size:1.08rem; color:rgba(255,255,255,.55); line-height:1.55; max-width:56%; }
+
+/* ── Dark Slide ── */
+.s-dark { background:var(--au-navy); padding:44px 52px; flex-direction:column; }
+.s-dark .tag  { font-family:var(--font-h); font-size:.7rem; font-weight:700; letter-spacing:.13em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:10px; }
+.s-dark .hdg  { font-family:var(--font-h); font-size:2rem; font-weight:700; color:#fff; line-height:1.12; margin-bottom:16px; }
+.s-dark .body { font-family:var(--font-b); font-size:.92rem; color:rgba(255,255,255,.7); line-height:1.65; }
+.s-dark .body strong { color:#fff; }
+
+/* ── Light Slide ── */
+.s-light { background:var(--au-white); padding:44px 52px; flex-direction:column; }
+.s-light .tag  { font-family:var(--font-h); font-size:.7rem; font-weight:700; letter-spacing:.13em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:10px; }
+.s-light .hdg  { font-family:var(--font-h); font-size:2rem; font-weight:700; color:var(--au-navy); line-height:1.12; margin-bottom:16px; }
+.s-light .body { font-family:var(--font-b); font-size:.92rem; color:var(--au-slate); line-height:1.65; }
+.s-light .body strong { color:var(--au-navy); }
+
+/* ── Sandstone Slide ── */
+.s-sand { background:var(--au-sandstone); padding:44px 52px; flex-direction:column; }
+.s-sand .tag  { font-family:var(--font-h); font-size:.7rem; font-weight:700; letter-spacing:.13em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:10px; }
+.s-sand .hdg  { font-family:var(--font-h); font-size:2rem; font-weight:700; color:var(--au-navy); line-height:1.12; margin-bottom:16px; }
+.s-sand .body { font-family:var(--font-b); font-size:.92rem; color:var(--au-slate); line-height:1.65; }
+.s-sand .body strong { color:var(--au-navy); }
+
+/* ── Section Divider ── */
+.s-div { background:var(--au-navy); padding:54px 52px; align-items:center; }
+.s-div .sn   { font-family:var(--font-h); font-size:6rem; font-weight:700; color:var(--au-blue); line-height:1; margin-right:42px; flex-shrink:0; letter-spacing:-.04em; }
+.s-div .sc   { flex:1; }
+.s-div .sr   { width:58px; height:3px; background:var(--au-lavender); margin-bottom:13px; border-radius:2px; }
+.s-div .sl   { font-family:var(--font-h); font-size:.75rem; font-weight:700; letter-spacing:.13em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:5px; }
+.s-div .st   { font-family:var(--font-h); font-size:2.2rem; font-weight:700; color:#fff; line-height:1.1; }
+.s-div .ss2  { font-family:var(--font-b); font-size:.96rem; color:rgba(255,255,255,.55); margin-top:11px; line-height:1.5; }
+
+/* ── Statement ── */
+.s-stmt { background:var(--au-navy); align-items:center; justify-content:center; padding:60px; }
+.s-stmt blockquote { font-family:var(--font-h); font-size:2.2rem; font-weight:700; color:#fff; text-align:center; line-height:1.2; max-width:790px; }
+.s-stmt .hl  { color:var(--au-lavender); }
+.s-stmt .attr { font-family:var(--font-b); font-size:.9rem; color:rgba(255,255,255,.45); margin-top:18px; font-style:italic; text-align:center; }
+
+/* ── Timer Slide ── */
+.s-timer { background:var(--au-navy); align-items:center; justify-content:center; flex-direction:column; gap:0; }
+.s-timer .t-label   { font-family:var(--font-h); font-size:.78rem; font-weight:700; letter-spacing:.14em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:6px; }
+.s-timer .t-act     { font-family:var(--font-h); font-size:1.6rem; font-weight:700; color:#fff; text-align:center; line-height:1.15; margin-bottom:18px; max-width:700px; }
+.s-timer .t-display { font-family:var(--font-h); font-size:7rem; font-weight:700; color:#fff; line-height:1; letter-spacing:-.02em; cursor:pointer; transition:color .5s; user-select:none; }
+.s-timer .t-display.warn  { color:#f5c518; }
+.s-timer .t-display.alert { color:#ff4444; animation:pulse 1s infinite; }
+.s-timer .t-display.done  { color:var(--au-lavender); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+.s-timer .t-bar-wrap { width:500px; height:6px; background:rgba(255,255,255,.15); border-radius:3px; margin:14px 0; }
+.s-timer .t-bar { height:6px; background:var(--au-lavender); border-radius:3px; transition:width .9s linear, background .5s; }
+.s-timer .t-bar.warn  { background:#f5c518; }
+.s-timer .t-bar.alert { background:#ff4444; }
+.s-timer .t-hint { font-family:var(--font-b); font-size:.82rem; color:rgba(255,255,255,.35); margin-top:14px; }
+
+/* ── Shared Utilities ── */
+.cols2 { display:flex; gap:28px; }
+.cols2 > div { flex:1; }
+.cols3 { display:flex; gap:20px; }
+.cols3 > div { flex:1; }
+.card { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:16px 18px; }
+.card-light { background:rgba(20,15,80,.04); border:1px solid rgba(20,15,80,.1); border-radius:6px; padding:16px 18px; }
+.card-sand { background:rgba(20,15,80,.06); border:1px solid rgba(20,15,80,.08); border-radius:6px; padding:16px 18px; }
+.pill { display:inline-block; padding:3px 10px; border-radius:12px; font-family:var(--font-h); font-size:.65rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.pill-purple { background:rgba(133,107,255,.18); color:var(--au-lavender); }
+.pill-blue   { background:rgba(20,72,255,.15); color:var(--au-blue); }
+.pill-green  { background:rgba(40,167,69,.15); color:var(--au-green); }
+.pill-red    { background:rgba(220,53,69,.15); color:var(--au-red); }
+.pill-amber  { background:rgba(245,197,24,.18); color:#b8860b; }
+.mt-sm { margin-top:8px; }
+.mt-md { margin-top:16px; }
+.mt-lg { margin-top:24px; }
+.mb-sm { margin-bottom:8px; }
+.gap-sm { gap:8px; }
+.rule  { height:2px; background:var(--au-lavender); opacity:.18; margin:0; flex-shrink:0; position:absolute; bottom:0; left:0; right:0; }
+.snum  { position:absolute; bottom:8px; right:16px; font-family:var(--font-h); font-size:.6rem; color:rgba(255,255,255,.2); }
+.snum-dk { color:rgba(20,15,80,.2); }
+
+/* ── Navigation Bar ── */
+.nav { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:14px; }
+.nav button { font-family:var(--font-h); font-size:.78rem; background:rgba(133,107,255,.25); color:#fff; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; letter-spacing:.04em; }
+.nav button:hover { background:rgba(133,107,255,.45); }
+.nav .counter { font-family:var(--font-h); font-size:.75rem; color:rgba(255,255,255,.5); min-width:60px; text-align:center; }
+.nav .slide-title-nav { font-family:var(--font-b); font-size:.78rem; color:rgba(255,255,255,.35); font-style:italic; max-width:300px; text-align:center; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+</style>
+</head>
+<body>
+
+<div class="ss">
+
+<!-- ╔══ 1: COVER ══╗ -->
+<div class="slide s-cover active" data-title="Cover">
+  <div class="acc"></div>
+  <div class="label">AI for Business Transformation · Week 5</div>
+  <div class="title">Startup AI<br>Strategy Lab</div>
+  <div class="sub">From enterprise planning to startup execution — design lean AI solutions, analyse real cases, and develop your Assignment 2 pitch.</div>
+  <div class="rule"></div>
+</div>
+
+<!-- ╔══ 2: TODAY'S AGENDA ══╗ -->
+<div class="slide s-dark" data-title="Today's Agenda">
+  <div class="tag">Workshop Overview</div>
+  <div class="hdg">Today's Agenda — 3 Hours at Startup Speed</div>
+  <div class="body" style="margin-bottom:14px;">Today's workshop moves fast, mirrors the energy of startup culture, and is entirely focused on application.</div>
+  <div class="cols3" style="flex:1;">
+    <div class="card" style="display:flex;flex-direction:column;">
+      <span class="pill pill-purple mb-sm" style="align-self:flex-start;">Hour 1 · 60 min</span>
+      <p style="font-family:var(--font-h);font-size:1.05rem;font-weight:700;color:#fff;margin:8px 0 6px;">Case Study Stations</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;">Rotate through three stations analysing <strong style="color:#fff;">Grammarly</strong>, <strong style="color:#fff;">Canva</strong>, and <strong style="color:#fff;">Humane AI Pin</strong>. Apply frameworks from your async content.</p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;">
+      <span class="pill pill-blue mb-sm" style="align-self:flex-start;">Hour 2 · 40 min</span>
+      <p style="font-family:var(--font-h);font-size:1.05rem;font-weight:700;color:#fff;margin:8px 0 6px;">Assignment 2 Development</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;">Dedicated group time to design your <strong style="color:#fff;">MVAIP</strong>, select free tools, and stress-test your concept with instructor feedback.</p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;">
+      <span class="pill pill-green mb-sm" style="align-self:flex-start;">Hour 3 · 60 min</span>
+      <p style="font-family:var(--font-h);font-size:1.05rem;font-weight:700;color:#fff;margin:8px 0 6px;">Speed Pitching & Synthesis</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;">90-second elevator pitches, peer feedback, iteration, and a final synthesis connecting everything to <strong style="color:#fff;">Assignment 2</strong>.</p>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">2</div>
+</div>
+
+<!-- ╔══ 3: THE MINDSET SHIFT ══╗ -->
+<div class="slide s-stmt" data-title="The Mindset Shift">
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <blockquote>Week 4 was about <span class="hl">navigating complexity</span>.<br>Week 5 is about <span class="hl">embracing simplicity</span>.</blockquote>
+    <p class="attr">Enterprise planning → Startup execution · Careful governance → Rapid iteration</p>
+    <div style="display:flex;gap:28px;margin-top:32px;">
+      <div style="text-align:center;">
+        <p style="font-family:var(--font-h);font-size:.7rem;color:var(--au-lavender);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Week 4 Enterprise</p>
+        <p style="font-family:var(--font-b);font-size:.85rem;color:rgba(255,255,255,.5);">Risk mitigation · Governance<br>Stakeholder alignment · Phased rollouts</p>
+      </div>
+      <div style="font-family:var(--font-h);font-size:2rem;color:var(--au-lavender);align-self:center;">→</div>
+      <div style="text-align:center;">
+        <p style="font-family:var(--font-h);font-size:.7rem;color:var(--au-lavender);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Week 5 Startup</p>
+        <p style="font-family:var(--font-b);font-size:.85rem;color:rgba(255,255,255,.5);">Speed of learning · Free tools<br>Customer validation · Lean MVAIPs</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">3</div>
+</div>
+
+<!-- ╔══ 4: SINCE YOU READ THE CONTENT — AI UPDATE ══╗ -->
+<div class="slide s-dark" data-title="AI Startup Update – March 2026">
+  <div class="tag">What's Changed Since Your Async Content Was Written</div>
+  <div class="hdg" style="font-size:1.7rem;">The AI Startup Landscape — Right Now (March 2026)</div>
+  <div class="cols2" style="flex:1;margin-top:6px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="card" style="padding:12px 14px;">
+        <span class="pill pill-green mb-sm" style="display:inline-block;">Funding Surge</span>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.5;margin-top:6px;">17+ US AI startups raised <strong style="color:#fff;">$100M+ rounds</strong> in the first two months of 2026 alone. Anthropic raised $30B at a $380B valuation. Australian startups raised <strong style="color:#fff;">$846M across 44 rounds</strong> by March 2026 — up 27% year-on-year.</p>
+      </div>
+      <div class="card" style="padding:12px 14px;">
+        <span class="pill pill-red mb-sm" style="display:inline-block;">The Reckoning</span>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.5;margin-top:6px;">Of 14,000 AI startups launched in 2024, <strong style="color:#fff;">40% have already shut down</strong>. Jasper AI, Copy.ai, Character.AI, and Tome all faltered. The "wrapper problem" is real — building a UI on someone else's API is no longer a business.</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="card" style="padding:12px 14px;">
+        <span class="pill pill-purple mb-sm" style="display:inline-block;">Vibe Coding Revolution</span>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.5;margin-top:6px;">Non-technical founders are building production apps with tools like <strong style="color:#fff;">Lovable, Bolt.new, and Cursor</strong>. 21% of YC's W25 cohort reported codebases that were 91%+ AI-generated. Replit hit a $9B valuation.</p>
+      </div>
+      <div class="card" style="padding:12px 14px;">
+        <span class="pill pill-amber mb-sm" style="display:inline-block;">Australian Spotlight</span>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.5;margin-top:6px;">Sydney's <strong style="color:#fff;">Lorikeet</strong> raised $35M for AI customer service agents. <strong style="color:#fff;">Neara</strong> hit $1B+ valuation with AI-powered infrastructure modelling. <strong style="color:#fff;">Heidi Health</strong> secured $16M for healthcare AI. Canva acquired Leonardo.AI.</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">4</div>
+</div>
+
+<!-- ╔══ 5: KEY TAKEAWAY FROM UPDATE ══╗ -->
+<div class="slide s-stmt" data-title="The Survival Filter">
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <p style="font-family:var(--font-h);font-size:.75rem;color:var(--au-lavender);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;">The 2026 AI Startup Survival Checklist</p>
+    <blockquote style="font-size:1.8rem;">"AI-powered" isn't enough anymore.<br>You need a <span class="hl">real moat</span>, <span class="hl">unit economics</span>,<br>and a problem <span class="hl">big labs won't solve</span>.</blockquote>
+    <div style="display:flex;gap:24px;margin-top:28px;">
+      <div style="text-align:center;padding:12px 18px;background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.25);border-radius:6px;">
+        <p style="font-family:var(--font-h);font-size:.9rem;color:#ff6b6b;">❌ Wrappers</p>
+        <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.45);margin-top:4px;">Nice UI on someone else's API</p>
+      </div>
+      <div style="text-align:center;padding:12px 18px;background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.25);border-radius:6px;">
+        <p style="font-family:var(--font-h);font-size:.9rem;color:#ff6b6b;">❌ No Moat</p>
+        <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.45);margin-top:4px;">Copyable in a weekend</p>
+      </div>
+      <div style="text-align:center;padding:12px 18px;background:rgba(40,167,69,.12);border:1px solid rgba(40,167,69,.25);border-radius:6px;">
+        <p style="font-family:var(--font-h);font-size:.9rem;color:#5cdb6f;">✓ Vertical + Deep</p>
+        <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.45);margin-top:4px;">Niche, regulated, or enterprise</p>
+      </div>
+      <div style="text-align:center;padding:12px 18px;background:rgba(40,167,69,.12);border:1px solid rgba(40,167,69,.25);border-radius:6px;">
+        <p style="font-family:var(--font-h);font-size:.9rem;color:#5cdb6f;">✓ Data Flywheel</p>
+        <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.45);margin-top:4px;">Gets better with every user</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">5</div>
+</div>
+
+<!-- ╔══ 6: QUICK CHECK-IN ══╗ -->
+<div class="slide s-light" data-title="Quick Check-In">
+  <div class="tag">Before We Start</div>
+  <div class="hdg">Quick Check-In</div>
+  <div class="body" style="margin-bottom:14px;">Before diving in, let's make sure everyone's ready to move at startup speed.</div>
+  <div class="cols2" style="flex:1;">
+    <div>
+      <div class="card-light" style="margin-bottom:12px;">
+        <p style="font-family:var(--font-h);font-size:.88rem;color:var(--au-navy);margin-bottom:6px;">✅ Async Content Completed?</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;">Concept 1: Startup AI Advantage<br>Concept 2: Lean AI Implementation (MVAIP)<br>Concept 3: Failure Modes & Success Patterns</p>
+      </div>
+      <div class="card-light">
+        <p style="font-family:var(--font-h);font-size:.88rem;color:var(--au-navy);margin-bottom:6px;">📋 Assignment 2 Brief Reviewed?</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;">Do you know the pitch requirements?<br>Have 2–3 preliminary business ideas?<br>Confirmed your group members?</p>
+      </div>
+    </div>
+    <div>
+      <div class="card-light" style="margin-bottom:12px;">
+        <p style="font-family:var(--font-h);font-size:.88rem;color:var(--au-navy);margin-bottom:6px;">🔧 Tools Ready?</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;">Laptop charged with internet access<br>Free AI tools accessible (ChatGPT, Claude, etc.)<br>AI Prompt Log ready for documentation</p>
+      </div>
+      <div class="card-light" style="background:rgba(133,107,255,.08);border-color:rgba(133,107,255,.2);">
+        <p style="font-family:var(--font-h);font-size:.88rem;color:var(--au-navy);margin-bottom:6px;">🧠 Mindset Shift Active?</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;"><strong>Done is better than perfect.</strong><br>Think like a founder, not an analyst.<br>Constraints are design parameters, not barriers.</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule" style="background:var(--au-lavender);"></div><div class="snum snum-dk">6</div>
+</div>
+
+<!-- ╔══ 7: SECTION 01 DIVIDER ══╗ -->
+<div class="slide s-div" data-title="Part 1: Case Study Stations">
+  <div class="sn">01</div>
+  <div class="sc">
+    <div class="sr"></div>
+    <div class="sl">Hour 1 · 60 Minutes</div>
+    <div class="st">Case Study Stations</div>
+    <div class="ss2">Rotate through three stations. Apply startup frameworks to real-world successes and failures. 20 minutes per station.</div>
+  </div>
+  <div class="rule"></div><div class="snum">7</div>
+</div>
+
+<!-- ╔══ 8: HOW STATIONS WORK ══╗ -->
+<div class="slide s-dark" data-title="Station Instructions">
+  <div class="tag">Case Study Rotation</div>
+  <div class="hdg">How the Stations Work</div>
+  <div class="body" style="margin-bottom:16px;">You'll rotate through three case study stations. At each station, your group applies specific frameworks from the async content to analyse what drove the outcome.</div>
+  <div class="cols3" style="flex:1;">
+    <div class="card" style="text-align:center;display:flex;flex-direction:column;align-items:center;">
+      <span style="font-family:var(--font-h);font-size:2.4rem;color:var(--au-green);line-height:1;">A</span>
+      <p style="font-family:var(--font-h);font-size:.95rem;color:#fff;margin:8px 0 4px;">Grammarly</p>
+      <span class="pill pill-green" style="margin-bottom:8px;">Success</span>
+      <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.45;">From lean startup to $700M ARR. How did constraint-driven design and an API-first approach create a durable moat?</p>
+    </div>
+    <div class="card" style="text-align:center;display:flex;flex-direction:column;align-items:center;">
+      <span style="font-family:var(--font-h);font-size:2.4rem;color:var(--au-blue);line-height:1;">B</span>
+      <p style="font-family:var(--font-h);font-size:.95rem;color:#fff;margin:8px 0 4px;">Canva</p>
+      <span class="pill pill-blue" style="margin-bottom:8px;">Australian Success</span>
+      <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.45;">$42B valuation. How did an Australian startup use agility and AI features (Magic Studio, Leonardo.AI acquisition) to achieve hypergrowth?</p>
+    </div>
+    <div class="card" style="text-align:center;display:flex;flex-direction:column;align-items:center;">
+      <span style="font-family:var(--font-h);font-size:2.4rem;color:var(--au-red);line-height:1;">C</span>
+      <p style="font-family:var(--font-h);font-size:.95rem;color:#fff;margin:8px 0 4px;">Humane AI Pin</p>
+      <span class="pill pill-red" style="margin-bottom:8px;">Failure</span>
+      <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.45;">$230M raised, product flopped. Which failure modes from Concept 3 predicted this outcome? What red flags existed from day one?</p>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">8</div>
+</div>
+
+<!-- ╔══ 9: STATION A — GRAMMARLY ══╗ -->
+<div class="slide s-dark" data-title="Station A: Grammarly">
+  <div class="tag">Station A · Success Case</div>
+  <div class="hdg" style="color:var(--au-green);">Grammarly — From Lean Startup to $700M ARR</div>
+  <div class="cols2" style="flex:1;margin-top:4px;">
+    <div>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin-bottom:6px;">Background</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.55;">Founded 2009, Ukrainian founders. Started with simple grammar checking before AI boom. Bootstrapped for years before raising venture capital. Now 30M+ daily active users.</p>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin:14px 0 6px;">Discussion Prompts</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.55;">1. How did Grammarly validate customer need before building complex AI?<br>2. What was their MVAIP — the minimum first version?<br>3. Where is their moat? Can ChatGPT replace them?</p>
+    </div>
+    <div>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin-bottom:6px;">Apply These Frameworks</p>
+      <div class="card" style="margin-bottom:8px;padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:#fff;">🔄 Build-Measure-Learn Cycle</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">Map Grammarly's iteration journey from grammar checker → writing assistant → enterprise platform</p>
+      </div>
+      <div class="card" style="margin-bottom:8px;padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:#fff;">🏰 Moat Analysis</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">Data flywheel? Workflow integration? Brand trust? Distribution?</p>
+      </div>
+      <div class="card" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:#fff;">⚡ Startup Advantage</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">Which specific startup advantages from Concept 1 did they leverage?</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">9</div>
+</div>
+
+<!-- ╔══ 10: STATION B — CANVA ══╗ -->
+<div class="slide s-dark" data-title="Station B: Canva">
+  <div class="tag">Station B · Australian Success Case</div>
+  <div class="hdg" style="color:var(--au-blue);">Canva — Australia's $42B AI Design Platform</div>
+  <div class="cols2" style="flex:1;margin-top:4px;">
+    <div>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin-bottom:6px;">Background</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.55;">Founded 2012 in Sydney by Melanie Perkins. Turned "I can't use Photoshop" into a $42B business. 190M+ users across 190 countries. Now integrating AI at massive scale — Magic Studio, acquired Leonardo.AI for generative capabilities.</p>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin:14px 0 6px;">Discussion Prompts</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.55;">1. What was Canva's original constraint-driven solution?<br>2. How did they add AI features without losing simplicity?<br>3. What does the Leonardo.AI acquisition tell us about build-vs-buy?</p>
+    </div>
+    <div>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin-bottom:6px;">Apply These Frameworks</p>
+      <div class="card" style="margin-bottom:8px;padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:#fff;">🎯 Problem-First Obsession</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">Canva didn't build AI — they solved "design is too hard." How does problem-first thinking apply?</p>
+      </div>
+      <div class="card" style="margin-bottom:8px;padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:#fff;">🇦🇺 Australian Context</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">What role did being Australian play? Advantage or limitation? What can your Assignment 2 concept learn?</p>
+      </div>
+      <div class="card" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:#fff;">📐 MVAIP Design</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">Reconstruct what Canva's MVAIP would have looked like. What was the minimum viable version?</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">10</div>
+</div>
+
+<!-- ╔══ 11: STATION C — HUMANE AI PIN ══╗ -->
+<div class="slide s-dark" data-title="Station C: Humane AI Pin">
+  <div class="tag">Station C · Failure Case</div>
+  <div class="hdg" style="color:var(--au-red);">Humane AI Pin — $230M in Funding, Total Flop</div>
+  <div class="cols2" style="flex:1;margin-top:4px;">
+    <div>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin-bottom:6px;">Background</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.55;">Founded by ex-Apple engineers. Raised $230M to build a wearable AI device that projected onto your hand. Launched at $699 + $24/mo subscription. Reviews were devastating. Sought acquisition — no buyer at asking price.</p>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin:14px 0 6px;">Discussion Prompts</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.55;">1. Which failure modes from Concept 3 predicted this?<br>2. What would a lean approach have looked like?<br>3. At what point should founders have pivoted?</p>
+    </div>
+    <div>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-lavender);margin-bottom:6px;">Red Flag Identification</p>
+      <div class="card" style="margin-bottom:8px;padding:10px 14px;border-color:rgba(220,53,69,.3);">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:var(--au-red);">🚩 Technology Mirage</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">Impressive tech nobody asked for. A solution looking for a problem.</p>
+      </div>
+      <div class="card" style="margin-bottom:8px;padding:10px 14px;border-color:rgba(220,53,69,.3);">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:var(--au-red);">🚩 Burn Rate Bomb</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">Hardware + subscription + AI compute costs = disastrous unit economics</p>
+      </div>
+      <div class="card" style="padding:10px 14px;border-color:rgba(220,53,69,.3);">
+        <p style="font-family:var(--font-h);font-size:.78rem;color:var(--au-red);">🚩 No Customer Validation</p>
+        <p style="font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.5);margin-top:3px;">Built in stealth for years. No Build-Measure-Learn cycle. No early user feedback.</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">11</div>
+</div>
+
+<!-- ╔══ 12: TIMER — CASE STUDY STATIONS ══╗ -->
+<div class="slide s-timer" data-title="Timer: Case Study Stations">
+  <div class="t-label">Hour 1 · Case Study Stations</div>
+  <div class="t-act">Rotate Through All Three Stations<br><span style="font-size:.9rem;color:rgba(255,255,255,.5);">~20 minutes per station · Document key insights</span></div>
+  <div class="t-display" id="timer1-display" onclick="toggleTimer('timer1',3600)">60:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="timer1-bar" style="width:100%;"></div></div>
+  <div class="t-hint">Click the timer to start / pause</div>
+  <div class="rule"></div><div class="snum">12</div>
+</div>
+
+<!-- ╔══ 13: DEBRIEF — CASE STUDIES ══╗ -->
+<div class="slide s-sand" data-title="Case Study Debrief">
+  <div class="tag">Debrief</div>
+  <div class="hdg">Case Study Insights — Share-Back</div>
+  <div class="body" style="margin-bottom:14px;">What patterns emerged across all three cases? Let's connect the dots.</div>
+  <div class="cols3" style="flex:1;">
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-size:.85rem;color:var(--au-navy);margin-bottom:6px;">🟢 What made Grammarly & Canva succeed?</p>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;">Started with a real problem, not technology. Validated with customers early. Built data flywheels. Stayed lean until product-market fit.</p>
+    </div>
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-size:.85rem;color:var(--au-navy);margin-bottom:6px;">🔴 What killed the AI Pin?</p>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;">Technology-first thinking. No customer validation. Hardware complexity. Tried to replace phones instead of solving a specific problem.</p>
+    </div>
+    <div class="card-sand" style="background:rgba(133,107,255,.1);border-color:rgba(133,107,255,.2);">
+      <p style="font-family:var(--font-h);font-size:.85rem;color:var(--au-navy);margin-bottom:6px;">💡 Apply to Assignment 2</p>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;">Is your concept problem-first or tech-first? Can you validate with free tools? What's your moat? Which failure modes threaten you?</p>
+    </div>
+  </div>
+  <div class="rule" style="background:var(--au-lavender);"></div><div class="snum snum-dk">13</div>
+</div>
+
+<!-- ╔══ 14: SECTION 02 DIVIDER ══╗ -->
+<div class="slide s-div" data-title="Part 2: Assignment 2 Development">
+  <div class="sn">02</div>
+  <div class="sc">
+    <div class="sr"></div>
+    <div class="sl">Hour 2 · 40 Minutes</div>
+    <div class="st">Assignment 2<br>Development Workshop</div>
+    <div class="ss2">Dedicated group time to design your AI business concept with instructor support. This is your most valuable pre-pitch preparation.</div>
+  </div>
+  <div class="rule"></div><div class="snum">14</div>
+</div>
+
+<!-- ╔══ 15: MVAIP FRAMEWORK ══╗ -->
+<div class="slide s-light" data-title="MVAIP Framework">
+  <div class="tag">Framework Refresher</div>
+  <div class="hdg">Designing Your MVAIP</div>
+  <div class="body" style="margin-bottom:12px;">Your Minimum Viable AI Product answers one question: <strong>Can AI solve this customer's problem well enough that they'll use it?</strong></div>
+  <div class="cols2" style="flex:1;">
+    <div>
+      <div class="card-light" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">1. Define One Core Function</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">Not five features — one. What is the single thing your AI does that makes someone say "I need this"?</p>
+      </div>
+      <div class="card-light" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">2. Select Free Tools</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">ChatGPT/Claude API (free tiers), Lovable/Bolt.new (prototyping), Google Forms (data capture), Notion (workflow).</p>
+      </div>
+      <div class="card-light">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">3. Design the Validation Test</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">How do you prove people want this <em>before</em> building anything complex? What's your Build-Measure-Learn first cycle?</p>
+      </div>
+    </div>
+    <div>
+      <div style="background:linear-gradient(135deg,rgba(133,107,255,.08),rgba(20,72,255,.08));border:1px solid rgba(133,107,255,.2);border-radius:6px;padding:16px 18px;height:100%;display:flex;flex-direction:column;justify-content:center;">
+        <p style="font-family:var(--font-h);font-size:.95rem;color:var(--au-navy);margin-bottom:10px;">⚠️ The #1 Mistake</p>
+        <p style="font-family:var(--font-b);font-size:.85rem;color:var(--au-slate);line-height:1.55;">Designing your MVAIP to <strong>impress your instructor</strong> instead of <strong>solve a customer problem</strong>.</p>
+        <p style="font-family:var(--font-b);font-size:.85rem;color:var(--au-slate);line-height:1.55;margin-top:10px;">Your pitch is assessed on <strong>strategic thinking and feasibility</strong>, not on how many AI features you can cram in.</p>
+        <p style="font-family:var(--font-b);font-size:.85rem;color:var(--au-lavender);line-height:1.55;margin-top:10px;font-style:italic;">Think Grammarly's first version, not Humane's AI Pin.</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule" style="background:var(--au-lavender);"></div><div class="snum snum-dk">15</div>
+</div>
+
+<!-- ╔══ 16: WHAT TO WORK ON ══╗ -->
+<div class="slide s-dark" data-title="Group Development Tasks">
+  <div class="tag">Assignment 2 Development Session</div>
+  <div class="hdg">What Your Group Should Work On</div>
+  <div class="body" style="margin-bottom:10px;">Use this 40 minutes strategically. Don't try to perfect everything — focus on foundations.</div>
+  <div style="display:flex;flex-direction:column;gap:8px;flex:1;">
+    <div class="card" style="display:flex;align-items:center;gap:14px;padding:10px 16px;">
+      <span style="font-family:var(--font-h);font-size:1.6rem;color:var(--au-lavender);flex-shrink:0;width:30px;text-align:center;">1</span>
+      <div>
+        <p style="font-family:var(--font-h);font-size:.88rem;color:#fff;">Agree on your concept <span style="color:var(--au-lavender);font-size:.75rem;">(10 min)</span></p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);margin-top:2px;">Compare your 2–3 preliminary ideas. Pick the one that's problem-first, feasible with free tools, and avoids obvious failure modes.</p>
+      </div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:14px;padding:10px 16px;">
+      <span style="font-family:var(--font-h);font-size:1.6rem;color:var(--au-lavender);flex-shrink:0;width:30px;text-align:center;">2</span>
+      <div>
+        <p style="font-family:var(--font-h);font-size:.88rem;color:#fff;">Design your MVAIP <span style="color:var(--au-lavender);font-size:.75rem;">(10 min)</span></p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);margin-top:2px;">Define the one core function. Select specific free tools. Map your first Build-Measure-Learn cycle.</p>
+      </div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:14px;padding:10px 16px;">
+      <span style="font-family:var(--font-h);font-size:1.6rem;color:var(--au-lavender);flex-shrink:0;width:30px;text-align:center;">3</span>
+      <div>
+        <p style="font-family:var(--font-h);font-size:.88rem;color:#fff;">Red flag check <span style="color:var(--au-lavender);font-size:.75rem;">(10 min)</span></p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);margin-top:2px;">Run your concept through failure modes: Technology Mirage? Open Source Guillotine? Burn Rate Bomb? Be honest.</p>
+      </div>
+    </div>
+    <div class="card" style="display:flex;align-items:center;gap:14px;padding:10px 16px;">
+      <span style="font-family:var(--font-h);font-size:1.6rem;color:var(--au-lavender);flex-shrink:0;width:30px;text-align:center;">4</span>
+      <div>
+        <p style="font-family:var(--font-h);font-size:.88rem;color:#fff;">Draft your 90-second pitch <span style="color:var(--au-lavender);font-size:.75rem;">(10 min)</span></p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);margin-top:2px;">Problem → Solution → Why AI → Why now → Ask. Keep it simple. You'll practise this in Hour 3.</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">16</div>
+</div>
+
+<!-- ╔══ 17: ASK THE INSTRUCTOR ══╗ -->
+<div class="slide s-sand" data-title="Instructor Feedback Guide">
+  <div class="tag">Making the Most of Instructor Time</div>
+  <div class="hdg">Questions to Ask During This Session</div>
+  <div class="body" style="margin-bottom:14px;">The instructor is circulating. Don't wait — flag them down. Here are the highest-value questions to ask:</div>
+  <div class="cols2" style="flex:1;">
+    <div>
+      <div class="card-sand" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">"Is our scope right?"</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">Too ambitious = unfeasible pitch. Too narrow = underwhelming pitch. Get this calibrated now.</p>
+      </div>
+      <div class="card-sand" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">"Does this avoid the wrapper trap?"</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">If OpenAI could add your feature tomorrow, your concept has no moat. Test this early.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card-sand" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">"What's our biggest blind spot?"</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">An outside perspective catches what group-think misses. The answer may surprise you.</p>
+      </div>
+      <div class="card-sand" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">"Can we actually build this with free tools?"</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">Feasibility is a core assessment criterion. Get a reality check on your technical plan.</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule" style="background:var(--au-lavender);"></div><div class="snum snum-dk">17</div>
+</div>
+
+<!-- ╔══ 18: TIMER — ASSIGNMENT 2 DEVELOPMENT ══╗ -->
+<div class="slide s-timer" data-title="Timer: Assignment 2 Development">
+  <div class="t-label">Hour 2 · Assignment 2 Development</div>
+  <div class="t-act">Group Work: Design Your Concept<br><span style="font-size:.9rem;color:rgba(255,255,255,.5);">Concept → MVAIP → Red Flags → Draft Pitch</span></div>
+  <div class="t-display" id="timer2-display" onclick="toggleTimer('timer2',2400)">40:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="timer2-bar" style="width:100%;"></div></div>
+  <div class="t-hint">Click the timer to start / pause</div>
+  <div class="rule"></div><div class="snum">18</div>
+</div>
+
+<!-- ╔══ 19: SECTION 03 DIVIDER ══╗ -->
+<div class="slide s-div" data-title="Part 3: Speed Pitching & Synthesis">
+  <div class="sn">03</div>
+  <div class="sc">
+    <div class="sr"></div>
+    <div class="sl">Hour 3 · 60 Minutes</div>
+    <div class="st">Speed Pitching<br>& Synthesis</div>
+    <div class="ss2">Practise rapid-fire pitches, give and receive feedback, and connect everything back to your Assignment 2 presentation.</div>
+  </div>
+  <div class="rule"></div><div class="snum">19</div>
+</div>
+
+<!-- ╔══ 20: PITCH STRUCTURE ══╗ -->
+<div class="slide s-dark" data-title="90-Second Pitch Structure">
+  <div class="tag">Speed Pitching</div>
+  <div class="hdg">The 90-Second Elevator Pitch</div>
+  <div class="body" style="margin-bottom:12px;">Startup founders pitch in lifts, corridors, and coffee queues. You have 90 seconds to hook your audience. Here's the structure:</div>
+  <div style="display:flex;gap:10px;flex:1;">
+    <div class="card" style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;">
+      <p style="font-family:var(--font-h);font-size:2rem;color:var(--au-lavender);">1</p>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;margin:4px 0;">The Problem</p>
+      <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.5);line-height:1.4;">~15 seconds<br>What painful, specific problem exists?</p>
+    </div>
+    <div class="card" style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;">
+      <p style="font-family:var(--font-h);font-size:2rem;color:var(--au-lavender);">2</p>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;margin:4px 0;">Your Solution</p>
+      <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.5);line-height:1.4;">~20 seconds<br>How does your AI product solve it?</p>
+    </div>
+    <div class="card" style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;">
+      <p style="font-family:var(--font-h);font-size:2rem;color:var(--au-lavender);">3</p>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;margin:4px 0;">Why AI</p>
+      <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.5);line-height:1.4;">~20 seconds<br>Why must this be AI-powered?</p>
+    </div>
+    <div class="card" style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;">
+      <p style="font-family:var(--font-h);font-size:2rem;color:var(--au-lavender);">4</p>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;margin:4px 0;">Why Now</p>
+      <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.5);line-height:1.4;">~15 seconds<br>What's changed to make this possible?</p>
+    </div>
+    <div class="card" style="flex:1;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 10px;">
+      <p style="font-family:var(--font-h);font-size:2rem;color:var(--au-lavender);">5</p>
+      <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;margin:4px 0;">The Ask</p>
+      <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.5);line-height:1.4;">~20 seconds<br>What do you need? End with clarity.</p>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">20</div>
+</div>
+
+<!-- ╔══ 21: FEEDBACK FRAMEWORK ══╗ -->
+<div class="slide s-light" data-title="Peer Feedback Framework">
+  <div class="tag">Speed Pitching</div>
+  <div class="hdg">Giving Feedback Like an Investor</div>
+  <div class="body" style="margin-bottom:14px;">After each group pitches, the audience provides structured feedback. Be constructive, specific, and honest.</div>
+  <div class="cols2" style="flex:1;">
+    <div>
+      <div class="card-light" style="margin-bottom:10px;border-left:3px solid var(--au-green);border-radius:0 6px 6px 0;">
+        <p style="font-family:var(--font-h);font-size:.85rem;color:var(--au-green);">✓ Strengths</p>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;margin-top:4px;">What was compelling? Did the problem feel real? Was the AI use case clear? Would you use this product?</p>
+      </div>
+      <div class="card-light" style="border-left:3px solid var(--au-amber);border-radius:0 6px 6px 0;">
+        <p style="font-family:var(--font-h);font-size:.85rem;color:#b8860b;">⚡ Sharpen</p>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;margin-top:4px;">Where did the pitch lose you? What questions weren't answered? Was any part confusing or vague?</p>
+      </div>
+    </div>
+    <div>
+      <div class="card-light" style="margin-bottom:10px;border-left:3px solid var(--au-red);border-radius:0 6px 6px 0;">
+        <p style="font-family:var(--font-h);font-size:.85rem;color:var(--au-red);">🚩 Red Flags</p>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;margin-top:4px;">Does this smell like a wrapper? Is the moat clear? Could ChatGPT do this already? Are the unit economics viable?</p>
+      </div>
+      <div class="card-light" style="border-left:3px solid var(--au-lavender);border-radius:0 6px 6px 0;">
+        <p style="font-family:var(--font-h);font-size:.85rem;color:var(--au-lavender);">💡 Suggestions</p>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;margin-top:4px;">What pivot or refinement would make this stronger? How could they sharpen the moat or narrow the focus?</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule" style="background:var(--au-lavender);"></div><div class="snum snum-dk">21</div>
+</div>
+
+<!-- ╔══ 22: TIMER — SPEED PITCHING ══╗ -->
+<div class="slide s-timer" data-title="Timer: Speed Pitching">
+  <div class="t-label">Hour 3 · Speed Pitching Round</div>
+  <div class="t-act">90 Seconds Per Group — Pitch!<br><span style="font-size:.9rem;color:rgba(255,255,255,.5);">Problem → Solution → Why AI → Why Now → Ask</span></div>
+  <div class="t-display" id="timer3-display" onclick="toggleTimer('timer3',90)">01:30</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="timer3-bar" style="width:100%;"></div></div>
+  <div class="t-hint">Click the timer to start / pause · Resets automatically</div>
+  <div class="rule"></div><div class="snum">22</div>
+</div>
+
+<!-- ╔══ 23: SYNTHESIS — WEEK 5 KEY TAKEAWAYS ══╗ -->
+<div class="slide s-dark" data-title="Week 5 Synthesis">
+  <div class="tag">Synthesis</div>
+  <div class="hdg">What We Learned Today</div>
+  <div style="display:flex;flex-direction:column;gap:10px;flex:1;margin-top:8px;">
+    <div class="card" style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;">
+      <span style="font-family:var(--font-h);font-size:1.4rem;color:var(--au-green);flex-shrink:0;">✓</span>
+      <div>
+        <p style="font-family:var(--font-h);font-size:.88rem;color:#fff;">Success comes from problem-first thinking</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);margin-top:2px;">Grammarly and Canva both started by solving a painful, specific problem. The AI came later.</p>
+      </div>
+    </div>
+    <div class="card" style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;">
+      <span style="font-family:var(--font-h);font-size:1.4rem;color:var(--au-red);flex-shrink:0;">✗</span>
+      <div>
+        <p style="font-family:var(--font-h);font-size:.88rem;color:#fff;">Failure follows predictable patterns</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);margin-top:2px;">Technology Mirage, Open Source Guillotine, Burn Rate Bomb. The AI Pin hit all three. Now you can spot these early.</p>
+      </div>
+    </div>
+    <div class="card" style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;">
+      <span style="font-family:var(--font-h);font-size:1.4rem;color:var(--au-lavender);flex-shrink:0;">⚡</span>
+      <div>
+        <p style="font-family:var(--font-h);font-size:.88rem;color:#fff;">Constraints are your competitive advantage</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);margin-top:2px;">Free tools + lean thinking forces strategic clarity. The "limitation" of Assignment 2 is actually its strength.</p>
+      </div>
+    </div>
+    <div class="card" style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;">
+      <span style="font-family:var(--font-h);font-size:1.4rem;color:var(--au-blue);flex-shrink:0;">🏰</span>
+      <div>
+        <p style="font-family:var(--font-h);font-size:.88rem;color:#fff;">Your moat is never the AI model itself</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.5);margin-top:2px;">In 2026, wrappers are dying. Your advantage is proprietary data, deep workflow integration, brand trust, or unique distribution.</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">23</div>
+</div>
+
+<!-- ╔══ 24: ASSIGNMENT 2 CONNECTIONS ══╗ -->
+<div class="slide s-light" data-title="Assignment 2 Next Steps">
+  <div class="tag">Looking Ahead</div>
+  <div class="hdg">Assignment 2 — What Happens Next</div>
+  <div class="body" style="margin-bottom:14px;">Your pitch is due <strong>Week 7</strong>. Here's how to use the next two weeks effectively.</div>
+  <div class="cols2" style="flex:1;">
+    <div>
+      <div class="card-light" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">📅 Week 6: Development</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">Refine your MVAIP. Build your pitch deck. Stress-test against failure modes. Rehearse as a group. Use AI tools to validate market research and refine your narrative.</p>
+      </div>
+      <div class="card-light">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:var(--au-navy);">📅 Week 7: Presentation</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.45;margin-top:4px;">In-class group pitch. <strong>You must attend your own enrolled session.</strong> Apply everything from Weeks 5 and 6. Demonstrate strategic thinking, not just technical knowledge.</p>
+      </div>
+    </div>
+    <div>
+      <div style="background:linear-gradient(135deg,rgba(133,107,255,.08),rgba(20,72,255,.08));border:1px solid rgba(133,107,255,.2);border-radius:6px;padding:18px;height:100%;display:flex;flex-direction:column;justify-content:center;">
+        <p style="font-family:var(--font-h);font-size:.95rem;color:var(--au-navy);margin-bottom:12px;">🎯 Your Pitch Should Show:</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.7;">
+          → A <strong>real problem</strong> worth solving<br>
+          → A <strong>lean MVAIP</strong> using free tools<br>
+          → A <strong>clear moat</strong> that isn't just "AI"<br>
+          → <strong>Awareness of failure modes</strong> and mitigations<br>
+          → A <strong>Build-Measure-Learn</strong> cycle<br>
+          → <strong>Strategic thinking</strong>, not just enthusiasm
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="rule" style="background:var(--au-lavender);"></div><div class="snum snum-dk">24</div>
+</div>
+
+<!-- ╔══ 25: DOCUMENTATION ══╗ -->
+<div class="slide s-dark" data-title="Documentation Reminders">
+  <div class="tag">Before You Leave</div>
+  <div class="hdg">Document While It's Fresh</div>
+  <div class="body" style="margin-bottom:14px;">Take 5 minutes now to capture these for your AI Prompt Log and Assignment 3 reflection:</div>
+  <div class="cols2" style="flex:1;">
+    <div>
+      <div class="card" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;">📝 AI Prompt Log</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.5;margin-top:4px;">Document any AI tools you used during today's session — market research, concept validation, brainstorming. Copy-paste your prompts and AI responses.</p>
+      </div>
+      <div class="card">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;">📊 Case Study Insights</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.5;margin-top:4px;">Key patterns from Grammarly, Canva, and Humane AI Pin. What frameworks helped you most in analysis?</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:10px;">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;">💡 Assignment 2 Progress</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.5;margin-top:4px;">Your group's agreed concept, MVAIP design, identified red flags, and any feedback from the instructor or peers.</p>
+      </div>
+      <div class="card">
+        <p style="font-family:var(--font-h);font-size:.82rem;color:#fff;">🔄 Mindset Reflection (Assign. 3)</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.5;margin-top:4px;">How did the shift from enterprise (Week 4) to startup (Week 5) change your thinking? What surprised you? How did constraints affect your design?</p>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">25</div>
+</div>
+
+<!-- ╔══ 26: CLOSING — COURSE JOURNEY ══╗ -->
+<div class="slide s-dark" data-title="Course Journey">
+  <div class="tag">Module 2: AI & Entrepreneurship</div>
+  <div class="hdg" style="font-size:1.6rem;margin-bottom:20px;">Your Journey So Far</div>
+  <div style="display:flex;gap:6px;align-items:stretch;flex:1;">
+    <div style="flex:1;padding:14px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:4px 0 0 4px;">
+      <p style="font-family:var(--font-h);font-size:.65rem;color:rgba(255,255,255,.35);margin-bottom:4px;">MODULE 1</p>
+      <p style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.5);">Week 1</p>
+      <p style="font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.3);">Collaborative Intelligence</p>
+    </div>
+    <div style="flex:1;padding:14px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);">
+      <p style="font-family:var(--font-h);font-size:.65rem;color:rgba(255,255,255,.35);margin-bottom:4px;">MODULE 1</p>
+      <p style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.5);">Week 2</p>
+      <p style="font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.3);">Multimodal Capability</p>
+    </div>
+    <div style="flex:1;padding:14px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);">
+      <p style="font-family:var(--font-h);font-size:.65rem;color:rgba(255,255,255,.35);margin-bottom:4px;">MODULE 1</p>
+      <p style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.5);">Week 3</p>
+      <p style="font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.3);">Orchestration Mastery</p>
+    </div>
+    <div style="flex:1;padding:14px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);">
+      <p style="font-family:var(--font-h);font-size:.65rem;color:rgba(20,72,255,.6);margin-bottom:4px;">MODULE 2</p>
+      <p style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.5);">Week 4</p>
+      <p style="font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.3);">Enterprise AI + Assign. 1</p>
+    </div>
+    <div style="flex:1;padding:14px 12px;background:rgba(133,107,255,.18);border:1px solid rgba(133,107,255,.4);">
+      <p style="font-family:var(--font-h);font-size:.65rem;color:var(--au-lavender);margin-bottom:4px;">MODULE 2 ✓</p>
+      <p style="font-family:var(--font-h);font-size:.78rem;color:#fff;">Week 5</p>
+      <p style="font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.5);">Startup AI Strategy</p>
+    </div>
+    <div style="flex:1;padding:14px 12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:0 4px 4px 0;">
+      <p style="font-family:var(--font-h);font-size:.65rem;color:rgba(20,72,255,.6);margin-bottom:4px;">NEXT</p>
+      <p style="font-family:var(--font-h);font-size:.78rem;color:#fff;">Week 6</p>
+      <p style="font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.5);">Pitch Development</p>
+    </div>
+  </div>
+  <p style="font-family:var(--font-b);font-size:.88rem;color:rgba(255,255,255,.4);font-style:italic;margin-top:14px;text-align:center;">Week 7: Assignment 2 Pitch Presentations · You must attend your enrolled session</p>
+  <div class="rule"></div><div class="snum">26</div>
+</div>
+
+<!-- ╔══ 27: END SLIDE ══╗ -->
+<div class="slide s-cover" data-title="End">
+  <div class="acc"></div>
+  <div class="label">AI for Business Transformation · Week 5</div>
+  <div class="title">Build Something<br>That Matters.</div>
+  <div class="sub">Done is better than perfect. Constraints fuel creativity. Your pitch is two weeks away. Make it count.</div>
+  <div style="position:absolute;bottom:44px;left:52px;">
+    <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.35);">Week 6: Pitch Development &nbsp;·&nbsp; Week 7: Assignment 2 Presentations</p>
+  </div>
+  <div style="background:var(--au-blue);height:6px;position:absolute;bottom:0;left:0;right:0;"></div>
+</div>
+
+</div><!-- /ss -->
+
+<!-- ── NAVIGATION ── -->
+<div class="nav">
+  <button onclick="prevSlide()">← Prev</button>
+  <div class="slide-title-nav" id="nav-title"></div>
+  <div class="counter" id="nav-counter"></div>
+  <button onclick="nextSlide()">Next →</button>
+</div>
+
+<!-- ── KEYBOARD HINT ── -->
+<p style="font-family:Georgia,serif;font-size:11px;color:#444466;margin-top:8px;text-align:center;">← → arrow keys to navigate &nbsp;·&nbsp; Click timer to start/pause</p>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const titles = Array.from(slides).map(s => s.dataset.title || '');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.getElementById('nav-counter').textContent = (current + 1) + ' / ' + slides.length;
+    document.getElementById('nav-title').textContent = titles[current] || '';
+  }
+
+  function nextSlide() { showSlide(current + 1); }
+  function prevSlide() { showSlide(current - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevSlide();
+  });
+
+  // ── TIMER ──────────────────────────────────────────────────────
+  const timers = {};
+
+  function fmt(s) {
+    const m = Math.floor(s / 60), sec = s % 60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  }
+
+  function toggleTimer(id, totalSec) {
+    if (!timers[id]) {
+      timers[id] = { remaining: totalSec, total: totalSec, running: false, interval: null };
+    }
+    const t = timers[id];
+    const disp = document.getElementById(id + '-display');
+    const bar  = document.getElementById(id + '-bar');
+
+    if (t.running) {
+      clearInterval(t.interval);
+      t.running = false;
+      disp.classList.remove('warn','alert','done');
+    } else {
+      if (t.remaining <= 0) { t.remaining = t.total; }
+      t.running = true;
+      t.interval = setInterval(() => {
+        t.remaining--;
+        disp.textContent = fmt(t.remaining);
+        const pct = (t.remaining / t.total) * 100;
+        bar.style.width = pct + '%';
+
+        // colour states
+        disp.classList.remove('warn','alert','done');
+        bar.classList.remove('warn','alert');
+        if (t.remaining <= 0) {
+          clearInterval(t.interval);
+          t.running = false;
+          disp.textContent = "TIME!";
+          disp.classList.add('done');
+          bar.style.width = '0%';
+        } else if (pct <= 10) {
+          disp.classList.add('alert');
+          bar.classList.add('alert');
+        } else if (pct <= 25) {
+          disp.classList.add('warn');
+          bar.classList.add('warn');
+        }
+      }, 1000);
+    }
+  }
+
+  // init
+  showSlide(0);
+</script>
+</body>
+</html>

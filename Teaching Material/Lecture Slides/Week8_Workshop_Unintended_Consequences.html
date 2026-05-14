@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 8 Workshop — Unintended Consequences</title>
+<style>
+/* ── AU Brand Tokens ── */
+:root {
+  --au-navy:      #140F50;
+  --au-lavender:  #856BFF;
+  --au-blue:      #1449FF;
+  --au-sandstone: #F8EFE0;
+  --au-white:     #FFFFFF;
+  --au-slate:     #444466;
+  --au-red:       #DC2626;
+  --au-orange:    #D97706;
+  --au-green:     #16A34A;
+  --font-h: Arial, Helvetica, sans-serif;
+  --font-b: Georgia, 'Times New Roman', serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0e0b2a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:18px 10px 60px;}
+
+/* ── Slide System ── */
+.ss{position:relative;width:960px;max-width:100%;}
+.slide{display:none;width:960px;min-height:540px;position:relative;overflow:hidden;}
+.slide.active{display:flex;}
+
+/* ── Cover ── */
+.s-cover{background:var(--au-navy);align-items:flex-start;justify-content:flex-end;padding:52px;flex-direction:column;position:relative;}
+.s-cover .acc{position:absolute;top:0;right:0;width:420px;height:100%;background:linear-gradient(135deg,transparent 40%,rgba(133,107,255,.10) 70%,rgba(20,73,255,.12) 100%);pointer-events:none;}
+.s-cover .logo{position:absolute;top:26px;left:52px;font-family:var(--font-h);font-size:.82rem;font-weight:700;letter-spacing:.09em;color:rgba(255,255,255,.45);text-transform:uppercase;}
+.s-cover .label{font-family:var(--font-h);font-size:.8rem;font-weight:700;letter-spacing:.13em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:12px;}
+.s-cover .title{font-family:var(--font-h);font-size:2.85rem;font-weight:700;color:#fff;line-height:1.05;margin-bottom:16px;max-width:62%;letter-spacing:-.01em;}
+.s-cover .sub{font-family:var(--font-b);font-size:1.08rem;color:rgba(255,255,255,.55);line-height:1.55;max-width:56%;}
+.s-cover .rule{width:56px;height:3px;background:var(--au-lavender);border-radius:2px;margin-top:18px;}
+
+/* ── Dark Slide ── */
+.s-dark{background:var(--au-navy);padding:44px 52px;flex-direction:column;}
+.s-dark .tag{font-family:var(--font-h);font-size:.7rem;font-weight:700;letter-spacing:.13em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:10px;}
+.s-dark .hdg{font-family:var(--font-h);font-size:2rem;font-weight:700;color:#fff;line-height:1.12;margin-bottom:16px;}
+.s-dark .body{font-family:var(--font-b);font-size:.92rem;color:rgba(255,255,255,.7);line-height:1.65;}
+.s-dark .body strong{color:#fff;}
+
+/* ── Light Slide ── */
+.s-light{background:var(--au-white);padding:44px 52px;flex-direction:column;}
+.s-light .tag{font-family:var(--font-h);font-size:.7rem;font-weight:700;letter-spacing:.13em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:10px;}
+.s-light .hdg{font-family:var(--font-h);font-size:2rem;font-weight:700;color:var(--au-navy);line-height:1.12;margin-bottom:16px;}
+.s-light .body{font-family:var(--font-b);font-size:.92rem;color:var(--au-slate);line-height:1.65;}
+.s-light .body strong{color:var(--au-navy);}
+
+/* ── Sandstone Slide ── */
+.s-sand{background:var(--au-sandstone);padding:44px 52px;flex-direction:column;}
+.s-sand .tag{font-family:var(--font-h);font-size:.7rem;font-weight:700;letter-spacing:.13em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:10px;}
+.s-sand .hdg{font-family:var(--font-h);font-size:2rem;font-weight:700;color:var(--au-navy);line-height:1.12;margin-bottom:16px;}
+.s-sand .body{font-family:var(--font-b);font-size:.92rem;color:var(--au-slate);line-height:1.65;}
+.s-sand .body strong{color:var(--au-navy);}
+
+/* ── White Slide (with header) ── */
+.s-white{background:var(--au-white);flex-direction:column;}
+.s-white .hdr{background:var(--au-navy);padding:18px 52px 14px;display:flex;align-items:baseline;justify-content:space-between;}
+.s-white .hdr h2{font-family:var(--font-h);font-weight:700;font-size:1.35rem;color:#fff;}
+.s-white .hdr .tag{font-family:var(--font-h);font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--au-lavender);text-transform:uppercase;}
+.s-white .body{padding:28px 52px;font-family:var(--font-b);font-size:.92rem;color:var(--au-slate);line-height:1.65;flex:1;}
+.s-white .body strong{color:var(--au-navy);}
+
+/* ── Split Slide ── */
+.s-split{flex-direction:row;background:var(--au-white);}
+.s-split .left{width:50%;background:var(--au-navy);padding:44px 36px;display:flex;flex-direction:column;justify-content:center;}
+.s-split .right{width:50%;padding:44px 36px;display:flex;flex-direction:column;justify-content:center;}
+.s-split .left .tag{font-family:var(--font-h);font-size:.7rem;font-weight:700;letter-spacing:.13em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:10px;}
+.s-split .left .hdg{font-family:var(--font-h);font-size:1.6rem;font-weight:700;color:#fff;line-height:1.15;margin-bottom:12px;}
+.s-split .left .body{font-family:var(--font-b);font-size:.85rem;color:rgba(255,255,255,.6);line-height:1.6;}
+.s-split .right .body{font-family:var(--font-b);font-size:.85rem;color:var(--au-slate);line-height:1.6;}
+.s-split .right .body strong{color:var(--au-navy);}
+
+/* ── End ── */
+.s-end{background:var(--au-navy);align-items:center;justify-content:center;flex-direction:column;gap:15px;}
+.s-end .er{width:76px;height:3px;background:var(--au-lavender);border-radius:2px;}
+.s-end .et{font-family:var(--font-h);font-size:2.15rem;font-weight:700;color:#fff;text-align:center;}
+.s-end .es{font-family:var(--font-b);font-size:.98rem;color:var(--au-lavender);text-align:center;}
+.s-end .ec{font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.3);text-align:center;margin-top:2px;}
+
+/* ── Components ── */
+.card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);border-radius:6px;padding:16px 18px;}
+.card-light{background:rgba(20,15,80,.04);border:1px solid rgba(20,15,80,.10);border-radius:6px;padding:16px 18px;}
+.card-sand{background:rgba(20,15,80,.05);border:1px solid rgba(20,15,80,.08);border-radius:6px;padding:16px 18px;}
+.pill{display:inline-block;font-family:var(--font-h);font-size:.68rem;font-weight:700;letter-spacing:.06em;padding:3px 10px;border-radius:3px;}
+.pill-purple{background:rgba(133,107,255,.22);color:var(--au-lavender);}
+.pill-blue{background:rgba(20,73,255,.18);color:var(--au-blue);}
+.pill-red{background:rgba(220,38,38,.15);color:var(--au-red);}
+.pill-green{background:rgba(22,163,74,.15);color:var(--au-green);}
+.pill-orange{background:rgba(217,119,6,.15);color:var(--au-orange);}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.mb-sm{margin-bottom:8px;}
+.mb-md{margin-bottom:14px;}
+.mt-sm{margin-top:8px;}
+.mt-md{margin-top:14px;}
+
+/* ── Quote Block ── */
+.quote-block{border-left:3px solid var(--au-lavender);padding:12px 18px;margin:10px 0;background:rgba(133,107,255,.06);border-radius:0 6px 6px 0;}
+.quote-block.dark{background:rgba(133,107,255,.12);border-left-color:var(--au-lavender);}
+.quote-block p{font-family:var(--font-b);font-style:italic;font-size:.88rem;line-height:1.55;color:var(--au-slate);}
+.quote-block.dark p{color:rgba(255,255,255,.8);}
+.quote-block .attr{font-family:var(--font-h);font-style:normal;font-size:.72rem;font-weight:700;color:var(--au-lavender);margin-top:6px;display:block;}
+
+/* ── Timer ── */
+.timer-box{background:rgba(133,107,255,.12);border:1px solid rgba(133,107,255,.25);border-radius:8px;padding:16px 24px;text-align:center;cursor:pointer;user-select:none;transition:background .2s;}
+.timer-box:hover{background:rgba(133,107,255,.2);}
+.timer-box .timer-label{font-family:var(--font-h);font-size:.72rem;font-weight:700;letter-spacing:.1em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:6px;}
+.timer-box .timer-display{font-family:var(--font-h);font-size:2.8rem;font-weight:700;color:#fff;letter-spacing:.04em;}
+.timer-box .timer-display.warn{color:var(--au-orange);}
+.timer-box .timer-display.alert{color:var(--au-red);}
+.timer-box .timer-display.done{color:var(--au-green);}
+.timer-box .timer-bar{height:3px;background:var(--au-lavender);border-radius:2px;margin-top:8px;transition:width 1s linear;}
+.timer-box .timer-bar.warn{background:var(--au-orange);}
+.timer-box .timer-bar.alert{background:var(--au-red);}
+.timer-box .timer-hint{font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.35);margin-top:6px;}
+
+/* ── View Cards for Three Views ── */
+.view-card{border-radius:8px;padding:18px 20px;display:flex;flex-direction:column;gap:6px;}
+.view-card .view-num{font-family:var(--font-h);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+.view-card .view-title{font-family:var(--font-h);font-size:1rem;font-weight:700;line-height:1.2;}
+.view-card .view-body{font-family:var(--font-b);font-size:.8rem;line-height:1.5;}
+
+/* ── Nav ── */
+.nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:9px;align-items:center;background:rgba(20,15,80,.92);padding:6px 16px;border-radius:22px;z-index:100;backdrop-filter:blur(8px);}
+.nav button{background:none;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.82);padding:4px 13px;border-radius:13px;cursor:pointer;font-size:.8rem;font-family:var(--font-h);letter-spacing:.04em;transition:background .2s;}
+.nav button:hover{background:rgba(255,255,255,.14);}
+.nav .counter{color:rgba(255,255,255,.48);font-size:.75rem;min-width:54px;text-align:center;font-family:var(--font-b);}
+.nav .slide-title-nav{font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.35);font-style:italic;max-width:300px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--au-lavender);transition:width .3s ease;z-index:200;}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="ss" id="ss">
+
+<!-- ╔══ 1: COVER ══╗ -->
+<div class="slide s-cover active" data-title="Cover">
+  <div class="acc"></div>
+  <span class="logo">Adelaide University</span>
+  <div class="label">AI for Business Transformation · Week 8</div>
+  <div class="title">Unintended<br>Consequences</div>
+  <div class="sub">From champion to critic — examining what happens when AI systems create harm, even when working exactly as designed.</div>
+  <div class="rule"></div>
+</div>
+
+<!-- ╔══ 2: THE CRITICAL TURN ══╗ -->
+<div class="slide s-dark" data-title="The Critical Turn">
+  <div class="tag">Module 3 Begins</div>
+  <div class="hdg">The Critical Turn</div>
+  <div class="body mb-md">Last week, you pitched an AI business to your peers. You championed innovation, demonstrated technical feasibility, and envisioned transformation. <strong>Hold onto that energy.</strong></div>
+  <div class="body mb-md">Now we're going to do something uncomfortable: <strong>interrogate everything we just celebrated.</strong></div>
+  <div class="cols2" style="margin-top:auto;">
+    <div class="card">
+      <span class="pill pill-purple mb-sm" style="display:inline-block;">Module 2 — You Were</span>
+      <p style="font-family:var(--font-h);font-size:.95rem;font-weight:700;color:#fff;margin:8px 0 4px;">Innovators & Entrepreneurs</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;">Building, pitching, championing AI's transformative potential</p>
+    </div>
+    <div class="card" style="border-color:rgba(133,107,255,.35);background:rgba(133,107,255,.12);">
+      <span class="pill pill-blue mb-sm" style="display:inline-block;">Module 3 — You Become</span>
+      <p style="font-family:var(--font-h);font-size:.95rem;font-weight:700;color:#fff;margin:8px 0 4px;">Critics & Analysts</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;">Interrogating, evaluating, navigating genuine complexity</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 3: WHY DISCOMFORT ══╗ -->
+<div class="slide s-sand" data-title="Why Discomfort Matters">
+  <div class="tag">Mindset</div>
+  <div class="hdg">Why This Feels Uncomfortable (And Why That's Essential)</div>
+  <div class="body mb-md">Professional expertise isn't about choosing sides — innovation <em>or</em> criticism, optimism <em>or</em> scepticism. It's about <strong>holding both perspectives simultaneously.</strong></div>
+  <div class="body mb-md">The best AI strategists aren't uncritical enthusiasts. They're people who can build powerful AI systems while also asking <strong>"what could go wrong?"</strong> and <strong>"who might this harm?"</strong> before deployment.</div>
+  <div class="card-sand" style="margin-top:auto;">
+    <p style="font-family:var(--font-b);font-size:.88rem;color:var(--au-navy);line-height:1.6;"><strong>The discomfort you feel this week? That's growth.</strong> Surface learning feels comfortable — absorbing information that confirms what you already believe. Deep learning is uncomfortable because it changes <em>how</em> you think, not just <em>what</em> you know.</p>
+  </div>
+</div>
+
+<!-- ╔══ 4: TODAY'S AGENDA ══╗ -->
+<div class="slide s-dark" data-title="Today's Agenda">
+  <div class="tag">Workshop Overview</div>
+  <div class="hdg">Today's Agenda — 3 Hours</div>
+  <div class="cols3" style="flex:1;margin-top:8px;">
+    <div class="card" style="display:flex;flex-direction:column;">
+      <span class="pill pill-purple mb-sm" style="align-self:flex-start;">Hour 1 · 60 min</span>
+      <p style="font-family:var(--font-h);font-size:1rem;font-weight:700;color:#fff;margin:8px 0 6px;">Case Study Deep Dives</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;">Small groups analyse real AI failures using the MIT taxonomy. Apply frameworks. Present findings.</p>
+      <p style="font-family:var(--font-h);font-size:.72rem;color:var(--au-lavender);margin-top:auto;padding-top:10px;">Active analytical work, not discussion for discussion's sake</p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;">
+      <span class="pill pill-blue mb-sm" style="align-self:flex-start;">Hour 2 · 45 min</span>
+      <p style="font-family:var(--font-h);font-size:1rem;font-weight:700;color:#fff;margin:8px 0 6px;">The Mirror Exercise</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;">Critically analyse your own Assignment 2 pitch for unintended consequences. Individual → pairs → share.</p>
+      <p style="font-family:var(--font-h);font-size:.72rem;color:var(--au-lavender);margin-top:auto;padding-top:10px;">The most challenging component</p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;">
+      <span class="pill pill-orange mb-sm" style="align-self:flex-start;">Hour 3 · 75 min</span>
+      <p style="font-family:var(--font-h);font-size:1rem;font-weight:700;color:#fff;margin:8px 0 6px;">Three Views Debate &<br>Assignment 3 Briefing</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.5;">Structured debate: competing visions for AI's economic future. Then: Assignment 3 briefing and Q&A.</p>
+      <p style="font-family:var(--font-h);font-size:.72rem;color:var(--au-lavender);margin-top:auto;padding-top:10px;">No correct answers — practise reasoned argumentation</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 5: QUICK CHECK-IN ══╗ -->
+<div class="slide s-light" data-title="Quick Check-In">
+  <div class="tag">Before We Begin</div>
+  <div class="hdg">Quick Check-In</div>
+  <div class="body mb-md">Before we dive in, confirm you're ready:</div>
+  <div class="cols2" style="gap:16px;">
+    <div class="card-light">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;color:var(--au-navy);margin-bottom:8px;">✅ Have You Completed</p>
+      <p style="font-family:var(--font-b);font-size:.84rem;color:var(--au-slate);line-height:1.6;">Concept 1: Spectrum of Unintended Consequences<br>Concept 2: "Working as Designed" Failures<br>Concept 3: The Job Displacement Debate<br>Pre-workshop video: Gihan Perera</p>
+    </div>
+    <div class="card-light">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;color:var(--au-navy);margin-bottom:8px;">📋 Have You Brought</p>
+      <p style="font-family:var(--font-b);font-size:.84rem;color:var(--au-slate);line-height:1.6;">Laptop (charged, with charger)<br>Assignment 2 pitch materials<br>AI Prompt Log (digital or physical)<br>Readiness for intellectual discomfort</p>
+    </div>
+  </div>
+  <div style="margin-top:auto;padding:14px 18px;background:rgba(133,107,255,.08);border-radius:6px;">
+    <p style="font-family:var(--font-b);font-size:.84rem;color:var(--au-navy);"><strong>Reminder:</strong> Today's workshop assumes you understand the frameworks from the async content. We're <em>applying</em>, not learning concepts from scratch.</p>
+  </div>
+</div>
+
+<!-- ╔══ 6: HOUR 1 HEADER ══╗ -->
+<div class="slide s-dark" data-title="Hour 1: Research Agent Practice">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;">
+    <span class="pill pill-purple" style="font-size:.8rem;padding:5px 16px;margin-bottom:16px;">Hour 1 · 55 Minutes</span>
+    <h2 style="font-family:var(--font-h);font-size:2.5rem;font-weight:700;color:#fff;margin-bottom:14px;">Research Agent Practice Run</h2>
+    <p style="font-family:var(--font-b);font-size:1.05rem;color:rgba(255,255,255,.55);max-width:560px;line-height:1.6;">Use a research agent to investigate <strong style="color:#fff;">Robodebt</strong> — Australia's automated debt recovery catastrophe. Produce a critical analysis <em>and</em> identify where your agent got it wrong.</p>
+    <p style="font-family:var(--font-b);font-size:.88rem;color:rgba(255,255,255,.35);max-width:500px;line-height:1.5;margin-top:12px;">Shared case. Different tools. You'll see how agent output varies — that variance is itself data about AI reliability.</p>
+  </div>
+</div>
+
+<!-- ╔══ 7: RESEARCH AGENT BRIEFING ══╗ -->
+<div class="slide s-white" data-title="Research Agent Briefing">
+  <div class="hdr"><h2>The Research Agent Exercise</h2><span class="tag">Hour 1 · Briefing · 8 min</span></div>
+  <div class="body">
+    <p class="mb-md"><strong>Form groups of 4–5.</strong> Each group picks a research agent: Gemini Deep Research, ChatGPT with search, or Claude. Different tools are welcome — we want to compare.</p>
+    <div class="cols2" style="gap:14px;">
+      <div class="card-light" style="border-left:3px solid var(--au-lavender);">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;color:var(--au-navy);margin-bottom:6px;">Hour 1: Practice Run (Shared Case)</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">All groups investigate <strong>Robodebt</strong>. Use the prompt template (next slide). Produce a short analysis and identify one thing your agent got wrong, missed, or oversimplified. 25 min work + 10 min report-back.</p>
+      </div>
+      <div class="card-light" style="border-left:3px solid var(--au-blue);">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;color:var(--au-navy);margin-bottom:6px;">Hour 2: Unique Case + Mirror</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Each group receives a different real-world AI failure case. Run the same method. Then apply the framework to <strong>your own Assignment 2 pitch</strong>. 30 min case + 20 min mirror + 10 min report.</p>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 8: PROMPT TEMPLATE ══╗ -->
+<div class="slide s-light" data-title="Research Agent Prompt">
+  <div class="hdr"><h2>The Prompt Template</h2><span class="tag">Copy this. Adapt for each case.</span></div>
+  <div class="body">
+    <div style="background:#0F0A3D;border-radius:6px;padding:14px 18px;font-family:'Courier New',monospace;font-size:.72rem;color:#E8E4FF;line-height:1.55;max-height:340px;overflow-y:auto;">
+You are a research assistant investigating a historical case of AI or algorithmic decision-making failure. I am studying <strong style="color:#FFD700;">[CASE NAME]</strong> for a university workshop on unintended consequences of AI deployment. Please investigate and structure your response around the following dimensions:<br><br>
+<strong style="color:#FFD700;">1. Intended outcome</strong> — What was the system designed to achieve? Who commissioned it and why?<br>
+<strong style="color:#FFD700;">2. Actual outcome</strong> — What happened when it was deployed? Quantify harms where possible.<br>
+<strong style="color:#FFD700;">3. Failure mechanisms</strong> — What specifically went wrong? Was it technical, organisational, or both?<br>
+<strong style="color:#FFD700;">4. Stakeholders harmed</strong> — Who bore the costs? Were they the same people who made the deployment decisions?<br>
+<strong style="color:#FFD700;">5. Organisational enablers</strong> — What decisions, incentives, or oversight failures allowed this to happen?<br>
+<strong style="color:#FFD700;">6. Accountability</strong> — Who was held responsible, if anyone? What was the legal or regulatory response?<br>
+<strong style="color:#FFD700;">7. Relevance to 2026 AI deployments</strong> — What analogous risks exist in current generative AI systems?<br><br>
+Provide specific dates, named individuals or organisations, and cited sources where possible. Flag any claims you are uncertain about.
+    </div>
+    <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);margin-top:10px;font-style:italic;">For Hour 1 practice run: replace [CASE NAME] with <strong>Robodebt (Australia, 2016–2020)</strong>.</p>
+  </div>
+</div>
+
+<!-- ╔══ 9: ROBODEBT PRACTICE TIMER ══╗ -->
+<div class="slide s-dark" data-title="Robodebt Practice Timer">
+  <div class="tag">Hour 1 · Practice Run</div>
+  <div class="hdg">Robodebt — Work Time</div>
+  <div class="body mb-md">Run the prompt. Read the output <em>critically</em>. Produce a 5-point summary plus one thing your agent got wrong. Then one-sentence report-back from each group.</div>
+  <div style="display:flex;gap:20px;margin-top:16px;">
+    <div class="timer-box" style="flex:2;" onclick="toggleTimer('cs',1500)">
+      <div class="timer-label">Group Work (Agent + Critique)</div>
+      <div class="timer-display" id="cs-disp">25:00</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;"><div class="timer-bar" id="cs-bar" style="width:100%;"></div></div>
+      <div class="timer-hint">Click to start / pause</div>
+    </div>
+    <div class="timer-box" style="flex:1;" onclick="toggleTimer('pres',600)">
+      <div class="timer-label">Report-Back</div>
+      <div class="timer-display" id="pres-disp">10:00</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;"><div class="timer-bar" id="pres-bar" style="width:100%;"></div></div>
+      <div class="timer-hint">1 sentence per group</div>
+    </div>
+  </div>
+  <div style="margin-top:16px;padding:10px 14px;background:rgba(133,107,255,.12);border-radius:6px;">
+    <p style="font-family:var(--font-b);font-size:.8rem;color:rgba(255,255,255,.85);"><strong>Report-back format:</strong> "Our agent was [tool]. The strongest point it made was ___. The biggest thing it got wrong or missed was ___."</p>
+  </div>
+</div>
+
+<!-- ╔══ 10: CASE ASSIGNMENTS ══╗ -->
+<div class="slide s-sand" data-title="Hour 2 Case Assignments">
+  <div class="tag">Hour 2 Setup</div>
+  <div class="hdg">Your Assigned Cases</div>
+  <div class="body mb-sm">Each group gets one case. Same prompt template, swap in your case name. Same critical evaluation requirements.</div>
+  <div class="cols2" style="gap:10px;margin-top:6px;">
+    <div class="card-sand" style="padding:10px 14px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">Group 1 — UK Post Office Horizon</p>
+      <p style="font-family:var(--font-b);font-size:.74rem;color:var(--au-slate);line-height:1.45;">Fujitsu accounting system. 900+ subpostmasters wrongly prosecuted. Ongoing inquiry.</p>
+    </div>
+    <div class="card-sand" style="padding:10px 14px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">Group 2 — Amazon Hiring Tool</p>
+      <p style="font-family:var(--font-b);font-size:.74rem;color:var(--au-slate);line-height:1.45;">Scrapped 2018. Gender bias from training on historical résumés.</p>
+    </div>
+    <div class="card-sand" style="padding:10px 14px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">Group 3 — COMPAS Recidivism</p>
+      <p style="font-family:var(--font-b);font-size:.74rem;color:var(--au-slate);line-height:1.45;">US criminal sentencing algorithm. ProPublica exposé on racial bias.</p>
+    </div>
+    <div class="card-sand" style="padding:10px 14px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">Group 4 — Dutch Childcare (Toeslagenaffaire)</p>
+      <p style="font-family:var(--font-b);font-size:.74rem;color:var(--au-slate);line-height:1.45;">26,000 families wrongly accused of fraud. Government collapsed 2021.</p>
+    </div>
+    <div class="card-sand" style="padding:10px 14px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">Group 5 — Air Canada Chatbot</p>
+      <p style="font-family:var(--font-b);font-size:.74rem;color:var(--au-slate);line-height:1.45;">2024 tribunal ruling. Chatbot hallucinated refund policy; airline held liable.</p>
+    </div>
+    <div class="card-sand" style="padding:10px 14px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">Group 6 — Facebook Myanmar</p>
+      <p style="font-family:var(--font-b);font-size:.74rem;color:var(--au-slate);line-height:1.45;">Content moderation failures contributed to violence against Rohingya, 2017–2018.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 11: HOUR 2 HEADER ══╗ -->
+<div class="slide s-dark" data-title="Hour 2: Agent + Mirror">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;">
+    <span class="pill pill-blue" style="font-size:.8rem;padding:5px 16px;margin-bottom:16px;">Hour 2 · 60 Minutes</span>
+    <h2 style="font-family:var(--font-h);font-size:2.5rem;font-weight:700;color:#fff;margin-bottom:14px;">Your Case + The Mirror</h2>
+    <p style="font-family:var(--font-b);font-size:1.05rem;color:rgba(255,255,255,.55);max-width:560px;line-height:1.6;">Run the prompt on your assigned case. Then apply the <em>same</em> framework to your own Assignment 2 pitch. The skill you practise on someone else's failure is the skill you need for your own.</p>
+  </div>
+</div>
+
+<!-- ╔══ 12: MIRROR INSTRUCTIONS ══╗ -->
+<div class="slide s-white" data-title="Hour 2 Instructions">
+  <div class="hdr"><h2>Hour 2 — Your Case + The Mirror</h2><span class="tag">60 min total</span></div>
+  <div class="body">
+    <p class="mb-md"><strong>30 min</strong> research agent on your assigned case → <strong>20 min</strong> Mirror Exercise → <strong>10 min</strong> report-backs</p>
+    <div class="cols2" style="gap:14px;">
+      <div class="card-light" style="border-left:3px solid var(--au-lavender);">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Part A: Assigned Case (30 min)</p>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.55;">Same prompt template, swap in your assigned case. Produce your 7-dimension analysis. <strong>Critical evaluation requirement:</strong> identify one unverifiable claim, one missed dimension, one biased framing. This is graded.</p>
+      </div>
+      <div class="card-light" style="border-left:3px solid var(--au-blue);">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Part B: The Mirror (20 min)</p>
+        <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.55;">Apply the <em>same 7 dimensions</em> to <strong>your own Assignment 2 pitch</strong>. What's your intended outcome? Actual likely outcome? Failure mechanisms? Stakeholders harmed? Enablers? Accountability? Analogous risks in your proposed system?</p>
+      </div>
+    </div>
+    <div style="margin-top:12px;padding:12px 16px;background:var(--au-sandstone);border-radius:6px;">
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-navy);"><strong>Report-back (10 min):</strong> One sentence per group — the strongest unintended consequence you identified <em>in your own pitch</em>. Not your assigned case. Your own work. This is the harder answer.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 13: MIRROR TIMER ══╗ -->
+<div class="slide s-dark" data-title="Hour 2 Timer">
+  <div class="tag">Hour 2</div>
+  <div class="hdg">Work Time</div>
+  <div class="body mb-md">Part A: your assigned case. Part B: your own pitch. Same method. Same evaluation criteria.</div>
+  <div style="display:flex;gap:16px;margin-top:14px;">
+    <div class="timer-box" style="flex:1.2;" onclick="toggleTimer('mi',1800)">
+      <div class="timer-label">A: Assigned Case + Critique</div>
+      <div class="timer-display" id="mi-disp">30:00</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;"><div class="timer-bar" id="mi-bar" style="width:100%;"></div></div>
+      <div class="timer-hint">Click to start / pause</div>
+    </div>
+    <div class="timer-box" style="flex:1;" onclick="toggleTimer('mp',1200)">
+      <div class="timer-label">B: Mirror Your Own Pitch</div>
+      <div class="timer-display" id="mp-disp">20:00</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;"><div class="timer-bar" id="mp-bar" style="width:100%;"></div></div>
+      <div class="timer-hint">Click to start / pause</div>
+    </div>
+    <div class="timer-box" style="flex:.8;" onclick="toggleTimer('ms',600)">
+      <div class="timer-label">Report-Back</div>
+      <div class="timer-display" id="ms-disp">10:00</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;"><div class="timer-bar" id="ms-bar" style="width:100%;"></div></div>
+      <div class="timer-hint">1 sentence per group</div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 14: HOUR 3 HEADER ══╗ -->
+<div class="slide s-dark" data-title="Hour 3: Three Views Debate">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;">
+    <span class="pill pill-orange" style="font-size:.8rem;padding:5px 16px;margin-bottom:16px;">Hour 3 · 65 Minutes</span>
+    <h2 style="font-family:var(--font-h);font-size:2.5rem;font-weight:700;color:#fff;margin-bottom:14px;">The Great AI Debate</h2>
+    <p style="font-family:var(--font-b);font-size:1.05rem;color:rgba(255,255,255,.55);max-width:560px;line-height:1.6;">Three competing visions for AI's economic future. Each backed by Nobel laureates, tech leaders, and credible research. <strong>Which do you find most persuasive?</strong></p>
+    <p style="font-family:var(--font-b);font-size:.85rem;color:rgba(255,255,255,.4);max-width:520px;line-height:1.55;margin-top:12px;">This hour is built for discussion. Don't rush. The point isn't to win — it's to genuinely hold positions you disagree with and see what that feels like.</p>
+  </div>
+</div>
+
+<!-- ╔══ 15: THREE VIEWS OVERVIEW ══╗ -->
+<div class="slide s-light" data-title="Three Views Overview">
+  <div class="tag">The Debate</div>
+  <div class="hdg">Three Competing Visions for AI's Economic Future</div>
+  <div class="cols3" style="margin-top:12px;flex:1;">
+    <div class="view-card" style="background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.2);">
+      <div class="view-num" style="color:var(--au-green);">View 1</div>
+      <div class="view-title" style="color:var(--au-navy);">Powerful but Limited</div>
+      <div class="view-body" style="color:var(--au-slate);">AI will transform work but humans remain essential. Hallucination is unfixable. Society needs accountable professionals.</div>
+      <div style="margin-top:auto;padding-top:10px;">
+        <span style="font-family:var(--font-h);font-size:.7rem;font-weight:700;color:var(--au-green);">Jensen Huang · Daron Acemoglu · Erik Brynjolfsson</span>
+      </div>
+    </div>
+    <div class="view-card" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2);">
+      <div class="view-num" style="color:var(--au-red);">View 2</div>
+      <div class="view-title" style="color:var(--au-navy);">AI Automates Everything</div>
+      <div class="view-body" style="color:var(--au-slate);">Scaling laws will produce superintelligence. All cognitive work becomes automated. We enter a world without work.</div>
+      <div style="margin-top:auto;padding-top:10px;">
+        <span style="font-family:var(--font-h);font-size:.7rem;font-weight:700;color:var(--au-red);">Dario Amodei · Sam Altman · Elon Musk</span>
+      </div>
+    </div>
+    <div class="view-card" style="background:rgba(133,107,255,.08);border:1px solid rgba(133,107,255,.2);">
+      <div class="view-num" style="color:var(--au-lavender);">View 3</div>
+      <div class="view-title" style="color:var(--au-navy);">LLMs Are a Dead End</div>
+      <div class="view-body" style="color:var(--au-slate);">Current AI is sophisticated autocomplete, not intelligence. Scaling won't bridge the gap. The next paradigm will be different.</div>
+      <div style="margin-top:auto;padding-top:10px;">
+        <span style="font-family:var(--font-h);font-size:.7rem;font-weight:700;color:var(--au-lavender);">Yann LeCun · Gary Marcus · Rodney Brooks</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 16: VIEW 1 DEEP DIVE ══╗ -->
+<div class="slide s-white" data-title="View 1: Powerful but Limited">
+  <div class="hdr"><h2>View 1: Powerful but Won't Automate Everything</h2><span class="tag" style="color:#16A34A;">The Augmentation View</span></div>
+  <div class="body">
+    <div class="quote-block">
+      <p>"You're not going to lose your job to an AI, but you're going to lose your job to somebody who uses AI."</p>
+      <span class="attr">— Jensen Huang, NVIDIA CEO, Milken Institute 2025</span>
+    </div>
+    <div class="cols2" style="margin-top:12px;">
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Core Argument</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">LLMs are genuinely powerful but structurally limited. Hallucination is <strong>mathematically proven unfixable</strong> (Xu et al., 2024). LLMs produce homogeneous outputs on open-ended tasks. Society will always need accountable professionals we can litigate against.</p>
+      </div>
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Key Evidence</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Nobel laureate <strong>Acemoglu</strong>: AI will automate only ~4.6% of tasks, yielding 1.1–1.6% GDP growth — 5x below Goldman Sachs' 7% estimate. <strong>Brynjolfsson</strong>: 15% productivity gains, concentrated among <em>least</em> experienced workers.</p>
+      </div>
+    </div>
+    <div class="quote-block" style="margin-top:10px;">
+      <p>"They're telling you, 'Oh look at ChatGPT, it passed the bar exam, there's going to be no need for lawyers,' and all that crap, which has nothing to do with reality."</p>
+      <span class="attr">— Daron Acemoglu, Nobel Prize-winning Economist, 2024</span>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 17: VIEW 1 RESEARCH ══╗ -->
+<div class="slide s-sand" data-title="View 1: Supporting Research">
+  <div class="tag">View 1 — Evidence Base</div>
+  <div class="hdg">The Research Behind the Augmentation View</div>
+  <div class="cols2" style="gap:14px;margin-top:8px;">
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);margin-bottom:4px;">"Artificial Hivemind" — Jiang et al. (2025)</p>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;">26,000 open-ended queries. Every LLM converged on identical metaphors ("Time is a river"). <strong>Mode collapse</strong> means LLMs can't replicate the diversity of human creative thought.</p>
+    </div>
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);margin-bottom:4px;">"Trendslop" — Romasanta et al. (HBR, 2026)</p>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;">15,000+ trials across 7 strategic tensions. LLMs consistently recommended trendy strategies regardless of context. Better prompting improved results by <strong>less than 2%</strong>.</p>
+    </div>
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);margin-bottom:4px;">"Why LLMs Hallucinate" — Kalai et al. (2025)</p>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;">By <strong>OpenAI researchers themselves</strong>. Hallucination arises from structural statistical pressures in training — not superficial defects. A systemic issue, not a fixable bug.</p>
+    </div>
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);margin-bottom:4px;">Yale Budget Lab (October 2025)</p>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:var(--au-slate);line-height:1.5;">Since ChatGPT's launch, the <strong>"broader labor market has not experienced a discernible disruption"</strong> from AI. Goldman Sachs' own follow-up: impacts "still negligible."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 18: VIEW 2 DEEP DIVE ══╗ -->
+<div class="slide s-white" data-title="View 2: AI Automates Everything">
+  <div class="hdr"><h2>View 2: AI Will Automate Everything</h2><span class="tag" style="color:#DC2626;">The Superintelligence View</span></div>
+  <div class="body">
+    <div class="quote-block">
+      <p>"My basic prediction is that AI-enabled biology and medicine will allow us to compress the progress that human biologists would have achieved over the next 50-100 years into 5-10 years."</p>
+      <span class="attr">— Dario Amodei, Anthropic CEO, "Machines of Loving Grace," October 2024</span>
+    </div>
+    <div class="cols2" style="margin-top:12px;">
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Core Argument</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Scaling laws prove capabilities improve predictably with compute. AI will match Nobel-level intellect by <strong>2026–2027</strong> (Amodei). Superintelligence within "a few thousand days" (Altman). <strong>50% of entry-level white-collar jobs</strong> could vanish within 5 years.</p>
+      </div>
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Key Evidence</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Inference costs falling <strong>10x every 12 months</strong>. Goldman Sachs: AI could boost GDP <strong>7%</strong> (~$7 trillion). McKinsey: <strong>$2.6–4.4 trillion</strong> annually. MIT study: AI can already do <strong>11.7%</strong> of US labour market tasks.</p>
+      </div>
+    </div>
+    <div class="quote-block" style="margin-top:10px;">
+      <p>"There will come a point where no job is needed. You can have a job if you want a job… but AI will be able to do everything."</p>
+      <span class="attr">— Elon Musk, AI Safety Summit, November 2023</span>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 19: VIEW 2 VOICES ══╗ -->
+<div class="slide s-dark" data-title="View 2: Key Voices">
+  <div class="tag">View 2 — The Builders</div>
+  <div class="hdg">What the AI Builders Are Saying</div>
+  <div class="cols2" style="gap:14px;margin-top:8px;">
+    <div class="card">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;color:#fff;margin-bottom:8px;">Dario Amodei — Anthropic</p>
+      <div class="quote-block dark">
+        <p>"We, as the producers of this technology, have a duty and an obligation to be honest about what is coming. I don't think this is on people's radar."</p>
+        <span class="attr">Axios, May 2025</span>
+      </div>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.5;margin-top:8px;">Predicts AGI by 2026–27. Warns of 10–20% unemployment. Proposes a "token tax" on AI companies.</p>
+    </div>
+    <div class="card">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;color:#fff;margin-bottom:8px;">Sam Altman — OpenAI</p>
+      <div class="quote-block dark">
+        <p>"Intelligence too cheap to meter is well within grasp."</p>
+        <span class="attr">"Three Observations," January 2025</span>
+      </div>
+      <p style="font-family:var(--font-b);font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.5;margin-top:8px;">Envisions everyone in 2035 marshalling the "intellectual capacity equivalent to everyone in 2025." Superintelligence in "a few thousand days."</p>
+    </div>
+  </div>
+  <div style="margin-top:auto;padding:10px 16px;background:rgba(220,38,38,.15);border-radius:6px;">
+    <p style="font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.7);">⚠️ <strong style="color:#fff;">Critical question for students:</strong> All three proponents lead companies whose valuations depend on continued belief in AI progress. How should we weigh that conflict of interest?</p>
+  </div>
+</div>
+
+<!-- ╔══ 20: VIEW 3 DEEP DIVE ══╗ -->
+<div class="slide s-white" data-title="View 3: LLMs Are a Dead End">
+  <div class="hdr"><h2>View 3: LLMs Are a Dead End</h2><span class="tag" style="color:#856BFF;">The Architectural Critique</span></div>
+  <div class="body">
+    <div class="quote-block">
+      <p>"The path to superintelligence via LLMs is complete bullshit. It's just never going to work."</p>
+      <span class="attr">— Yann LeCun, Turing Award Winner, November 2025</span>
+    </div>
+    <div class="cols2" style="margin-top:12px;">
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Core Argument</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">LLMs are statistical pattern-matching, not intelligence. A house cat understands physics better than the largest LLMs — and <strong>LeCun's lab proved it</strong>: JEPA models develop object permanence from video while LLMs score near chance (Garrido et al., 2025). He left Meta and raised <strong>$1.03B</strong> to build the alternative.</p>
+      </div>
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Key Evidence</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;"><strong>EsoLang-Bench</strong> (March 2026): LLMs scoring 85–95% on Python drop to <strong>0–11%</strong> on equivalent tasks in unfamiliar languages. Apple's GSM-Symbolic: one irrelevant clause drops maths performance up to <strong>65%</strong>. Even <strong>Ilya Sutskever</strong> (OpenAI co-founder): "The era of 'Just Add GPUs' is over."</p>
+      </div>
+    </div>
+    <div class="quote-block" style="margin-top:10px;">
+      <p>"LLMs don't actually know what a nationality is… they know what words are and they know which words predict which other words. And that's pretty much it."</p>
+      <span class="attr">— Gary Marcus, NYU Cognitive Scientist, 2025</span>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 21: VIEW 3 THE $2B BET ══╗ -->
+<div class="slide s-dark" data-title="View 3: The $2B Bet">
+  <div class="tag">View 3 — Putting Money Where the Mouth Is</div>
+  <div class="hdg">Two Turing-Class Researchers Just Bet $2 Billion Against LLMs</div>
+  <div class="body mb-md">In three weeks in early 2026, two of AI's most decorated researchers raised a combined <strong>$2+ billion</strong> to build alternatives to LLMs:</div>
+  <div class="cols2" style="gap:16px;">
+    <div class="card">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.95rem;color:#fff;margin-bottom:6px;">Yann LeCun — AMI Labs</p>
+      <p style="font-family:var(--font-b);font-size:.88rem;color:var(--au-lavender);font-weight:700;margin-bottom:8px;">$1.03 billion · March 2026</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.5;">Europe's largest seed round ever. $3.5B valuation with 12 employees and no product. Building <strong style="color:#fff;">JEPA</strong> — world models that learn physics from video. LeCun's own lab showed JEPA develops <strong style="color:#fff;">object permanence and shape consistency</strong> from video while LLMs score near chance (Garrido et al., 2025).</p>
+      <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.4);margin-top:8px;">Backed by NVIDIA, Bezos, Schmidt</p>
+    </div>
+    <div class="card">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.95rem;color:#fff;margin-bottom:6px;">Fei-Fei Li — World Labs</p>
+      <p style="font-family:var(--font-b);font-size:.88rem;color:var(--au-lavender);font-weight:700;margin-bottom:8px;">$1 billion · February 2026</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.5;">Stanford professor, ImageNet creator. Building spatial intelligence systems that understand and generate 3D worlds.</p>
+      <p style="font-family:var(--font-b);font-size:.78rem;color:rgba(255,255,255,.4);margin-top:8px;">Marble product already available</p>
+    </div>
+  </div>
+  <div style="margin-top:auto;">
+    <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.4);font-style:italic;">Rodney Brooks (MIT/iRobot): LLMs are "the classic con. A fast talker convinces people that there is more to them than there really is."</p>
+  </div>
+</div>
+
+<!-- ╔══ 22: THE CLASH ══╗ -->
+<div class="slide s-sand" data-title="Where Views Collide">
+  <div class="tag">Direct Clashes</div>
+  <div class="hdg">Where These Views Collide</div>
+  <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
+    <div class="card-sand" style="display:flex;gap:16px;align-items:center;">
+      <div style="min-width:140px;"><p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">LeCun vs Hassabis</p><p style="font-family:var(--font-b);font-size:.72rem;color:var(--au-slate);">December 2025</p></div>
+      <div><p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;">LeCun: "There is no such thing as general intelligence. This concept makes absolutely no sense." Hassabis: "Yann is just plain incorrect here." Musk: "Demis is right."</p></div>
+    </div>
+    <div class="card-sand" style="display:flex;gap:16px;align-items:center;">
+      <div style="min-width:140px;"><p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">Acemoglu vs Goldman</p><p style="font-family:var(--font-b);font-size:.72rem;color:var(--au-slate);">2024 ongoing</p></div>
+      <div><p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;">Goldman projects AI boosts GDP by <strong>7%</strong>. Nobel laureate Acemoglu estimates <strong>1.1–1.6%</strong> — roughly five times lower. One of the widest disagreements in mainstream economic forecasting.</p></div>
+    </div>
+    <div class="card-sand" style="display:flex;gap:16px;align-items:center;">
+      <div style="min-width:140px;"><p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-navy);">OpenAI vs Sacks-Kratsios</p><p style="font-family:var(--font-b);font-size:.72rem;color:var(--au-slate);">April 2026</p></div>
+      <div><p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;">OpenAI's April 8 policy paper proposes <strong>robot taxes</strong>, a <strong>sovereign wealth fund</strong>, and trials of a <strong>32-hour workweek</strong>. Three weeks earlier, the Sacks-Kratsios framework <em>limits</em> AI developer liability and opposes redistribution. Same View 2 trajectory — opposite policy response.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 23: DEBATE INSTRUCTIONS ══╗ -->
+<div class="slide s-white" data-title="Debate Instructions">
+  <div class="hdr"><h2>Structured Debate — Instructions</h2><span class="tag">Hour 3</span></div>
+  <div class="body">
+    <p class="mb-md"><strong>You will be assigned to argue for one view — regardless of your personal opinion.</strong> This develops the capacity to steelman positions you disagree with.</p>
+    <div class="cols3" style="gap:12px;margin-bottom:14px;">
+      <div style="padding:12px 14px;background:rgba(22,163,74,.06);border-radius:6px;border-top:3px solid var(--au-green);">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-green);">Group A</p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;color:var(--au-navy);">View 1: Powerful but Limited</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.5;margin-top:4px;">Argue that AI augments but humans remain essential</p>
+      </div>
+      <div style="padding:12px 14px;background:rgba(220,38,38,.06);border-radius:6px;border-top:3px solid var(--au-red);">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-red);">Group B</p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;color:var(--au-navy);">View 2: Automates Everything</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.5;margin-top:4px;">Argue that ASI is imminent and work becomes optional</p>
+      </div>
+      <div style="padding:12px 14px;background:rgba(133,107,255,.06);border-radius:6px;border-top:3px solid var(--au-lavender);">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:var(--au-lavender);">Group C</p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;color:var(--au-navy);">View 3: LLMs Are a Dead End</p>
+        <p style="font-family:var(--font-b);font-size:.78rem;color:var(--au-slate);line-height:1.5;margin-top:4px;">Argue that LLMs are a dead end and the next paradigm is different</p>
+      </div>
+    </div>
+    <div style="padding:14px 18px;background:var(--au-sandstone);border-radius:6px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Format: 10 min prep → 3 min opening per group → 15 min cross-examination → 10 min debrief</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;">Use the quotes, research, and evidence from the previous slides. Your argument is stronger when grounded in specific data, not general impressions.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 24: DEBATE TIMER ══╗ -->
+<div class="slide s-dark" data-title="Debate Timer">
+  <div class="tag">Hour 3</div>
+  <div class="hdg">Debate — Work Time</div>
+  <div class="body mb-md">Build the strongest possible case for your assigned view. Use specific quotes, data points, and research findings.</div>
+  <div style="display:flex;gap:16px;margin-top:14px;">
+    <div class="timer-box" style="flex:1;" onclick="toggleTimer('dp',600)">
+      <div class="timer-label">Group Prep</div>
+      <div class="timer-display" id="dp-disp">10:00</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;"><div class="timer-bar" id="dp-bar" style="width:100%;"></div></div>
+      <div class="timer-hint">Click to start / pause</div>
+    </div>
+    <div class="timer-box" style="flex:1;" onclick="toggleTimer('do',180)">
+      <div class="timer-label">Opening Statement</div>
+      <div class="timer-display" id="do-disp">3:00</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;"><div class="timer-bar" id="do-bar" style="width:100%;"></div></div>
+      <div class="timer-hint">Per group</div>
+    </div>
+    <div class="timer-box" style="flex:1;" onclick="toggleTimer('dx',900)">
+      <div class="timer-label">Cross-Examination</div>
+      <div class="timer-display" id="dx-disp">15:00</div>
+      <div style="background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;"><div class="timer-bar" id="dx-bar" style="width:100%;"></div></div>
+      <div class="timer-hint">Click to start / pause</div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 25: DEBATE DEBRIEF ══╗ -->
+<div class="slide s-light" data-title="Debate Debrief">
+  <div class="tag">Debrief</div>
+  <div class="hdg">The Real Question</div>
+  <div class="body mb-md" style="font-size:.95rem;">None of these views is "correct." The purpose of the debate isn't to pick a winner — it's to develop <strong>the capacity to engage with genuine uncertainty</strong>.</div>
+  <div class="cols2" style="gap:14px;">
+    <div class="card-light" style="border-left:3px solid var(--au-lavender);">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">For Your Career</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Regardless of which view proves closest to reality, <strong>professionals who can navigate this uncertainty are the ones organisations need</strong>. Can you build with AI while questioning its limits? Can you plan for disruption while acknowledging what we don't know?</p>
+    </div>
+    <div class="card-light" style="border-left:3px solid var(--au-blue);">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">For Assignment 3</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Your Critical Reflective Analysis should engage with this complexity — not pick a side and defend it, but <strong>demonstrate that you can hold multiple perspectives simultaneously</strong> and reason through the implications for your own practice.</p>
+    </div>
+  </div>
+  <div style="margin-top:auto;padding:12px 18px;background:rgba(133,107,255,.06);border-radius:6px;">
+    <p style="font-family:var(--font-b);font-size:.84rem;color:var(--au-navy);"><strong>📝 Document:</strong> Which view did you find most persuasive? Which was hardest to argue for? What changed about your thinking? → AI Prompt Log</p>
+  </div>
+</div>
+
+<!-- ╔══ 26: CONSEQUENCES COMPARISON ══╗ -->
+<div class="slide s-dark" data-title="Consequences Across Views">
+  <div class="tag">The Deeper Question</div>
+  <div class="hdg" style="font-size:1.7rem;">Unintended Consequences — Across All Three Views</div>
+  <div class="body mb-sm">Regardless of which view is correct, <strong>several consequences emerge in all scenarios:</strong></div>
+  <div style="display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden;font-size:.72rem;margin-top:6px;">
+    <div style="background:var(--au-navy);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:var(--au-lavender);">Consequence</div>
+    <div style="background:var(--au-navy);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#16A34A;text-align:center;">View 1: Augment</div>
+    <div style="background:var(--au-navy);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#DC2626;text-align:center;">View 2: Automate</div>
+    <div style="background:var(--au-navy);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#856BFF;text-align:center;">View 3: Dead End</div>
+
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#fff;">Inequality</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">AI-augmented vs non-augmented workers. New "token budget" axis of advantage.</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Existential. All returns to capital owners. Top 50 Americans gained median $10B each in 2025.</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Misallocation bubble. Trillions invested in dead-end tech while gains flow to narrow investor class.</div>
+
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#fff;">Job Displacement</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Moderate (~4.6% of tasks). But entry-level pipeline collapses. Young workers already -13%.</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Catastrophic. 50% entry-level jobs in 5 years. 10–20% unemployment. "Unusually painful."</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Overstated threat — but orgs that restructure around LLMs face capability crisis when they plateau.</div>
+
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#fff;">Enfeeblement</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Managed risk. But healthcare AI already eroding diagnostic reasoning and clinical judgment.</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Feature, not bug. Human skill becomes irrelevant. Musk: "Does your life have meaning?"</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">A trap. Professionals deskill relying on systems that can't actually reason. No recovery when they fail.</div>
+
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#fff;">Energy Crisis</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Manageable. Targeted deployment = natural brake on consumption.</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Existential. Scaling to ASI requires power the grid can't deliver. 9% of US electricity by 2030.</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Massive waste. Hundreds of billions in infrastructure for a dead-end technology. Prices rise regardless.</div>
+
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#fff;">Meaning Crisis</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Chronic. Professionals must continuously redefine their value alongside AI.</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Civilisational. "Even 10% shrinkage will feel like a depression" — Khan Academy CEO.</div>
+    <div style="background:rgba(20,15,80,.85);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Acute then relieved. Intense anxiety during hype cycle; harm from premature career redirections.</div>
+
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-h);font-weight:700;color:#fff;">Homogenisation</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">The defining risk. "Trendslop" — every company gets identical AI-generated strategy.</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Temporary. Superintelligence would generate diverse outputs. But transition period floods culture with AI slop.</div>
+    <div style="background:rgba(20,15,80,.75);padding:8px 10px;font-family:var(--font-b);color:rgba(255,255,255,.7);">Architectural feature. Systems that recombine training data will always converge. Unfixable by scaling.</div>
+  </div>
+</div>
+
+<!-- ╔══ 27: KEY INSIGHT ══╗ -->
+<div class="slide s-sand" data-title="Consequences: Key Insight">
+  <div class="tag">The Strategic Takeaway</div>
+  <div class="hdg">The Consequences That Are Robust Across Scenarios</div>
+  <div class="body mb-md" style="font-size:.95rem;">The most important observation: <strong>several consequences emerge regardless of which view is correct.</strong></div>
+  <div class="cols2" style="gap:14px;margin-bottom:14px;">
+    <div class="card-sand" style="border-left:3px solid var(--au-red);">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">Robust Across All Views</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Inequality grows in all three scenarios<br>The experience pipeline collapses in all three<br>Enfeeblement is a risk in all three<br>Energy costs rise in all three<br>Identity disruption occurs in all three</p>
+    </div>
+    <div class="card-sand" style="border-left:3px solid var(--au-green);">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">What This Means For You</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">You can't resolve the debate about AI's trajectory. But you <strong>can</strong> identify consequences that demand action <em>now</em>, regardless of which future materialises. That's strategic thinking — and it's exactly what Assignment 3 should demonstrate.</p>
+    </div>
+  </div>
+  <div class="quote-block">
+    <p>"If white-collar work were to shrink even 10%, it's going to feel like a depression."</p>
+    <span class="attr">— Salman Khan, CEO of Khan Academy, Fortune, February 2026</span>
+  </div>
+</div>
+
+<!-- ╔══ 28: THIS WEEK — GLASSWING ══╗ -->
+<div class="slide s-dark" data-title="This Week: Glasswing">
+  <div class="tag">Live Developments — This Week</div>
+  <div class="hdg" style="font-size:1.6rem;">The Dual-Use Dilemma in Real Time</div>
+  <div class="body mb-sm">Three events in the past ten days illustrate exactly what Module 3 is about:</div>
+  <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
+    <div class="card" style="border-left:3px solid #856BFF;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.9rem;color:#fff;margin-bottom:4px;">🔒 Project Glasswing (Anthropic, 7 April 2026)</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.75);line-height:1.55;">Anthropic's new frontier model, <strong style="color:#fff;">Claude Mythos Preview</strong>, autonomously found thousands of zero-day vulnerabilities — including a <strong style="color:#fff;">17-year-old exploit in FreeBSD</strong> and a <strong style="color:#fff;">27-year-old bug in OpenBSD</strong>. Partners: AWS, Apple, Google, Microsoft, NVIDIA, JPMorgan, Cisco, the Linux Foundation. $100M in credits committed. <strong style="color:#fff;">The same capability that helps defenders also arms attackers.</strong> That's the dual-use dilemma — not a thought experiment, but this week's news.</p>
+    </div>
+    <div class="card" style="border-left:3px solid #DC2626;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.9rem;color:#fff;margin-bottom:4px;">📋 OpenAI Policy Paper (8 April 2026)</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.75);line-height:1.55;">13-page blueprint proposing <strong style="color:#fff;">robot taxes, a national public wealth fund, and trials of a 32-hour workweek</strong>. An $852B company — whose CEO predicts superintelligence — formally proposing structural redistribution. Three weeks after Sacks-Kratsios proposed the opposite.</p>
+    </div>
+    <div class="card" style="border-left:3px solid #16A34A;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.9rem;color:#fff;margin-bottom:4px;">💰 Anthropic Overtakes OpenAI on Revenue</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.75);line-height:1.55;">$30B ARR vs OpenAI's $25B — first time. Anthropic grew from $1B to $30B in <strong style="color:#fff;">16 months</strong>. The fastest corporate growth arc in tech history. The people warning you about job losses are also the fastest-growing company in the world.</p>
+    </div>
+  </div>
+  <div style="margin-top:auto;padding:10px 14px;background:rgba(133,107,255,.15);border-radius:6px;">
+    <p style="font-family:var(--font-b);font-size:.82rem;color:#fff;"><strong>The takeaway:</strong> This is a live, fast-moving debate. The material you graduate into will have moved again by July. Developing independent analytical capacity is not optional — it's the core skill.</p>
+  </div>
+</div>
+
+<!-- ╔══ 29: ASSIGNMENT 3 BRIEFING ══╗ -->
+<div class="slide s-white" data-title="Assignment 3 Briefing">
+  <div class="hdr"><h2>Assignment 3: Critical Reflective Analysis</h2><span class="tag">30% · Due End of Week 10</span></div>
+  <div class="body">
+    <p class="mb-md">Your final assessment asks you to critically reflect on your journey as an AI-capable business professional across all ten weeks.</p>
+    <div class="cols2" style="gap:14px;margin-bottom:14px;">
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">What It Is</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">A <strong>critical reflective analysis</strong> of your evolving understanding of human-AI collaboration. Use your AI Prompt Log as evidence. Demonstrate growth in critical thinking, not just tool proficiency.</p>
+      </div>
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">What It's Not</p>
+        <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Not a summary of what you did each week. Not a review of AI tools. Not a description of course content. It's an <strong>analysis of how your thinking changed</strong> and what that means for your professional practice.</p>
+      </div>
+    </div>
+    <div style="padding:14px 18px;background:var(--au-sandstone);border-radius:6px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">What "Critical Reflective Writing" Looks Like</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;"><strong>Descriptive (avoid):</strong> "In Week 3, I learned about AI agents."<br><strong>Critical (aim for):</strong> "My initial assumption that AI agents could operate autonomously was challenged when I discovered the accountability gap — if an agent makes a consequential error, the liability still sits with a human professional. This tension between AI capability and legal accountability fundamentally changed how I evaluate automation opportunities."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 30: ASSIGNMENT 3 TIPS ══╗ -->
+<div class="slide s-light" data-title="Assignment 3 Tips">
+  <div class="tag">Assignment 3</div>
+  <div class="hdg">How to Succeed</div>
+  <div class="cols2" style="gap:14px;margin-top:8px;">
+    <div>
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:8px;">✅ High-Distinction Strategies</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.7;">Use specific AI Prompt Log entries as evidence<br>Show how your thinking <em>changed</em>, not just what you learned<br>Connect personal insights to broader frameworks (CLO4)<br>Engage with complexity — don't oversimplify<br>Reference today's debate positions and your evolving stance<br>Acknowledge tensions and unresolved questions</p>
+    </div>
+    <div>
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:8px;">❌ Common Pitfalls</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.7;">Week-by-week summary with no analysis<br>Describing tools without reflecting on implications<br>Claiming AI is "just a tool" without engaging with evidence<br>Picking one view and defending it without nuance<br>Generic statements not grounded in personal experience<br>Ignoring the ethical dimensions explored in Module 3</p>
+    </div>
+  </div>
+  <div style="margin-top:auto;padding:14px 18px;background:rgba(133,107,255,.06);border-radius:6px;">
+    <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:4px;">🗓 Timeline</p>
+    <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.5;">Weeks 8–9: Gather evidence, document reflections, build your analytical framework<br>Week 10: Workshop scaffolding + intensive writing period<br>Due: End of Week 10</p>
+  </div>
+</div>
+
+<!-- ╔══ 31: DOCUMENTATION ══╗ -->
+<div class="slide s-sand" data-title="Post-Workshop Documentation">
+  <div class="tag">Before You Leave</div>
+  <div class="hdg">Post-Workshop Documentation</div>
+  <div class="body mb-md">The insights from today's workshop are your <strong>evidence base for Assignment 3</strong>. Document now while it's fresh:</div>
+  <div class="cols2" style="gap:14px;">
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">📋 Update Your AI Prompt Log</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;">Key insights from your case study analysis (~15 min)<br>Your Mirror Exercise findings and discomfort (~20 min)<br>Your position on the three views debate (~15 min)<br>Which view you found hardest to argue for and why (~10 min)</p>
+    </div>
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.84rem;color:var(--au-navy);margin-bottom:6px;">🔮 Looking Ahead</p>
+      <p style="font-family:var(--font-b);font-size:.82rem;color:var(--au-slate);line-height:1.6;"><strong>Week 9:</strong> Trust, Transparency & Regulation — how do we govern AI systems that even their creators can't fully predict?<br><br><strong>Week 10:</strong> Future-Proofing — adaptive capacity, Assignment 3 intensive scaffolding</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ 32: COURSE JOURNEY ══╗ -->
+<div class="slide s-dark" data-title="Course Journey">
+  <div class="tag">Your Transformation</div>
+  <div class="hdg" style="font-size:1.6rem;">The Course Journey — Where You Are Now</div>
+  <div style="display:flex;gap:6px;margin-top:16px;flex:1;">
+    <div style="flex:1;padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:4px 0 0 4px;opacity:.55;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.68rem;color:var(--au-lavender);margin-bottom:4px;">Weeks 1–3</p>
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:#fff;">Personal AI Mastery</p>
+      <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.4);">Text · Multimodal · Agents</p>
+    </div>
+    <div style="display:flex;align-items:center;color:rgba(255,255,255,.25);font-size:14px;">→</div>
+    <div style="flex:1;padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);opacity:.55;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.68rem;color:var(--au-lavender);margin-bottom:4px;">Weeks 4–7</p>
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:#fff;">AI & Entrepreneurship</p>
+      <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.4);">Enterprise · Startups · Pitch</p>
+    </div>
+    <div style="display:flex;align-items:center;color:rgba(255,255,255,.25);font-size:14px;">→</div>
+    <div style="flex:1;padding:12px 14px;background:rgba(133,107,255,.18);border:1px solid rgba(133,107,255,.4);border-radius:0 4px 4px 0;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.68rem;color:var(--au-lavender);margin-bottom:4px;">Weeks 8–10 ✓</p>
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;color:#fff;">Critical Analysis</p>
+      <p style="font-family:var(--font-b);font-size:.72rem;color:rgba(255,255,255,.55);">Consequences · Trust · Future</p>
+    </div>
+  </div>
+  <p style="font-family:var(--font-b);font-size:.88rem;color:rgba(255,255,255,.45);font-style:italic;margin-top:auto;">Next week: Trust, Transparency & Regulation — how do we govern systems that even their creators disagree about?</p>
+</div>
+
+<!-- ╔══ 33: END ══╗ -->
+<div class="slide s-end" data-title="End">
+  <div class="er"></div>
+  <div class="et">See you next week.</div>
+  <div class="es">Week 9: Trust, Transparency & Regulation</div>
+  <div class="ec">AI for Business Transformation · Adelaide University · 2026</div>
+</div>
+
+</div><!-- /ss -->
+
+<!-- ── Navigation ── -->
+<div class="nav">
+  <button onclick="prevSlide()">← Prev</button>
+  <div class="slide-title-nav" id="nav-title"></div>
+  <div class="counter" id="nav-counter"></div>
+  <button onclick="nextSlide()">Next →</button>
+</div>
+
+<p style="font-family:var(--font-b);font-size:.7rem;color:rgba(255,255,255,.22);margin-top:10px;">← → arrow keys to navigate · Click timers to start/pause</p>
+
+<script>
+  // ── Slide Navigation ──
+  const slides = document.querySelectorAll('.slide');
+  let cur = 0;
+
+  function showSlide(n) {
+    slides[cur].classList.remove('active');
+    cur = (n + slides.length) % slides.length;
+    slides[cur].classList.add('active');
+    document.getElementById('nav-counter').textContent = (cur+1) + ' / ' + slides.length;
+    document.getElementById('nav-title').textContent = slides[cur].dataset.title || '';
+    document.getElementById('prog').style.width = ((cur+1)/slides.length*100) + '%';
+  }
+  function nextSlide() { showSlide(cur+1); }
+  function prevSlide() { showSlide(cur-1); }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  });
+
+  // ── Timers ──
+  const timers = {};
+  function toggleTimer(id, total) {
+    if (!timers[id]) timers[id] = { total: total, remaining: total, interval: null, running: false };
+    const t = timers[id];
+    const disp = document.getElementById(id + '-disp');
+    const bar = document.getElementById(id + '-bar');
+
+    if (t.running) {
+      clearInterval(t.interval);
+      t.running = false;
+      return;
+    }
+
+    if (t.remaining <= 0) {
+      t.remaining = t.total;
+      disp.textContent = fmt(t.total);
+      disp.className = 'timer-display';
+      bar.className = 'timer-bar';
+      bar.style.width = '100%';
+      return;
+    }
+
+    t.running = true;
+    t.interval = setInterval(() => {
+      t.remaining--;
+      disp.textContent = fmt(t.remaining);
+      const pct = (t.remaining / t.total) * 100;
+      bar.style.width = pct + '%';
+
+      if (t.remaining <= 0) {
+        clearInterval(t.interval);
+        t.running = false;
+        disp.textContent = "TIME";
+        disp.classList.add('done');
+        bar.style.width = '0%';
+      } else if (pct <= 10) {
+        disp.classList.add('alert');
+        bar.classList.add('alert');
+      } else if (pct <= 25) {
+        disp.classList.add('warn');
+        bar.classList.add('warn');
+      }
+    }, 1000);
+  }
+
+  function fmt(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  // init
+  showSlide(0);
+</script>
+</body>
+</html>

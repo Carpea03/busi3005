@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 6 Workshop — The Pitch Bootcamp</title>
+<style>
+/* ── AU Brand Tokens ── */
+:root {
+  --au-navy:      #140F50;
+  --au-lavender:  #856BFF;
+  --au-blue:      #1449FF;
+  --au-sandstone: #F8EFE0;
+  --au-white:     #FFFFFF;
+  --au-slate:     #444466;
+  --au-red:       #DC2626;
+  --au-orange:    #D97706;
+  --au-green:     #16A34A;
+  --font-h: Arial, Helvetica, sans-serif;
+  --font-b: Georgia, 'Times New Roman', serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0e0b2a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:18px 10px 60px;}
+
+/* ── Slide System ── */
+.ss{position:relative;width:960px;max-width:100%;}
+.slide{display:none;width:960px;min-height:540px;position:relative;overflow:hidden;}
+.slide.active{display:flex;}
+
+/* ── Cover ── */
+.s-cover{background:var(--au-navy);align-items:flex-start;justify-content:flex-end;padding:52px;flex-direction:column;position:relative;}
+.s-cover .acc{position:absolute;top:0;right:0;width:420px;height:100%;background:linear-gradient(135deg,transparent 40%,rgba(133,107,255,.10) 70%,rgba(20,73,255,.12) 100%);pointer-events:none;}
+.s-cover .logo{position:absolute;top:26px;left:52px;font-family:var(--font-h);font-size:.82rem;font-weight:700;letter-spacing:.09em;color:rgba(255,255,255,.45);text-transform:uppercase;}
+.s-cover .label{font-family:var(--font-h);font-size:.8rem;font-weight:700;letter-spacing:.13em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:12px;}
+.s-cover .title{font-family:var(--font-h);font-size:2.85rem;font-weight:700;color:#fff;line-height:1.05;margin-bottom:16px;max-width:62%;letter-spacing:-.01em;}
+.s-cover .sub{font-family:var(--font-b);font-size:1.08rem;color:rgba(255,255,255,.55);line-height:1.55;max-width:58%;}
+
+/* ── White Content Slide ── */
+.s-white{background:var(--au-white);flex-direction:column;}
+.s-white .hdr{background:var(--au-navy);padding:15px 42px 12px;flex-shrink:0;}
+.s-white .hdr h2{font-family:var(--font-h);font-size:1.4rem;font-weight:700;color:#fff;line-height:1.2;}
+.s-white .hdr .tag{font-family:var(--font-h);font-size:.68rem;font-weight:700;color:var(--au-lavender);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;display:block;}
+.s-white .body{padding:28px 42px 24px;flex:1;overflow:hidden;}
+.s-white .body p{font-family:var(--font-b);font-size:.95rem;color:#222;line-height:1.6;margin-bottom:11px;}
+.s-white .body strong{font-family:var(--font-h);font-weight:700;}
+
+/* ── Cards ── */
+.card-sand{background:var(--au-sandstone);border-radius:8px;padding:16px 20px;margin-bottom:12px;}
+.card-outline{border:2px solid #e0daf4;border-radius:8px;padding:16px 20px;margin-bottom:12px;}
+.card-navy{background:var(--au-navy);border-radius:8px;padding:16px 20px;margin-bottom:12px;color:#fff;}
+.card-navy strong{color:var(--au-lavender);}
+.card-blue{background:var(--au-blue);border-radius:8px;padding:16px 20px;margin-bottom:12px;color:#fff;}
+.card-warn{background:#FEF3C7;border:2px solid var(--au-orange);border-radius:8px;padding:16px 20px;margin-bottom:12px;}
+.card-red{background:#FEE2E2;border:2px solid var(--au-red);border-radius:8px;padding:14px 20px;margin-bottom:12px;}
+.card-green{background:#DCFCE7;border:2px solid var(--au-green);border-radius:8px;padding:14px 20px;margin-bottom:12px;}
+
+/* ── Grid helpers ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+
+/* ── Section Divider ── */
+.s-div{background:var(--au-navy);align-items:center;justify-content:center;padding:60px 56px;flex-direction:row;}
+.s-div .sn{font-family:var(--font-h);font-size:6rem;font-weight:700;color:var(--au-blue);line-height:1;margin-right:42px;flex-shrink:0;letter-spacing:-.04em;}
+.s-div .sc{flex:1;}
+.s-div .sr{width:58px;height:3px;background:var(--au-lavender);margin-bottom:13px;border-radius:2px;}
+.s-div .sl{font-family:var(--font-h);font-size:.75rem;font-weight:700;letter-spacing:.13em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:5px;}
+.s-div .st{font-family:var(--font-h);font-size:2.2rem;font-weight:700;color:#fff;line-height:1.1;}
+.s-div .ss2{font-family:var(--font-b);font-size:.96rem;color:rgba(255,255,255,.55);margin-top:11px;line-height:1.5;}
+
+/* ── Statement ── */
+.s-stmt{background:var(--au-navy);align-items:center;justify-content:center;padding:60px;flex-direction:column;}
+.s-stmt blockquote{font-family:var(--font-h);font-size:2.2rem;font-weight:700;color:#fff;text-align:center;line-height:1.2;max-width:790px;}
+.s-stmt .hl{color:var(--au-lavender);}
+.s-stmt .attr{font-family:var(--font-b);font-size:.9rem;color:rgba(255,255,255,.45);margin-top:18px;font-style:italic;text-align:center;}
+
+/* ── Timer Slide ── */
+.s-timer{background:var(--au-navy);align-items:center;justify-content:center;flex-direction:column;gap:0;}
+.s-timer .t-label{font-family:var(--font-h);font-size:.78rem;font-weight:700;letter-spacing:.14em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:6px;}
+.s-timer .t-act{font-family:var(--font-h);font-size:1.6rem;font-weight:700;color:#fff;text-align:center;line-height:1.15;margin-bottom:18px;max-width:700px;}
+.s-timer .t-display{font-family:var(--font-h);font-size:7rem;font-weight:700;color:#fff;line-height:1;letter-spacing:-.02em;transition:color .5s;cursor:pointer;}
+.s-timer .t-display.warn{color:#f5c518;}
+.s-timer .t-display.alert{color:#ff4444;animation:pulse 1s infinite;}
+.s-timer .t-display.done{color:var(--au-lavender);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.s-timer .t-bar-wrap{width:500px;height:6px;background:rgba(255,255,255,.15);border-radius:3px;margin:14px 0;}
+.s-timer .t-bar{height:6px;background:var(--au-lavender);border-radius:3px;transition:width .9s linear,background .5s;}
+.s-timer .t-bar.warn{background:#f5c518;}
+.s-timer .t-bar.alert{background:#ff4444;}
+.s-timer .t-hint{font-family:var(--font-b);font-size:.82rem;color:rgba(255,255,255,.35);margin-top:14px;}
+
+/* ── End ── */
+.s-end{background:var(--au-navy);align-items:center;justify-content:center;flex-direction:column;gap:15px;}
+.s-end .el{font-family:var(--font-h);font-size:1.6rem;font-weight:700;color:rgba(255,255,255,.75);letter-spacing:.05em;text-transform:uppercase;}
+.s-end .er{width:76px;height:3px;background:var(--au-lavender);border-radius:2px;}
+.s-end .et{font-family:var(--font-h);font-size:2.15rem;font-weight:700;color:#fff;text-align:center;}
+.s-end .es{font-family:var(--font-b);font-size:.98rem;color:var(--au-lavender);text-align:center;}
+.s-end .ec{font-family:var(--font-b);font-size:.75rem;color:rgba(255,255,255,.3);text-align:center;margin-top:2px;}
+
+/* ── Sandstone slide ── */
+.s-sand{background:var(--au-sandstone);flex-direction:column;}
+.s-sand .hdr{background:var(--au-navy);padding:15px 42px 12px;flex-shrink:0;}
+.s-sand .hdr h2{font-family:var(--font-h);font-size:1.4rem;font-weight:700;color:#fff;line-height:1.2;}
+.s-sand .hdr .tag{font-family:var(--font-h);font-size:.68rem;font-weight:700;color:var(--au-lavender);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;display:block;}
+.s-sand .body{padding:28px 42px 24px;flex:1;overflow:hidden;}
+.s-sand .body p{font-family:var(--font-b);font-size:.95rem;color:#222;line-height:1.6;margin-bottom:11px;}
+
+/* ── Foot ── */
+.foot{position:absolute;bottom:0;left:0;right:0;height:5px;background:var(--au-blue);}
+
+/* ── Nav ── */
+.nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:9px;align-items:center;background:rgba(20,15,80,.92);padding:6px 16px;border-radius:22px;z-index:100;backdrop-filter:blur(8px);}
+.nav button{background:none;border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.82);padding:4px 13px;border-radius:13px;cursor:pointer;font-size:.8rem;font-family:var(--font-h);letter-spacing:.04em;transition:background .2s;}
+.nav button:hover{background:rgba(255,255,255,.14);}
+.nav .ctr{color:rgba(255,255,255,.48);font-size:.75rem;min-width:54px;text-align:center;font-family:var(--font-b);}
+.nav .slide-title-nav{color:rgba(255,255,255,.55);font-size:.72rem;font-family:var(--font-h);max-width:200px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--au-lavender);transition:width .3s ease;z-index:200;}
+
+/* ── Misc ── */
+.num-big{font-family:var(--font-h);font-size:2.8rem;font-weight:700;color:var(--au-blue);line-height:1;}
+.num-label{font-family:var(--font-h);font-size:.72rem;font-weight:700;color:var(--au-slate);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.hl{color:var(--au-lavender);}
+ul.clean{list-style:none;padding:0;}
+ul.clean li{font-family:var(--font-b);font-size:.92rem;color:#222;line-height:1.55;padding:4px 0 4px 18px;position:relative;}
+ul.clean li::before{content:"›";position:absolute;left:0;color:var(--au-blue);font-weight:700;}
+.tag-pill{display:inline-block;font-family:var(--font-h);font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:10px;color:#fff;background:var(--au-blue);}
+.tag-red{background:var(--au-red);}
+.tag-green{background:var(--au-green);}
+.tag-orange{background:var(--au-orange);}
+.tag-lav{background:var(--au-lavender);}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="ss" id="ss">
+
+<!-- ╔══ 1: COVER ══╗ -->
+<div class="slide s-cover active" data-title="Cover">
+  <div class="acc"></div>
+  <div class="logo">Adelaide University</div>
+  <div class="label">AI for Business Transformation &nbsp;·&nbsp; Week 6 Workshop</div>
+  <div class="title">The Pitch Bootcamp</div>
+  <div class="sub">From idea to launchable business — customer discovery, pitch construction, and practice delivery before Week 7.</div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 2: AGENDA ══╗ -->
+<div class="slide s-white" data-title="Today's Plan">
+  <div class="hdr"><h2>Today's Plan — 3 Hours</h2><span class="tag">Workshop Agenda</span></div>
+  <div class="body">
+    <div class="grid3" style="gap:16px;">
+      <div class="card-sand">
+        <p style="margin:0;"><span class="tag-pill">Hour 1</span></p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1.05rem;margin:8px 0 4px;">Customer Discovery</p>
+        <p style="font-size:.85rem;margin:0;">The difference between an idea and evidence. Interview prep, role-play, and building your validation plan.</p>
+        <p style="font-family:var(--font-h);font-size:.72rem;color:var(--au-slate);margin:6px 0 0;font-weight:700;">60 MINUTES</p>
+      </div>
+      <div class="card-sand">
+        <p style="margin:0;"><span class="tag-pill tag-lav">Hour 2</span></p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1.05rem;margin:8px 0 4px;">Pitch Construction</p>
+        <p style="font-size:.85rem;margin:0;">Structure your 10-minute pitch. Opportunity framing, implementation credibility, and deck architecture.</p>
+        <p style="font-family:var(--font-h);font-size:.72rem;color:var(--au-slate);margin:6px 0 0;font-weight:700;">50 MINUTES</p>
+      </div>
+      <div class="card-sand">
+        <p style="margin:0;"><span class="tag-pill tag-green">Hour 3</span></p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1.05rem;margin:8px 0 4px;">Practice & Feedback</p>
+        <p style="font-size:.85rem;margin:0;">Deliver practice pitches, handle Q&A with the PEAR framework, and refine based on peer and instructor feedback.</p>
+        <p style="font-family:var(--font-h);font-size:.72rem;color:var(--au-slate);margin:6px 0 0;font-weight:700;">50 MINUTES</p>
+      </div>
+    </div>
+    <div class="card-navy" style="margin-top:14px;">
+      <p style="font-family:var(--font-b);font-size:.88rem;margin:0;color:rgba(255,255,255,.85);"><strong>This week's shift:</strong> You are no longer learning frameworks — you are <em>using</em> them. Every minute today is preparation for a business you could actually launch. The Assignment 2 pitch next week is a milestone, not the finish line.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 3: THE SYNTHESIS MOMENT ══╗ -->
+<div class="slide s-white" data-title="The Convergence">
+  <div class="hdr"><h2>Where Everything Meets</h2><span class="tag">Weeks 1–5 → Week 6</span></div>
+  <div class="body">
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <div class="card-outline" style="padding:12px 16px;">
+          <p style="margin:0;font-size:.85rem;"><strong>Module 1 (Weeks 1–3):</strong> You became fluent AI collaborators — prompting, multimodal creation, agentic workflows. <em>AI is now your co-founder, not your subject.</em></p>
+        </div>
+        <div class="card-outline" style="padding:12px 16px;">
+          <p style="margin:0;font-size:.85rem;"><strong>Week 4:</strong> You studied how enterprises adopt AI — governance, stakeholders, systemic change. <em>You understand buyer complexity.</em></p>
+        </div>
+        <div class="card-outline" style="padding:12px 16px;">
+          <p style="margin:0;font-size:.85rem;"><strong>Week 5:</strong> You explored startup agility — lean methodology, MVAIPs, failure patterns. <em>You know why most AI startups die.</em></p>
+        </div>
+      </div>
+      <div>
+        <div class="card-blue" style="display:flex;flex-direction:column;justify-content:center;min-height:100%;padding:24px;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:1.2rem;margin:0 0 10px;color:#fff;">Week 6: Synthesis</p>
+          <p style="font-family:var(--font-b);font-size:.9rem;margin:0;color:rgba(255,255,255,.85);line-height:1.55;">Today you combine enterprise rigour with startup speed to build something that's <strong>desirable, viable, feasible, and defensible</strong> — and then practise communicating it under pressure.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 4: REALITY CHECK ══╗ -->
+<div class="slide s-white" data-title="The Funding–Failure Paradox">
+  <div class="hdr"><h2>The Funding–Failure Paradox</h2><span class="tag">Why This Matters Right Now</span></div>
+  <div class="body">
+    <div class="grid2" style="gap:16px;margin-bottom:14px;">
+      <div>
+        <div class="card-green" style="text-align:center;padding:18px 16px;">
+          <div class="num-big" style="color:var(--au-green);">$189B</div>
+          <div class="num-label">Global AI VC in Feb 2026 alone</div>
+          <p style="font-family:var(--font-b);font-size:.78rem;color:#555;margin:6px 0 0;">The single largest month of startup funding ever recorded. But here's the thing — with AI tools, you don't need a cent of it to get started.</p>
+        </div>
+      </div>
+      <div>
+        <div class="card-red" style="text-align:center;padding:18px 16px;">
+          <div class="num-big" style="color:var(--au-red);">38%</div>
+          <div class="num-label">AI startups that fail due to no market need</div>
+          <p style="font-family:var(--font-b);font-size:.78rem;color:#555;margin:6px 0 0;">The #1 killer hasn't changed in a decade. They build first, then search for customers. Only 5% of GenAI pilots achieve rapid revenue growth.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card-navy">
+      <p style="font-family:var(--font-b);font-size:.88rem;margin:0;color:rgba(255,255,255,.85);"><strong>The lesson for your pitch — and your business:</strong> The good news is that AI has made building radically cheaper. A team of students with the right tools can launch what used to require a funded startup. But cheaper to build doesn't mean easier to succeed. The 38% didn't fail because they lacked funding — they failed because they built something nobody needed. That's the mistake you're learning to avoid.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 5: CHECK-IN ══╗ -->
+<div class="slide s-sand" data-title="Group Check-In">
+  <div class="hdr"><h2>Honest Check-In</h2><span class="tag">Where Is Your Group?</span></div>
+  <div class="body">
+    <p style="margin-bottom:14px;"><strong>Before we start — be honest with yourselves and with me.</strong> Raise your hand for the one that fits best:</p>
+    <div class="grid3" style="gap:12px;">
+      <div class="card-green">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.9rem;color:var(--au-green);margin:0 0 6px;">🟢 We've talked to real people</p>
+        <p style="font-size:.82rem;margin:0;">We contacted people in our network. We have quotes, pain points, and evidence our problem is real.</p>
+      </div>
+      <div class="card-warn">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.9rem;color:var(--au-orange);margin:0 0 6px;">🟡 We have a concept but no conversations</p>
+        <p style="font-size:.82rem;margin:0;">We've done research. We have an idea we believe in. We haven't spoken to anyone experiencing the problem.</p>
+      </div>
+      <div class="card-red">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.9rem;color:var(--au-red);margin:0 0 6px;">🔴 We're still figuring it out</p>
+        <p style="font-size:.82rem;margin:0;">We don't have a locked-in concept or we're unsure whether the problem is real.</p>
+      </div>
+    </div>
+    <div class="card-navy" style="margin-top:12px;">
+      <p style="font-family:var(--font-b);font-size:.85rem;margin:0;color:rgba(255,255,255,.85);">If you're 🟡 or 🔴 — <strong>that's fine, but today must change that.</strong> Hour 1 is specifically designed to move you toward evidence. You still have time, but only if you use it.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 6: SECTION DIVIDER — HOUR 1 ══╗ -->
+<div class="slide s-div" data-title="Hour 1: Customer Discovery">
+  <div class="sn">01</div>
+  <div class="sc">
+    <div class="sr"></div>
+    <div class="sl">Hour 1 · 60 Minutes</div>
+    <div class="st">Customer Discovery</div>
+    <div class="ss2">The difference between a hypothesis and a pitch is evidence.<br>Evidence comes from people — not Google.</div>
+  </div>
+</div>
+
+<!-- ╔══ 7: DESK RESEARCH ISN'T VALIDATION ══╗ -->
+<div class="slide s-stmt" data-title="The Hard Truth">
+  <blockquote>"Research suggests this is a significant problem" is <span class="hl">table stakes</span>.<br><br>"We spoke with 5 small business owners and here's exactly what they told us" is <span class="hl">evidence</span>.</blockquote>
+  <div class="attr">— What separates a credible pitch from an interesting theory</div>
+</div>
+
+<!-- ╔══ 8: WHY CUSTOMER CONVERSATIONS MATTER ══╗ -->
+<div class="slide s-white" data-title="Customer Conversations">
+  <div class="hdr"><h2>Why You Need to Talk to People</h2><span class="tag">Customer Discovery Principles</span></div>
+  <div class="body">
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1rem;margin:0 0 10px;color:var(--au-navy);">What desk research tells you:</p>
+        <ul class="clean" style="margin-bottom:14px;">
+          <li>Market size estimates (often inflated)</li>
+          <li>Competitor lists (often incomplete)</li>
+          <li>Industry trends (often stale)</li>
+          <li>That a problem <em>probably</em> exists</li>
+        </ul>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1rem;margin:0 0 10px;color:var(--au-navy);">What conversations tell you:</p>
+        <ul class="clean">
+          <li>Whether the problem is <em>urgent enough</em> to pay for</li>
+          <li>What people actually do about it today</li>
+          <li>Why existing solutions fail them</li>
+          <li>Language your pitch should use</li>
+        </ul>
+      </div>
+      <div>
+        <div class="card-sand" style="margin-bottom:12px;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">The Three Questions That Matter</p>
+          <p style="font-size:.85rem;margin:0 0 6px;"><strong>1. What does this problem actually cost you</strong> in time, money, or stress?</p>
+          <p style="font-size:.85rem;margin:0 0 6px;"><strong>2. How do you currently deal with it?</strong></p>
+          <p style="font-size:.85rem;margin:0;"><strong>3. What have you tried that didn't fully work?</strong></p>
+        </div>
+        <div class="card-warn">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;margin:0 0 4px;">⚠️ Rules of engagement</p>
+          <p style="font-size:.82rem;margin:0;"><strong>Listen. Don't lead.</strong> Don't describe your solution. Don't ask "would you use this?" Let them tell you whether the problem is real, how serious it is, and whether anything adequately solves it already.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 9: YOUR NETWORK IS YOUR LAB ══╗ -->
+<div class="slide s-white" data-title="Your Network">
+  <div class="hdr"><h2>Your Network Is Your Lab</h2><span class="tag">Where to Find Real People</span></div>
+  <div class="body">
+    <p style="margin-bottom:12px;">You don't need LinkedIn. You don't need cold outreach. You need your <strong>actual network</strong>.</p>
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <div class="card-sand">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">People you already know</p>
+          <ul class="clean">
+            <li>Parents, siblings, aunts, uncles</li>
+            <li>Family friends and neighbours</li>
+            <li>Former employers and managers</li>
+            <li>Friends' parents who run businesses</li>
+            <li>Anyone who works in your target industry</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card-outline">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">What you're looking for</p>
+          <ul class="clean">
+            <li>Someone who <em>owns or runs</em> a business</li>
+            <li>Someone who <em>works in</em> the industry you're targeting</li>
+            <li>Someone with <em>direct experience</em> of the problem you think you're solving</li>
+          </ul>
+          <p style="font-size:.82rem;margin:8px 0 0;color:var(--au-red);font-family:var(--font-h);font-weight:700;">If you can't find anyone — that's a signal. Don't ignore it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 10: ACTIVITY — INTERVIEW PREP ══╗ -->
+<div class="slide s-sand" data-title="Activity: Interview Prep">
+  <div class="hdr"><h2>Activity: Customer Interview Preparation</h2><span class="tag">Group Work · 20 Minutes</span></div>
+  <div class="body">
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1rem;margin:0 0 10px;">Step 1: Map your group's network (10 min)</p>
+        <ul class="clean">
+          <li>Each member: list 3 people you know who might experience your problem or work in your target space</li>
+          <li>For each person, note: their role/industry, why they're relevant, how you'd reach them (call, text, in person)</li>
+          <li>As a group: pick the 3–5 strongest leads</li>
+        </ul>
+        <div class="card-warn" style="margin-top:10px;">
+          <p style="font-size:.82rem;margin:0;"><strong>If nobody in your group can name a single person</strong> who experiences your problem — stop. That's your first red flag. Talk to your instructor before proceeding.</p>
+        </div>
+      </div>
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1rem;margin:0 0 10px;">Step 2: Draft your questions (10 min)</p>
+        <ul class="clean">
+          <li>Write 5–7 open-ended questions (not yes/no)</li>
+          <li>Start broad: "Tell me about how you handle [X]"</li>
+          <li>Go specific: "What does that cost you in time?"</li>
+          <li>Include: "What have you tried? What didn't work?"</li>
+          <li><strong>Do NOT describe your solution yet</strong></li>
+        </ul>
+        <div class="card-green" style="margin-top:10px;">
+          <p style="font-size:.82rem;margin:0;"><strong>Deliverable:</strong> A named list of contacts and a written interview script your group can use this week — before the pitch.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 11: ACTIVITY — ROLE-PLAY ══╗ -->
+<div class="slide s-white" data-title="Activity: Interview Role-Play">
+  <div class="hdr"><h2>Activity: Interview Role-Play</h2><span class="tag">Pairs · 20 Minutes</span></div>
+  <div class="body">
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1rem;margin:0 0 10px;">How it works</p>
+        <ul class="clean">
+          <li><strong>Pair up</strong> with someone from a different group</li>
+          <li><strong>Person A</strong> plays the interviewer. <strong>Person B</strong> plays a potential customer (using a scenario from Person A's pitch concept)</li>
+          <li>Run the interview for <strong>5 minutes</strong></li>
+          <li>Person B gives <strong>2 minutes of feedback</strong>: Did the questions feel leading? Did they learn about the problem or just seek validation?</li>
+          <li><strong>Swap roles</strong> and repeat</li>
+        </ul>
+      </div>
+      <div>
+        <div class="card-red" style="margin-bottom:12px;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 6px;">Common mistakes to watch for</p>
+          <ul class="clean" style="font-size:.82rem;">
+            <li>Describing the solution before asking about the problem</li>
+            <li>Asking "Would you use this?" (they'll say yes to be polite)</li>
+            <li>Asking leading questions: "Don't you think X is a problem?"</li>
+            <li>Talking more than listening</li>
+          </ul>
+        </div>
+        <div class="card-green">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 6px;">Signs you're doing it right</p>
+          <ul class="clean" style="font-size:.82rem;">
+            <li>The "customer" does 80% of the talking</li>
+            <li>You learn something you didn't expect</li>
+            <li>The problem description uses their words, not yours</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 12: VALIDATION SIGNALS ══╗ -->
+<div class="slide s-white" data-title="Reading the Signals">
+  <div class="hdr"><h2>Reading the Signals</h2><span class="tag">What Customer Responses Tell You</span></div>
+  <div class="body">
+    <div class="grid3" style="gap:12px;margin-bottom:14px;">
+      <div class="card-green">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 6px;color:var(--au-green);">🟢 Strong signal</p>
+        <ul class="clean" style="font-size:.8rem;">
+          <li>"I spend 10 hours a week on this"</li>
+          <li>"I've tried three tools and none work"</li>
+          <li>"I'd pay to fix this tomorrow"</li>
+          <li>Unprompted emotion or frustration</li>
+        </ul>
+      </div>
+      <div class="card-warn">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 6px;color:var(--au-orange);">🟡 Weak signal</p>
+        <ul class="clean" style="font-size:.8rem;">
+          <li>"Yeah, it's annoying sometimes"</li>
+          <li>"I haven't really thought about it"</li>
+          <li>"I guess that could be useful"</li>
+          <li>Polite agreement without specifics</li>
+        </ul>
+      </div>
+      <div class="card-red">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 6px;color:var(--au-red);">🔴 Pivot signal</p>
+        <ul class="clean" style="font-size:.8rem;">
+          <li>"We already use [X] and it's fine"</li>
+          <li>"That's not really a problem for us"</li>
+          <li>"I can't think of anyone who'd need this"</li>
+          <li>Can't find anyone to interview</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card-navy">
+      <p style="font-family:var(--font-b);font-size:.85rem;margin:0;color:rgba(255,255,255,.85);"><strong>A red signal is not failure — it's information.</strong> The groups who walk into Week 7 having pivoted based on evidence will pitch with more confidence than groups defending an unvalidated assumption.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 13: HOUR 1 TIMER ══╗ -->
+<div class="slide s-timer" data-title="Timer: Hour 1">
+  <div class="t-label">Hour 1 — Customer Discovery</div>
+  <div class="t-act">Interview Prep + Role-Play + Debrief</div>
+  <div class="t-display" id="t1-display" onclick="toggleTimer('t1',3600)">60:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t1-bar" style="width:100%"></div></div>
+  <div class="t-hint">Click the timer to start/pause</div>
+</div>
+
+<!-- ╔══ 14: HOUR 1 DEBRIEF ══╗ -->
+<div class="slide s-white" data-title="Hour 1 Debrief">
+  <div class="hdr"><h2>Hour 1 Debrief</h2><span class="tag">Before We Move On</span></div>
+  <div class="body">
+    <p style="margin-bottom:14px;"><strong>Quick share:</strong> 2–3 groups — what did you learn from the role-play that changed how you think about your problem?</p>
+    <div class="grid2" style="gap:14px;">
+      <div class="card-sand">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">What you should have now</p>
+        <ul class="clean">
+          <li>A list of 3–5 real people to contact this week</li>
+          <li>A refined interview script</li>
+          <li>Experience running an interview without leading</li>
+          <li>A clearer sense of whether your problem is real</li>
+        </ul>
+      </div>
+      <div class="card-warn">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">⚠️ Your action item before Week 7</p>
+        <p style="font-size:.85rem;margin:0;">Contact at least <strong>2–3 people</strong> from your list. Have actual conversations. Document what they tell you — in their words, not yours. Bring those quotes to your pitch.</p>
+      </div>
+    </div>
+    <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;color:var(--au-navy);margin-top:12px;text-align:center;">15 MINUTE BREAK</p>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 15: SECTION DIVIDER — HOUR 2 ══╗ -->
+<div class="slide s-div" data-title="Hour 2: Pitch Construction">
+  <div class="sn">02</div>
+  <div class="sc">
+    <div class="sr"></div>
+    <div class="sl">Hour 2 · 50 Minutes</div>
+    <div class="st">Pitch Construction</div>
+    <div class="ss2">Structuring your 10-minute pitch for maximum impact.<br>Opportunity → Solution → Implementation → Ask.</div>
+  </div>
+</div>
+
+<!-- ╔══ 16: PITCH STRUCTURE ══╗ -->
+<div class="slide s-white" data-title="10-Minute Pitch Structure">
+  <div class="hdr"><h2>The 10-Minute Pitch</h2><span class="tag">Slide-by-Slide Architecture</span></div>
+  <div class="body">
+    <div class="grid4" style="gap:8px;margin-bottom:10px;">
+      <div class="card-sand" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.75rem;color:var(--au-blue);margin:0;">1. HOOK</p>
+        <p style="font-size:.76rem;margin:3px 0 0;">Open with the problem, not your solution. Make us feel it. 30 sec.</p>
+      </div>
+      <div class="card-sand" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.75rem;color:var(--au-blue);margin:0;">2. OPPORTUNITY</p>
+        <p style="font-size:.76rem;margin:3px 0 0;">Evidence the problem exists. Customer quotes, market data, urgency. 2 min.</p>
+      </div>
+      <div class="card-sand" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.75rem;color:var(--au-blue);margin:0;">3. SOLUTION</p>
+        <p style="font-size:.76rem;margin:3px 0 0;">What you're building and how it solves the problem. JTBD framing. 2 min.</p>
+      </div>
+      <div class="card-sand" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.75rem;color:var(--au-blue);margin:0;">4. AI INTEGRATION</p>
+        <p style="font-size:.76rem;margin:3px 0 0;">Why this requires AI. What AI enables that wasn't possible before. 1.5 min.</p>
+      </div>
+    </div>
+    <div class="grid4" style="gap:8px;margin-bottom:10px;">
+      <div class="card-sand" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.75rem;color:var(--au-lavender);margin:0;">5. DEMO / PROTOTYPE</p>
+        <p style="font-size:.76rem;margin:3px 0 0;">Show, don't tell. MVAIP walkthrough, mockup, or live demo. 1.5 min.</p>
+      </div>
+      <div class="card-sand" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.75rem;color:var(--au-lavender);margin:0;">6. IMPLEMENTATION</p>
+        <p style="font-size:.76rem;margin:3px 0 0;">Build/buy/API decisions. Timeline. How you get from here to there. 1 min.</p>
+      </div>
+      <div class="card-sand" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.75rem;color:var(--au-lavender);margin:0;">7. TRACTION</p>
+        <p style="font-size:.76rem;margin:3px 0 0;">What you've validated so far. Customer conversations, interest signals. 1 min.</p>
+      </div>
+      <div class="card-sand" style="padding:10px 14px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.75rem;color:var(--au-lavender);margin:0;">8. THE ASK</p>
+        <p style="font-size:.76rem;margin:3px 0 0;">Close strong. What you need next and why this team can deliver. 30 sec.</p>
+      </div>
+    </div>
+    <div class="card-navy">
+      <p style="font-family:var(--font-b);font-size:.84rem;margin:0;color:rgba(255,255,255,.85);"><strong>Slide count guide:</strong> 10–15 slides total. The most common mistake is too many slides with too much text. Each slide should make <em>one point</em>. If you can't explain a slide in 30 seconds, split it or cut it.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 17: OPPORTUNITY FRAMING ══╗ -->
+<div class="slide s-white" data-title="Framing the Opportunity">
+  <div class="hdr"><h2>Framing the Opportunity</h2><span class="tag">What Earns Marks (and Interest)</span></div>
+  <div class="body">
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <div class="card-red" style="margin-bottom:12px;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 6px;color:var(--au-red);">❌ What doesn't work</p>
+          <p style="font-size:.84rem;margin:0 0 4px;">"Research suggests this is a significant problem in the industry."</p>
+          <p style="font-size:.84rem;margin:0 0 4px;">"The global market for X is worth $Y billion."</p>
+          <p style="font-size:.84rem;margin:0;">"According to a McKinsey report..."</p>
+        </div>
+        <p style="font-size:.82rem;color:var(--au-slate);font-style:italic;">Generic, unearned, and indistinguishable from every other pitch. AI can generate this in 30 seconds — and so can everyone else.</p>
+      </div>
+      <div>
+        <div class="card-green" style="margin-bottom:12px;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 6px;color:var(--au-green);">✓ What earns attention</p>
+          <p style="font-size:.84rem;margin:0 0 4px;">"We spoke with 4 café owners in Adelaide. Three of them spend 6+ hours a week on [X]."</p>
+          <p style="font-size:.84rem;margin:0 0 4px;">"One told us: 'I've tried two apps and gave up on both.'"</p>
+          <p style="font-size:.84rem;margin:0;">"Despite tools like [Y] existing, none handle [specific pain point]."</p>
+        </div>
+        <p style="font-size:.82rem;color:var(--au-slate);font-style:italic;">Specific, grounded, and impossible to fake. This is the standard you're aiming for.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 18: BUILD VS BUY VS API ══╗ -->
+<div class="slide s-white" data-title="Build vs Buy vs API">
+  <div class="hdr"><h2>Implementation Credibility</h2><span class="tag">Build vs Buy vs API</span></div>
+  <div class="body">
+    <div class="grid3" style="gap:12px;margin-bottom:12px;">
+      <div class="card-sand">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">🔨 Build</p>
+        <p style="font-size:.82rem;margin:0 0 6px;"><strong>When:</strong> It's your core differentiator. This is where your moat lives.</p>
+        <p style="font-size:.82rem;margin:0 0 6px;"><strong>Risk:</strong> Expensive, slow, requires deep expertise.</p>
+        <p style="font-size:.82rem;margin:0;"><strong>Example:</strong> Custom ML model trained on proprietary data.</p>
+      </div>
+      <div class="card-sand">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">🛒 Buy</p>
+        <p style="font-size:.82rem;margin:0 0 6px;"><strong>When:</strong> It's commodity functionality. Don't reinvent wheels.</p>
+        <p style="font-size:.82rem;margin:0 0 6px;"><strong>Risk:</strong> Vendor lock-in, limited customisation.</p>
+        <p style="font-size:.82rem;margin:0;"><strong>Example:</strong> Stripe for payments, Auth0 for authentication.</p>
+      </div>
+      <div class="card-sand">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">🔌 API</p>
+        <p style="font-size:.82rem;margin:0 0 6px;"><strong>When:</strong> You need AI capability fast but it's not your moat.</p>
+        <p style="font-size:.82rem;margin:0 0 6px;"><strong>Risk:</strong> Platform dependency. If OpenAI ships your feature, you're toast.</p>
+        <p style="font-size:.82rem;margin:0;"><strong>Example:</strong> GPT-4 API for text generation, Whisper for transcription.</p>
+      </div>
+    </div>
+    <div class="card-navy">
+      <p style="font-family:var(--font-b);font-size:.85rem;margin:0;color:rgba(255,255,255,.85);"><strong>Your pitch must answer:</strong> "Why can't someone rebuild this in a weekend using the same APIs?" If the answer is "they can" — you don't have a business. You have a feature. Your moat is the thing you build, buy, or earn that others can't easily replicate: proprietary data, domain expertise, workflow integration, or network effects.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 19: ACTIVITY — PITCH DECK CONSTRUCTION ══╗ -->
+<div class="slide s-sand" data-title="Activity: Build Your Deck">
+  <div class="hdr"><h2>Activity: Pitch Deck Construction</h2><span class="tag">Group Work · 35 Minutes</span></div>
+  <div class="body">
+    <p style="margin-bottom:12px;"><strong>Using the 8-beat structure, start building your actual pitch deck.</strong> This isn't a planning exercise — you should leave today with a working first draft.</p>
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <div class="card-outline">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">Tasks for the next 35 minutes</p>
+          <ul class="clean" style="font-size:.82rem;">
+            <li><strong>Minutes 1–5:</strong> Agree on your hook — what's the opening line/slide?</li>
+            <li><strong>Minutes 5–15:</strong> Draft the Opportunity and Solution slides (use your JTBD from async content)</li>
+            <li><strong>Minutes 15–25:</strong> Map your build/buy/API decisions and draft the Implementation slide</li>
+            <li><strong>Minutes 25–35:</strong> Outline your demo/prototype plan — what will you actually show?</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card-green" style="margin-bottom:10px;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 4px;">Use AI right now</p>
+          <p style="font-size:.82rem;margin:0;">Use ChatGPT, Claude, or Gemini to help draft slide content, stress-test your value proposition, or generate competitive analysis. <strong>Document your prompts</strong> in your AI Prompt Log.</p>
+        </div>
+        <div class="card-sand">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 4px;">Instructor questions welcome</p>
+          <p style="font-size:.82rem;margin:0;">Ask specific questions: "Should we target SMEs or enterprise first?" beats "Is our idea good?" every time.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 20: HOUR 2 TIMER ══╗ -->
+<div class="slide s-timer" data-title="Timer: Hour 2">
+  <div class="t-label">Hour 2 — Pitch Construction</div>
+  <div class="t-act">Build Your Pitch Deck</div>
+  <div class="t-display" id="t2-display" onclick="toggleTimer('t2',3000)">50:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t2-bar" style="width:100%"></div></div>
+  <div class="t-hint">Click the timer to start/pause</div>
+</div>
+
+<!-- ╔══ 21: SECTION DIVIDER — HOUR 3 ══╗ -->
+<div class="slide s-div" data-title="Hour 3: Practice & Feedback">
+  <div class="sn">03</div>
+  <div class="sc">
+    <div class="sr"></div>
+    <div class="sl">Hour 3 · 50 Minutes</div>
+    <div class="st">Practice & Feedback</div>
+    <div class="ss2">Deliver under pressure. Handle tough questions.<br>Leave today knowing what still needs work.</div>
+  </div>
+</div>
+
+<!-- ╔══ 22: THE COMMUNICATION FRAMEWORK ══╗ -->
+<div class="slide s-white" data-title="3-Level Communication">
+  <div class="hdr"><h2>The 3-Level Communication Rule</h2><span class="tag">Pitch Delivery</span></div>
+  <div class="body">
+    <div class="grid3" style="gap:12px;margin-bottom:14px;">
+      <div class="card-sand">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 8px;">Level 1: Everyone</p>
+        <p style="font-size:.84rem;margin:0 0 6px;">Your pitch must be understandable by someone with <strong>zero technical knowledge</strong>.</p>
+        <p style="font-size:.82rem;margin:0;color:var(--au-slate);font-style:italic;">"We help small retailers predict what to stock next week so they waste less and sell more."</p>
+      </div>
+      <div class="card-sand">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 8px;">Level 2: Credibility</p>
+        <p style="font-size:.84rem;margin:0 0 6px;">Include enough <strong>technical depth</strong> to show you understand the AI, without drowning the audience.</p>
+        <p style="font-size:.82rem;margin:0;color:var(--au-slate);font-style:italic;">"We use a fine-tuned forecasting model trained on POS data, deployed via API for minimal integration cost."</p>
+      </div>
+      <div class="card-sand">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 8px;">Level 3: Q&A Only</p>
+        <p style="font-size:.84rem;margin:0 0 6px;">Save deep technical detail for <strong>when asked</strong>. It shows you know it; you just chose not to bore everyone.</p>
+        <p style="font-size:.82rem;margin:0;color:var(--au-slate);font-style:italic;">"Our model uses XGBoost with 14 engineered features. We retrain weekly on 90-day rolling windows."</p>
+      </div>
+    </div>
+    <div class="card-navy">
+      <p style="font-family:var(--font-b);font-size:.85rem;margin:0;color:rgba(255,255,255,.85);"><strong>The mark of a great pitch:</strong> Your grandmother understands the problem and the value. Your CS friend respects the technical approach. Your first customer sees something they'd actually pay for.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 23: PEAR FRAMEWORK ══╗ -->
+<div class="slide s-white" data-title="PEAR Framework">
+  <div class="hdr"><h2>Handling Q&A: The PEAR Framework</h2><span class="tag">5-Minute Q&A Strategy</span></div>
+  <div class="body">
+    <div class="grid4" style="gap:10px;margin-bottom:14px;">
+      <div class="card-blue" style="text-align:center;padding:18px 12px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1.6rem;margin:0;">P</p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;margin:4px 0;">Pause</p>
+        <p style="font-size:.76rem;margin:0;">Take a breath. Acknowledge the question. Don't rush into a defensive answer.</p>
+      </div>
+      <div class="card-blue" style="text-align:center;padding:18px 12px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1.6rem;margin:0;">E</p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;margin:4px 0;">Evidence</p>
+        <p style="font-size:.76rem;margin:0;">Respond with data, customer quotes, or specific examples — not opinions or hopes.</p>
+      </div>
+      <div class="card-blue" style="text-align:center;padding:18px 12px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1.6rem;margin:0;">A</p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;margin:4px 0;">Articulate</p>
+        <p style="font-size:.76rem;margin:0;">Explain the reasoning behind your decision. Show strategic thinking, not guesswork.</p>
+      </div>
+      <div class="card-blue" style="text-align:center;padding:18px 12px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1.6rem;margin:0;">R</p>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.82rem;margin:4px 0;">Redirect</p>
+        <p style="font-size:.76rem;margin:0;">Connect back to your core value proposition. Don't let Q&A pull you off-message.</p>
+      </div>
+    </div>
+    <div class="card-sand">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 4px;">Example: "What happens when OpenAI builds this feature?"</p>
+      <p style="font-size:.82rem;margin:0;"><strong>P:</strong> "That's the right question to ask." <strong>E:</strong> "We've mapped OpenAI's product roadmap — their focus is horizontal tools, not vertical workflows." <strong>A:</strong> "Our moat is the domain-specific data pipeline we build with each client, not the model itself." <strong>R:</strong> "Which is exactly why our customer retention data shows 90% stickiness — the value isn't the AI, it's the integration."</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 24: PRACTICE ROUNDS ══╗ -->
+<div class="slide s-sand" data-title="Activity: Practice Pitches">
+  <div class="hdr"><h2>Activity: Practice Pitch Rounds</h2><span class="tag">All Groups · 35 Minutes</span></div>
+  <div class="body">
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <p style="font-family:var(--font-h);font-weight:700;font-size:1rem;margin:0 0 10px;">Structure</p>
+        <ul class="clean">
+          <li><strong>Round 1 (15 min):</strong> Each group delivers a 5-minute condensed pitch to one other group. Receiving group gives 3 min structured feedback.</li>
+          <li><strong>Round 2 (15 min):</strong> Swap — the other group pitches. Same structure.</li>
+          <li><strong>Debrief (5 min):</strong> Each group identifies their top 3 improvements for Week 7.</li>
+        </ul>
+        <p style="font-size:.82rem;margin-top:8px;color:var(--au-slate);"><em>Note: This is a condensed pitch — not the full 10 minutes. Focus on the hook, opportunity, and solution.</em></p>
+      </div>
+      <div>
+        <div class="card-outline" style="margin-bottom:12px;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">Peer Feedback Framework</p>
+          <p style="font-size:.82rem;margin:0 0 4px;"><strong>1. Clarity:</strong> Could I explain this idea to someone who wasn't here? What confused me?</p>
+          <p style="font-size:.82rem;margin:0 0 4px;"><strong>2. Evidence:</strong> Did I believe the problem was real? What evidence was most/least convincing?</p>
+          <p style="font-size:.82rem;margin:0 0 4px;"><strong>3. AI value:</strong> Was AI essential or bolted on? Could this work without AI?</p>
+          <p style="font-size:.82rem;margin:0;"><strong>4. Biggest gap:</strong> What's the one thing that would most strengthen this pitch?</p>
+        </div>
+        <div class="card-green">
+          <p style="font-size:.82rem;margin:0;"><strong>Be constructive and specific.</strong> "Your opportunity slide needs customer evidence" is useful. "I liked it" is not.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 25: HOUR 3 TIMER ══╗ -->
+<div class="slide s-timer" data-title="Timer: Hour 3">
+  <div class="t-label">Hour 3 — Practice & Feedback</div>
+  <div class="t-act">Practice Pitch Rounds</div>
+  <div class="t-display" id="t3-display" onclick="toggleTimer('t3',3000)">50:00</div>
+  <div class="t-bar-wrap"><div class="t-bar" id="t3-bar" style="width:100%"></div></div>
+  <div class="t-hint">Click the timer to start/pause</div>
+</div>
+
+<!-- ╔══ 26: SYNTHESIS ══╗ -->
+<div class="slide s-white" data-title="What You Built Today">
+  <div class="hdr"><h2>What You Built Today</h2><span class="tag">Workshop Synthesis</span></div>
+  <div class="body">
+    <div class="grid3" style="gap:12px;margin-bottom:14px;">
+      <div class="card-sand" style="text-align:center;padding:18px 16px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">Hour 1</p>
+        <p style="font-size:.84rem;margin:0;">A customer interview plan with named contacts, a tested script, and role-play experience.</p>
+      </div>
+      <div class="card-sand" style="text-align:center;padding:18px 16px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">Hour 2</p>
+        <p style="font-size:.84rem;margin:0;">A working first draft of your pitch deck with structured slides and implementation decisions.</p>
+      </div>
+      <div class="card-sand" style="text-align:center;padding:18px 16px;">
+        <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 6px;">Hour 3</p>
+        <p style="font-size:.84rem;margin:0;">Practice delivery experience, peer feedback, and a clear list of what to improve this week.</p>
+      </div>
+    </div>
+    <div class="card-navy">
+      <p style="font-family:var(--font-b);font-size:.88rem;margin:0;color:rgba(255,255,255,.85);"><strong>The groups who walk into Week 7 with real conversations behind them will pitch with a confidence that is immediately obvious.</strong> The groups who don't will feel it in the room. You know what to do this week.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 27: ASSIGNMENT 2 CHECKLIST ══╗ -->
+<div class="slide s-white" data-title="Assignment 2 Checklist">
+  <div class="hdr"><h2>Assignment 2 — Final Checklist</h2><span class="tag">Due: Week 7 In-Class Presentation</span></div>
+  <div class="body">
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <div class="card-outline">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 8px;">Content Requirements</p>
+          <ul class="clean" style="font-size:.82rem;">
+            <li>10-minute pitch presentation + 5-minute Q&A</li>
+            <li>Pitch deck: 10–15 professional slides</li>
+            <li>Executive summary: 2-page business overview</li>
+            <li>Peer evaluation forms (after all presentations)</li>
+            <li>Submit all materials via Canvas <strong>before</strong> presenting</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card-outline">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.88rem;margin:0 0 8px;">What Earns High Marks</p>
+          <ul class="clean" style="font-size:.82rem;">
+            <li><strong>AI Integration (30%):</strong> AI transforms the business model, not just bolted on</li>
+            <li><strong>Business Design & Delivery (35%):</strong> Validated opportunity, professional delivery</li>
+            <li><strong>Documentation (20%):</strong> Professional exec summary and deck design</li>
+            <li><strong>Peer Evaluation (15%):</strong> Your contribution to the group</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="card-red" style="margin-top:10px;">
+      <p style="font-family:var(--font-h);font-weight:700;font-size:.85rem;margin:0 0 4px;">⚠️ You must attend your enrolled session in Week 7</p>
+      <p style="font-size:.82rem;margin:0;">You present during your registered workshop (Wednesday or Friday). If you're unsure, check your enrolment now.</p>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 29: COURSE JOURNEY ══╗ -->
+<div class="slide s-white" data-title="Course Journey">
+  <div class="hdr"><h2>Your Course Journey</h2><span class="tag">Where You Are</span></div>
+  <div class="body">
+    <div style="display:flex;gap:3px;margin-bottom:16px;">
+      <div style="flex:1;background:var(--au-lavender);height:6px;border-radius:3px;opacity:.45;"></div>
+      <div style="flex:1;background:var(--au-lavender);height:6px;border-radius:3px;opacity:.45;"></div>
+      <div style="flex:1;background:var(--au-lavender);height:6px;border-radius:3px;opacity:.45;"></div>
+      <div style="flex:1;background:var(--au-lavender);height:6px;border-radius:3px;opacity:.55;"></div>
+      <div style="flex:1;background:var(--au-lavender);height:6px;border-radius:3px;opacity:.7;"></div>
+      <div style="flex:1;background:var(--au-blue);height:6px;border-radius:3px;"></div>
+      <div style="flex:1;background:var(--au-sandstone);height:6px;border-radius:3px;border:1px solid #ddd;"></div>
+      <div style="flex:1;background:var(--au-sandstone);height:6px;border-radius:3px;border:1px solid #ddd;"></div>
+      <div style="flex:1;background:var(--au-sandstone);height:6px;border-radius:3px;border:1px solid #ddd;"></div>
+      <div style="flex:1;background:var(--au-sandstone);height:6px;border-radius:3px;border:1px solid #ddd;"></div>
+    </div>
+    <div class="grid2" style="gap:14px;">
+      <div>
+        <div class="card-sand" style="padding:12px 16px;opacity:.7;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.78rem;margin:0;color:var(--au-slate);">MODULE 1: Personal AI Mastery (Weeks 1–3) ✓</p>
+        </div>
+        <div class="card-sand" style="padding:12px 16px;opacity:.85;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.78rem;margin:0;color:var(--au-slate);">MODULE 2: AI & Entrepreneurship (Weeks 4–7)</p>
+          <p style="font-size:.78rem;margin:4px 0 0;">Week 4: Enterprise AI ✓ · Week 5: Startup AI ✓ · <strong style="color:var(--au-blue);">Week 6: Pitch Bootcamp ← YOU ARE HERE</strong> · Week 7: Assignment 2 Presentations</p>
+        </div>
+      </div>
+      <div>
+        <div class="card-outline" style="padding:12px 16px;">
+          <p style="font-family:var(--font-h);font-weight:700;font-size:.78rem;margin:0;color:var(--au-slate);">MODULE 3: Critical Analysis (Weeks 8–10)</p>
+          <p style="font-size:.78rem;margin:4px 0 0;">After spending Weeks 4–7 championing AI innovation, Module 3 asks you to critically examine the consequences. Week 8: Unintended Consequences · Week 9: AI Governance · Week 10: Assignment 3</p>
+        </div>
+        <div class="card-navy" style="padding:12px 16px;">
+          <p style="font-size:.82rem;margin:0;color:rgba(255,255,255,.85);"><strong>The deliberate shift:</strong> Module 2 → Module 3 is designed to create cognitive dissonance. You've just built an AI business. Now you'll examine whether you should have. That's professional maturity.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"></div>
+</div>
+
+<!-- ╔══ 30: CLOSING ══╗ -->
+<div class="slide s-end" data-title="Close">
+  <div class="el">Adelaide University</div>
+  <div class="er"></div>
+  <div class="et">Go Talk to People.</div>
+  <div class="es">The pitch is next week. The business is the point. Take it seriously.</div>
+  <div class="ec">Week 7: Assignment 2 Presentations &nbsp;·&nbsp; Week 8: Unintended Consequences</div>
+  <div style="background:var(--au-blue);height:6px;position:absolute;bottom:0;left:0;right:0;"></div>
+</div>
+
+</div><!-- /ss -->
+
+<!-- ── NAVIGATION ── -->
+<div class="nav">
+  <button onclick="prevSlide()">← Prev</button>
+  <div class="slide-title-nav" id="nav-title"></div>
+  <div class="ctr" id="nav-counter"></div>
+  <button onclick="nextSlide()">Next →</button>
+</div>
+
+<!-- ── KEYBOARD HINT ── -->
+<p style="font-family:Georgia,serif;font-size:11px;color:#444466;margin-top:8px;text-align:center;">← → arrow keys to navigate &nbsp;·&nbsp; Click timer to start/pause</p>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const titles = Array.from(slides).map(s => s.dataset.title || '');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, slides.length - 1));
+    slides[current].classList.add('active');
+    document.getElementById('nav-counter').textContent = (current + 1) + ' / ' + slides.length;
+    document.getElementById('nav-title').textContent = titles[current] || '';
+    document.getElementById('prog').style.width = ((current + 1) / slides.length * 100) + '%';
+  }
+
+  function nextSlide() { showSlide(current + 1); }
+  function prevSlide() { showSlide(current - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prevSlide();
+  });
+
+  // ── TIMER ──────────────────────────────────────────────────────
+  const timers = {};
+
+  function fmt(s) {
+    const m = Math.floor(s / 60), sec = s % 60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  }
+
+  function toggleTimer(id, totalSec) {
+    if (!timers[id]) {
+      timers[id] = { remaining: totalSec, total: totalSec, running: false, interval: null };
+    }
+    const t = timers[id];
+    const disp = document.getElementById(id + '-display');
+    const bar  = document.getElementById(id + '-bar');
+
+    if (t.running) {
+      clearInterval(t.interval);
+      t.running = false;
+    } else {
+      if (t.remaining <= 0) { t.remaining = t.total; disp.textContent = fmt(t.total); disp.classList.remove('done','warn','alert'); bar.classList.remove('warn','alert'); bar.style.width = '100%'; }
+      t.running = true;
+      t.interval = setInterval(() => {
+        t.remaining--;
+        disp.textContent = fmt(t.remaining);
+        const pct = (t.remaining / t.total) * 100;
+        bar.style.width = pct + '%';
+
+        disp.classList.remove('warn','alert','done');
+        bar.classList.remove('warn','alert');
+        if (t.remaining <= 0) {
+          clearInterval(t.interval);
+          t.running = false;
+          disp.textContent = "TIME!";
+          disp.classList.add('done');
+          bar.style.width = '0%';
+        } else if (pct <= 10) {
+          disp.classList.add('alert');
+          bar.classList.add('alert');
+        } else if (pct <= 25) {
+          disp.classList.add('warn');
+          bar.classList.add('warn');
+        }
+      }, 1000);
+    }
+  }
+
+  // init
+  showSlide(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 4 Workshop: Assignment 1 — Staged Case Study | Adelaide University</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --au-navy:      #140F50;
+  --au-blue:      #1448FF;
+  --au-sandstone: #F8EFE0;
+  --au-lavender:  #836BFF;
+  --au-mid-blue:  #3B67FF;
+  --au-slate:     #284150;
+  --au-pale-teal: #DAEDEF;
+  --au-white:     #FFFFFF;
+  --au-red:       #DC3545;
+  --font-h: "Franklin Gothic Demi Cond","Franklin Gothic Medium","Arial Narrow",Arial,sans-serif;
+  --font-b: Georgia,"Times New Roman",serif;
+}
+html,body { width:100%; height:100%; background:#0b0928; font-family:var(--font-b); overflow:hidden; }
+
+/* ── Slideshow ── */
+.ss { width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; }
+.slide { display:none; width:960px; height:540px; position:relative; overflow:hidden; flex-shrink:0; flex-direction:column; }
+.slide.active { display:flex; }
+
+/* ── Cover Dark ── */
+.s-cover { background:var(--au-navy); padding:44px 52px; justify-content:flex-end; }
+.s-cover .logo { position:absolute; top:26px; left:34px; height:46px; width:auto; filter:brightness(0) invert(1); opacity:.9; }
+.s-cover .acc { position:absolute; top:0; right:0; width:280px; height:100%; overflow:hidden; pointer-events:none; }
+.s-cover .acc::before { content:""; position:absolute; top:-5%; right:44px; width:3px; height:120%; background:var(--au-lavender); transform:rotate(-12deg); transform-origin:top center; opacity:.65; }
+.s-cover .acc::after  { content:""; position:absolute; top:-5%; right:74px; width:1px; height:120%; background:var(--au-lavender); transform:rotate(-12deg); transform-origin:top center; opacity:.25; }
+.s-cover .label { font-family:var(--font-h); font-size:.8rem; font-weight:700; letter-spacing:.13em; color:var(--au-lavender); text-transform:uppercase; margin-bottom:12px; }
+.s-cover .title { font-family:var(--font-h); font-size:2.85rem; font-weight:700; color:#fff; line-height:1.05; margin-bottom:16px; max-width:62%; letter-spacing:-.01em; }
+.s-cover .sub   { font-family:var(--font-b); font-size:1rem; color:rgba(255,255,255,.65); line-height:1.6; max-width:56%; }
+
+/* ── Content White ── */
+.s-white { background:#fff; }
+.s-white .hdr { background:var(--au-navy); padding:15px 38px; flex-shrink:0; display:flex; align-items:center; gap:12px; }
+.s-white .hdr h2 { font-family:var(--font-h); font-size:1.5rem; font-weight:700; color:#fff; letter-spacing:.01em; }
+.s-white .hdr .tag { font-family:var(--font-h); font-size:.65rem; font-weight:700; letter-spacing:.1em; background:var(--au-lavender); color:#fff; padding:2px 8px; border-radius:3px; text-transform:uppercase; white-space:nowrap; }
+.s-white .hdr .tag-red { font-family:var(--font-h); font-size:.65rem; font-weight:700; letter-spacing:.1em; background:var(--au-red); color:#fff; padding:2px 8px; border-radius:3px; text-transform:uppercase; white-space:nowrap; }
+.s-white .body { flex:1; padding:20px 38px 48px; display:flex; flex-direction:column; }
+.s-white .body p, .s-white .body li { font-family:var(--font-b); font-size:1.05rem; line-height:1.65; color:var(--au-navy); margin-bottom:8px; }
+.s-white .body ul { padding-left:1.3em; list-style:disc; }
+.s-white .body ul ul { list-style:circle; margin-top:3px; padding-left:1.2em; }
+.s-white .body ul ul li { font-size:.95rem; }
+.s-white .body strong { color:var(--au-navy); }
+.s-white .body .cols  { display:flex; gap:20px; flex:1; }
+.s-white .body .col   { flex:1; }
+.s-white .body .col-label { font-family:var(--font-h); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--au-lavender); font-weight:700; margin-bottom:6px; }
+.s-white .body .def   { background:var(--au-sandstone); border-left:3px solid var(--au-lavender); padding:9px 13px; margin-bottom:10px; border-radius:0 4px 4px 0; }
+.s-white .body .def p { font-size:.96rem; margin-bottom:0; }
+.s-white .body .def-red { background:#FFF0F0; border-left:3px solid var(--au-red); padding:9px 13px; margin-bottom:10px; border-radius:0 4px 4px 0; }
+.s-white .body .def-red p { font-size:.96rem; margin-bottom:0; color:#8B1A1A; }
+
+.s-white .body .rctf { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:4px; }
+.s-white .body .ri   { background:var(--au-navy); border-radius:6px; padding:9px 13px; display:flex; align-items:flex-start; gap:9px; }
+.s-white .body .rl   { font-family:var(--font-h); font-size:1.9rem; font-weight:700; color:var(--au-lavender); line-height:1; flex-shrink:0; }
+.s-white .body .rtt  { font-family:var(--font-h); font-size:.82rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:.05em; }
+.s-white .body .rtd  { font-family:var(--font-b); font-size:.77rem; color:rgba(255,255,255,.7); margin-top:2px; }
+.s-white .body .ex   { background:var(--au-pale-teal); border-radius:6px; padding:9px 15px; margin-top:9px; }
+.s-white .body .ex p { font-size:.85rem; color:var(--au-slate); font-style:italic; margin:0; }
+.s-white .body .ex strong { color:var(--au-navy); font-style:normal; }
+
+.s-white .body .stage-grid { display:flex; gap:10px; margin-top:6px; }
+.s-white .body .stage-card { flex:1; border-radius:8px; padding:13px 15px; }
+.s-white .body .stage-card.s1 { background:var(--au-navy); }
+.s-white .body .stage-card.s2 { background:var(--au-mid-blue); }
+.s-white .body .stage-card.s3 { background:var(--au-slate); }
+.s-white .body .stage-num  { font-family:var(--font-h); font-size:1.3rem; font-weight:700; color:var(--au-lavender); }
+.s-white .body .stage-name { font-family:var(--font-h); font-size:.88rem; font-weight:700; color:#fff; margin:2px 0 5px; }
+.s-white .body .stage-desc { font-family:var(--font-b); font-size:.72rem; color:rgba(255,255,255,.78); line-height:1.45; }
+.s-white .body .stage-time { font-family:var(--font-h); font-size:.65rem; font-weight:700; color:var(--au-lavender); text-transform:uppercase; letter-spacing:.07em; margin-top:6px; }
+
+.s-white .body .crit-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:6px; }
+.s-white .body .crit { border-radius:7px; padding:12px 14px; }
+.s-white .body .crit.c1 { background:var(--au-navy); }
+.s-white .body .crit.c2 { background:var(--au-mid-blue); }
+.s-white .body .crit.c3 { background:var(--au-slate); }
+.s-white .body .crit.c4 { background:#1a3a50; }
+.s-white .body .crit-pct  { font-family:var(--font-h); font-size:1.4rem; font-weight:700; color:var(--au-lavender); }
+.s-white .body .crit-name { font-family:var(--font-h); font-size:.82rem; font-weight:700; color:#fff; margin:2px 0 4px; }
+.s-white .body .crit-desc { font-family:var(--font-b); font-size:.72rem; color:rgba(255,255,255,.78); line-height:1.45; }
+
+.s-white .body .doc-row { display:flex; gap:10px; margin-top:6px; }
+.s-white .body .doc-box { flex:1; background:var(--au-sandstone); border-radius:7px; padding:11px 14px; border-left:3px solid var(--au-lavender); }
+.s-white .body .doc-title { font-family:var(--font-h); font-size:.82rem; font-weight:700; color:var(--au-navy); margin-bottom:4px; }
+.s-white .body .doc-items { font-family:var(--font-b); font-size:.74rem; color:var(--au-slate); line-height:1.55; }
+
+.s-white .rule { height:3px; background:var(--au-lavender); position:absolute; bottom:26px; left:38px; right:38px; border-radius:2px; }
+.s-white .snum { position:absolute; bottom:7px; right:38px; font-family:var(--font-b); font-size:.67rem; color:#aaa; }
+
+/* ── Statement ── */
+.s-stmt { background:var(--au-navy); align-items:center; justify-content:center; padding:60px; }
+.s-stmt blockquote { font-family:var(--font-h); font-size:2.4rem; font-weight:700; color:#fff; text-align:center; line-height:1.2; max-width:790px; }
+.s-stmt .hl { color:var(--au-lavender); }
+.s-stmt .attr { font-family:var(--font-b); font-size:.9rem; color:rgba(255,255,255,.45); margin-top:18px; font-style:italic; text-align:center; }
+
+/* ── Assessment Reference (single persistent slide) ── */
+.s-assess { background:var(--au-navy); padding:30px 44px; flex-direction:column; justify-content:space-between; }
+.s-assess .a-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+.s-assess .a-badge { font-family:var(--font-h); font-size:.72rem; font-weight:700; letter-spacing:.12em; background:var(--au-red); color:#fff; padding:4px 12px; border-radius:3px; text-transform:uppercase; }
+.s-assess .a-title { font-family:var(--font-h); font-size:1.6rem; font-weight:700; color:#fff; }
+
+.s-assess .a-stages { display:flex; gap:10px; margin-bottom:12px; }
+.s-assess .a-stage { flex:1; border-radius:8px; padding:14px 16px; border:2px solid rgba(255,255,255,.12); }
+.s-assess .a-stage.active-stage { border-color:var(--au-lavender); background:rgba(131,107,255,.08); }
+.s-assess .a-snum { font-family:var(--font-h); font-size:1.1rem; font-weight:700; color:var(--au-lavender); }
+.s-assess .a-sname { font-family:var(--font-h); font-size:.82rem; font-weight:700; color:#fff; margin:2px 0; }
+.s-assess .a-sframe { font-family:var(--font-h); font-size:.65rem; font-weight:700; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.06em; }
+.s-assess .a-swords { font-family:var(--font-b); font-size:.7rem; color:rgba(255,255,255,.4); margin-top:3px; }
+
+.s-assess .a-warn { background:rgba(220,53,69,.15); border:2px solid var(--au-red); border-radius:8px; padding:12px 18px; margin-bottom:10px; }
+.s-assess .a-warn p { font-family:var(--font-h); font-size:.88rem; font-weight:700; color:#fff; text-align:center; line-height:1.4; margin:0; }
+.s-assess .a-warn .a-warn-hl { color:var(--au-red); }
+
+.s-assess .a-submit { display:flex; gap:10px; margin-bottom:8px; }
+.s-assess .a-submit-box { flex:1; background:rgba(255,255,255,.06); border-radius:6px; padding:10px 14px; }
+.s-assess .a-submit-title { font-family:var(--font-h); font-size:.75rem; font-weight:700; color:var(--au-lavender); text-transform:uppercase; letter-spacing:.06em; margin-bottom:3px; }
+.s-assess .a-submit-desc { font-family:var(--font-b); font-size:.72rem; color:rgba(255,255,255,.6); line-height:1.45; }
+
+.s-assess .a-footer { display:flex; justify-content:space-between; align-items:center; }
+.s-assess .a-footer-left { font-family:var(--font-b); font-size:.72rem; color:rgba(255,255,255,.35); line-height:1.5; }
+.s-assess .a-footer-right { font-family:var(--font-h); font-size:.68rem; font-weight:700; color:rgba(255,255,255,.25); text-transform:uppercase; letter-spacing:.1em; }
+
+/* ── End ── */
+.s-end { background:var(--au-navy); align-items:center; justify-content:center; flex-direction:column; gap:15px; }
+.s-end .el { height:86px; width:auto; filter:brightness(0) invert(1); opacity:.88; }
+.s-end .er { width:76px; height:3px; background:var(--au-lavender); border-radius:2px; }
+.s-end .et { font-family:var(--font-h); font-size:2.15rem; font-weight:700; color:#fff; text-align:center; }
+.s-end .es { font-family:var(--font-b); font-size:.98rem; color:var(--au-lavender); text-align:center; }
+.s-end .ec { font-family:var(--font-b); font-size:.75rem; color:rgba(255,255,255,.3); text-align:center; margin-top:2px; }
+
+/* ── Nav ── */
+.nav { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:9px; align-items:center; background:rgba(20,15,80,.92); padding:6px 16px; border-radius:22px; z-index:100; backdrop-filter:blur(8px); }
+.nav button { background:none; border:1px solid rgba(255,255,255,.22); color:rgba(255,255,255,.82); padding:4px 13px; border-radius:13px; cursor:pointer; font-size:.8rem; font-family:var(--font-h); letter-spacing:.04em; transition:background .2s; }
+.nav button:hover { background:rgba(255,255,255,.14); }
+.nav .ctr { color:rgba(255,255,255,.48); font-size:.75rem; min-width:54px; text-align:center; font-family:var(--font-b); }
+.progress { position:fixed; top:0; left:0; height:3px; background:var(--au-lavender); transition:width .3s ease; z-index:200; }
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="ss" id="ss">
+
+<!-- ╔══ 1: COVER ══╗ -->
+<div class="slide s-cover active">
+  <span class="logo">Adelaide University</span>
+  <div class="acc"></div>
+  <div class="label">AI for Business Transformation &nbsp;·&nbsp; Week 4 Workshop</div>
+  <div class="title">Assignment 1:<br>Staged Case Study</div>
+  <div class="sub">From AI user to AI strategist — applying everything you've built in Weeks 1–3 under assessment conditions.</div>
+</div>
+
+<!-- ╔══ 2: YOUR JOURNEY SO FAR ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Your Journey So Far</h2><span class="tag">Weeks 1–3 Recap</span></div>
+  <div class="body">
+    <p style="margin-bottom:10px;">Over three weeks, you've built a toolkit that most business professionals don't yet have:</p>
+    <div class="rctf">
+      <div class="ri">
+        <div class="rl">W1</div>
+        <div class="rt">
+          <div class="rtt">Collaborative Intelligence</div>
+          <div class="rtd">RCTF prompting framework, critical evaluation of AI outputs, hallucination detection, tool comparison across ChatGPT, Claude, Perplexity, Copilot</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">W2</div>
+        <div class="rt">
+          <div class="rtt">Multimodal AI</div>
+          <div class="rtd">Image generation, video AI, code AI, synthetic data. RCTF applied across modalities. Strategic tool selection for different output types</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">W3</div>
+        <div class="rt">
+          <div class="rtt">AI Agents &amp; Automation</div>
+          <div class="rtd">Research agents (Perplexity Deep Research, Copilot), workflow automation (Zapier, n8n), autonomy evaluation, risk assessment</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">W4</div>
+        <div class="rt">
+          <div class="rtt">Enterprise AI Strategy</div>
+          <div class="rtd">Constraint Mapping, Strategy Evaluation Matrix, Failure Analysis — the analytical frameworks you studied in this week's asynchronous content</div>
+        </div>
+      </div>
+    </div>
+    <div class="ex"><p><strong>Today:</strong> You apply all of it — prompting skill, tool selection, research agents, critical evaluation, and strategic frameworks — to a live business scenario under timed conditions.</p></div>
+  </div>
+  <div class="rule"></div><div class="snum">2</div>
+</div>
+
+<!-- ╔══ 3: TODAY IS DIFFERENT ══╗ -->
+<div class="slide s-stmt">
+  <blockquote>Today is <span class="hl">not</span> a practice session.<br><br>This workshop <span class="hl">is</span> Assignment 1.</blockquote>
+  <div class="attr">40% of your final grade &nbsp;·&nbsp; Individual &nbsp;·&nbsp; Assessment conditions apply</div>
+</div>
+
+<!-- ╔══ 4: THREE STAGES EXPLAINED ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>The Three Stages</h2><span class="tag">Structure</span></div>
+  <div class="body">
+    <p style="margin-bottom:8px;">Each stage releases <strong>new information on Canvas</strong> at a fixed time. You cannot see later stages until they open. This simulates how strategy consultants process information progressively.</p>
+    <div class="stage-grid">
+      <div class="stage-card s1">
+        <div class="stage-num">Stage 1</div>
+        <div class="stage-name">Initial Analysis</div>
+        <div class="stage-desc">Background context about two organisations. Apply <strong style="color:var(--au-lavender);">Constraint Mapping</strong> to analyse their AI implementation approaches.</div>
+        <div class="stage-time">40 minutes · 500–600 words</div>
+      </div>
+      <div class="stage-card s2">
+        <div class="stage-num">Stage 2</div>
+        <div class="stage-name">Problem Response</div>
+        <div class="stage-desc">New challenges emerge. Apply the <strong style="color:var(--au-lavender);">Strategy Evaluation Matrix</strong> to reassess both organisations. Show how your thinking evolves.</div>
+        <div class="stage-time">40 minutes · 500–600 words</div>
+      </div>
+      <div class="stage-card s3">
+        <div class="stage-num">Stage 3</div>
+        <div class="stage-name">Final Synthesis</div>
+        <div class="stage-desc">Stakeholder responses and complications. Apply <strong style="color:var(--au-lavender);">Failure Analysis</strong> and synthesise all three stages into strategic recommendations.</div>
+        <div class="stage-time">40 minutes · 500–800 words</div>
+      </div>
+    </div>
+    <div class="ex"><p><strong>Key:</strong> Your Stage 1 analysis doesn't need to be "right" — it needs to reflect genuine thinking. Stage 2 and 3 reward students who adapt, not students who hedge.</p></div>
+  </div>
+  <div class="rule"></div><div class="snum">4</div>
+</div>
+
+<!-- ╔══ 5: WHAT YOU SUBMIT ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>What You Submit — Each Stage</h2><span class="tag-red">Required</span></div>
+  <div class="body">
+    <p style="margin-bottom:8px;">Each stage requires <strong>two submissions</strong> to the corresponding Canvas assignment:</p>
+    <div class="doc-row">
+      <div class="doc-box">
+        <div class="doc-title">📄 Analysis</div>
+        <div class="doc-items">
+          Your written analysis (500–600 words for Stages 1 &amp; 2; 500–800 words for Stage 3).<br><br>
+          <strong>Format:</strong> Text entry in Canvas, Word document, or PDF — your choice.<br><br>
+          Apply the relevant framework. Take a position. Show your reasoning.
+        </div>
+      </div>
+      <div class="doc-box">
+        <div class="doc-title">📋 Prompt Log</div>
+        <div class="doc-items">
+          All prompts used — numbered, with brief notes on <strong>why</strong> you refined or changed them.<br><br>
+          <strong>Format:</strong> Text entry in Canvas, Word document, or PDF — your choice.<br><br>
+          Copy and paste your prompts and key AI outputs directly. Failed prompts are valuable evidence.
+        </div>
+      </div>
+    </div>
+    <div class="def-red" style="margin-top:10px;">
+      <p><strong>The submission portal for each stage closes permanently when the next stage opens.</strong> If you have not submitted before it closes, you cannot submit for that stage. Leave at least 2–3 minutes for uploading.</p>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">5</div>
+</div>
+
+<!-- ╔══ 6: ASSESSMENT CRITERIA ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>How You're Being Assessed</h2><span class="tag">Criteria</span></div>
+  <div class="body">
+    <div class="crit-grid">
+      <div class="crit c1">
+        <div class="crit-pct">30%</div>
+        <div class="crit-name">Progressive AI Collaboration</div>
+        <div class="crit-desc">Quality and sophistication of your AI collaboration — not just quantity of prompts. Show purposeful refinement, critical evaluation of outputs, and <strong style="color:var(--au-lavender);">strategic tool selection</strong> across stages. Which AI for which task?</div>
+      </div>
+      <div class="crit c2">
+        <div class="crit-pct">30%</div>
+        <div class="crit-name">Organisational Context Analysis</div>
+        <div class="crit-desc">Depth and nuance in analysing how context shapes AI implementation. Show your analysis <strong style="color:var(--au-lavender);">evolving</strong> across stages as new information emerges. Don't just list constraints — analyse their implications.</div>
+      </div>
+      <div class="crit c3">
+        <div class="crit-pct">25%</div>
+        <div class="crit-name">Adaptive Thinking</div>
+        <div class="crit-desc">How effectively you incorporate new and <strong style="color:var(--au-lavender);">contradictory</strong> information. Demonstrate strategic pivots, not just additive updates. Stage 2 should challenge your Stage 1 — embrace that.</div>
+      </div>
+      <div class="crit c4">
+        <div class="crit-pct">15%</div>
+        <div class="crit-name">Synthesis Quality</div>
+        <div class="crit-desc">Final integration of all stages into a <strong style="color:var(--au-lavender);">coherent narrative</strong> with clear, defensible recommendations. Take a position and justify it — don't hedge everything.</div>
+      </div>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">6</div>
+</div>
+
+<!-- ╔══ 7: RULES ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Rules &amp; Expectations</h2><span class="tag-red">Assessment Conditions</span></div>
+  <div class="body">
+    <div class="cols">
+      <div class="col">
+        <div class="col-label">You Must</div>
+        <ul>
+          <li>Work <strong>individually</strong> — no discussion with other students during the assessment</li>
+          <li>Submit both items (analysis + prompt log) for <strong>each stage before the portal closes</strong></li>
+          <li>Document <strong>all AI interactions</strong> in your prompt log as you work — copy and paste prompts and key outputs</li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="col-label">You May</div>
+        <ul>
+          <li>Use <strong>any AI tools</strong> — ChatGPT, Claude, Perplexity, Copilot, Gemini, Grok, and others</li>
+          <li>Use <strong>multiple tools</strong> simultaneously — different tools suit different tasks</li>
+          <li>Access the <strong>internet</strong> for research</li>
+          <li>Reference your <strong>notes and course materials</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="def" style="margin-top:6px;">
+      <p><strong>Each workshop session has a different case study.</strong> The Wednesday and Friday scenarios are not the same. There is no benefit to sharing content between sessions.</p>
+    </div>
+    <div class="def-red" style="margin-top:6px;">
+      <p><strong>Do not</strong> share any case study content with anyone outside this room. Do not discuss your analysis during the assessment.</p>
+    </div>
+  </div>
+  <div class="rule"></div><div class="snum">7</div>
+</div>
+
+<!-- ╔══ 8: STRATEGIC ADVICE ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Strategic Advice</h2><span class="tag">From Your Instructor</span></div>
+  <div class="body">
+    <div class="rctf">
+      <div class="ri">
+        <div class="rl">🔧</div>
+        <div class="rt">
+          <div class="rtt">Use Your Full Toolkit</div>
+          <div class="rtd">You've spent 3 weeks building capabilities across text AI, research agents, multimodal tools, and workflow thinking. This assessment rewards students who draw on that range <em>strategically</em>.</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">🧠</div>
+        <div class="rt">
+          <div class="rtt">Your Judgment Is the Differentiator</div>
+          <div class="rtd">AI can research, structure, and draft. But <em>your</em> judgment about what matters, what's missing, and what to recommend separates excellent from adequate.</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">⚡</div>
+        <div class="rt">
+          <div class="rtt">Engage With Complexity</div>
+          <div class="rtd">There are no clean answers. Taking a defensible position and justifying it is far more valuable than hedging everything. Don't simplify away the tension.</div>
+        </div>
+      </div>
+      <div class="ri">
+        <div class="rl">📝</div>
+        <div class="rt">
+          <div class="rtt">Read the Details Carefully</div>
+          <div class="rtd">Details in the briefings matter. Information that seems minor in Stage 1 may become critical in Stage 3. Read carefully before you start prompting.</div>
+        </div>
+      </div>
+    </div>
+    <div class="ex"><p><strong>Remember:</strong> 5 excellent, iterative prompts showing critical refinement are worth more than 20 basic queries. Document your failures — they demonstrate learning.</p></div>
+  </div>
+  <div class="rule"></div><div class="snum">8</div>
+</div>
+
+<!-- ╔══ 9: EXPECTATIONS ══╗ -->
+<div class="slide s-stmt">
+  <blockquote>The expectation is <span class="hl">very high</span>.<br><br>I expect you to know <span class="hl">which AI to use</span> for which task — and to demonstrate <span class="hl">everything</span> we've covered.</blockquote>
+  <div class="attr">This is where Weeks 1, 2, and 3 come together.</div>
+</div>
+
+<!-- ╔══ 10: QUESTIONS ══╗ -->
+<div class="slide s-white">
+  <div class="hdr"><h2>Questions?</h2><span class="tag">Process Only</span></div>
+  <div class="body" style="align-items:center; justify-content:center; text-align:center;">
+    <p style="font-size:1.2rem; margin-bottom:16px;">I'll answer questions about <strong>how the assessment works</strong>.</p>
+    <p style="font-size:.95rem; color:var(--au-slate); margin-bottom:20px;">I will not answer questions about analytical approach or which tools to use — that's what you're being assessed on.</p>
+    <div class="def" style="max-width:580px;">
+      <p style="text-align:center;"><strong>Checklist before we begin:</strong><br>
+      ✓ Laptop charged &amp; charger accessible<br>
+      ✓ Canvas open — you can see the Assignment 1 module<br>
+      ✓ AI tools logged in and ready (at least 2 recommended)<br>
+      ✓ A document open and ready to capture your prompt log as you work</p>
+    </div>
+    <p style="font-size:.88rem; color:var(--au-slate); margin-top:16px; font-style:italic;">Stage 1 will appear on Canvas shortly. I will tell you when it's live.</p>
+  </div>
+  <div class="rule"></div><div class="snum">10</div>
+</div>
+
+<!-- ╔══ 11: ASSESSMENT REFERENCE SLIDE (stays up for 2 hours) ══╗ -->
+<div class="slide s-assess">
+  <div class="a-top">
+    <div class="a-title">Assignment 1 — In Progress</div>
+    <div class="a-badge">Assessment Conditions</div>
+  </div>
+
+  <div class="a-stages">
+    <div class="a-stage active-stage">
+      <div class="a-snum">Stage 1</div>
+      <div class="a-sname">Initial Analysis</div>
+      <div class="a-sframe">Constraint Mapping</div>
+      <div class="a-swords">500–600 words</div>
+    </div>
+    <div class="a-stage">
+      <div class="a-snum">Stage 2</div>
+      <div class="a-sname">Problem Response</div>
+      <div class="a-sframe">Strategy Evaluation</div>
+      <div class="a-swords">500–600 words</div>
+    </div>
+    <div class="a-stage">
+      <div class="a-snum">Stage 3</div>
+      <div class="a-sname">Final Synthesis</div>
+      <div class="a-sframe">Failure Analysis + Synthesis</div>
+      <div class="a-swords">500–800 words</div>
+    </div>
+  </div>
+
+  <div class="a-warn">
+    <p>⚠️ Each submission portal <span class="a-warn-hl">closes permanently</span> when the next stage opens.<br>Leave 2–3 minutes to submit. If the portal is closed, you cannot submit for that stage.</p>
+  </div>
+
+  <div class="a-submit">
+    <div class="a-submit-box">
+      <div class="a-submit-title">Submit per stage: Analysis</div>
+      <div class="a-submit-desc">Your written analysis applying the relevant framework. Text entry in Canvas, Word doc, or PDF.</div>
+    </div>
+    <div class="a-submit-box">
+      <div class="a-submit-title">Submit per stage: Prompt Log</div>
+      <div class="a-submit-desc">All prompts (numbered) with notes on refinements, plus key AI outputs. Copy and paste directly. Text entry, Word doc, or PDF.</div>
+    </div>
+  </div>
+
+  <div class="a-footer">
+    <div class="a-footer-left">Work individually &nbsp;·&nbsp; Any AI tools permitted &nbsp;·&nbsp; Internet access permitted &nbsp;·&nbsp; Notes &amp; course materials permitted</div>
+    <div class="a-footer-right">AI for Business Transformation · Week 4</div>
+  </div>
+</div>
+
+<!-- ╔══ 12: END ══╗ -->
+<div class="slide s-end">
+  <span class="el">Adelaide University</span>
+  <div class="er"></div>
+  <div class="et">See You Next Week</div>
+  <div class="es">Week 5: AI in Startups — Building AI-Native Products Under Constraints</div>
+  <div class="ec">AI for Business Transformation &nbsp;·&nbsp; Adelaide University &nbsp;·&nbsp; 2026</div>
+</div>
+
+</div><!-- /ss -->
+
+<div class="nav">
+  <button onclick="go(-1)">&#8592; Prev</button>
+  <span class="ctr" id="ctr">1 / 12</span>
+  <button onclick="go(1)">Next &#8594;</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll(".slide");
+let cur = 0;
+function show(n) {
+  slides[cur].classList.remove("active");
+  cur = (n + slides.length) % slides.length;
+  slides[cur].classList.add("active");
+  document.getElementById("ctr").textContent = (cur+1) + " / " + slides.length;
+  document.getElementById("prog").style.width = ((cur+1)/slides.length*100)+"%";
+}
+function go(d) { show(cur+d); }
+document.addEventListener("keydown", e => {
+  if(["ArrowRight","ArrowDown"," "].includes(e.key)){ e.preventDefault(); go(1); }
+  if(["ArrowLeft","ArrowUp"].includes(e.key)){ e.preventDefault(); go(-1); }
+  if(e.key==="Home") show(0);
+  if(e.key==="End") show(slides.length-1);
+});
+function scale() {
+  const s = Math.min(window.innerWidth/960, window.innerHeight/540)*0.96;
+  slides.forEach(sl => sl.style.transform = "scale("+s+")");
+}
+window.addEventListener("resize", scale);
+scale();
+document.getElementById("prog").style.width = (1/slides.length*100)+"%";
+document.getElementById("ctr").textContent = "1 / " + slides.length;
+</script>
+</body>
+</html>

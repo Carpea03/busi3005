@@ -1,143 +1,69 @@
-# AI for Business Transformation — Group Formation App
+# BUSI3005 — AI for Business Transformation
 
-A Next.js web app that collects student survey responses and uses Claude AI to generate balanced project groups for Assignment 2: AI Business Pitch.
+Adelaide University course hub for **BUSI3005 AI for Business Transformation** (Bachelor of Business). Built on Next.js 14 + Redis, deployed on Vercel.
 
----
+Landing page at `/` is a hub with three cards:
 
-## Features
+- **Group formation** (`/group-formation`) — student survey for Assignment 2: AI Side Hustle Launch. Solo, pair, or trio (max 3).
+- **Workshop quizzes** (`/quiz`) — baseline + reflect polls run each weekly workshop. Quiz content lives in [lib/quizzes.js](lib/quizzes.js); status is date-gated with manual override.
+- **Lecturer dashboard** (`/admin`) — group-formation responses, AI group suggestions, quiz control room, student drill-down, CSV exports.
 
-- **4-step student survey** — collects AI experience, skills, availability, industry interests, and working style
-- **Vercel Redis** — stores all submissions serverlessly; handles duplicate submissions gracefully
-- **Password-protected admin dashboard** — view all responses, filter by experience level, expand individual profiles
-- **AI group generation** — sends all profiles to Claude and receives balanced group suggestions (groups of 3–4)
-- **CSV export** — download all responses for offline use
-- **Adelaide University branding** — official colours, typography, and visual identity throughout
-
----
-
-## Tech Stack
+## Tech stack
 
 - Next.js 14 (App Router)
-- Redis (`redis`)
-- Tailwind CSS
-- Claude API (claude-sonnet-4-20250514)
+- Redis (`redis` package)
+- Tailwind utility classes + custom Adelaide University brand CSS in [app/globals.css](app/globals.css)
+- Claude API for group suggestions (fetch-based; no SDK dependency)
 
----
-
-## Deployment Instructions
-
-### 1. Create a Vercel project
+## Local development
 
 ```bash
-# Install Vercel CLI if needed
-npm i -g vercel
-
-# From the project directory
-vercel
+npm install
+cp .env.example .env.local            # then fill in ADMIN_PASSWORD and ANTHROPIC_API_KEY
+vercel link                           # one-off, to wire to Vercel
+vercel env pull .env.local            # adds REDIS_URL from the connected store
+npm run dev                           # http://localhost:3000
+npm test                              # node --test
 ```
 
-Or connect your GitHub repo at vercel.com and import the project.
-
-### 2. Add Vercel Redis
-
-In your Vercel dashboard:
-1. Go to **Storage** → **Create Database** → **Redis**
-2. Name it (e.g. `group-formation-redis`)
-3. Click **Connect to project** and select your project
-4. Vercel automatically adds the `REDIS_URL` environment variable
-
-### 3. Set environment variables
-
-In Vercel dashboard → **Settings** → **Environment Variables**, add:
+Required env vars:
 
 | Variable | Value |
 |---|---|
-| `ADMIN_PASSWORD` | Your chosen admin password |
-| `ANTHROPIC_API_KEY` | Your Anthropic API key (from console.anthropic.com) |
+| `REDIS_URL` | Vercel adds this when you connect a Redis store. |
+| `ADMIN_PASSWORD` | Your chosen admin password. |
+| `ANTHROPIC_API_KEY` | From console.anthropic.com — used for AI group suggestions only. |
 
-> The Redis variable is added automatically — do **not** add it manually.
+## Deployment
 
-### 4. Deploy
+Vercel-only (see [vercel.json](vercel.json)). Connect a Redis store via Storage → Create Database → Redis. Set the two env vars above in Settings → Environment Variables. `vercel --prod` deploys.
+
+## Rolling out a fresh semester
+
+Quiz definitions live in [lib/quizzes.js](lib/quizzes.js). To run the same code with new content, edit that file, push, and redeploy.
+
+To wipe the deployed Redis (drops all submissions, quiz responses, aggregates, student identities, status overrides):
 
 ```bash
-vercel --prod
+REDIS_URL=rediss://... node scripts/flush-redis.js
+# add --yes to skip the confirmation prompt
 ```
 
----
+The script refuses to run without `REDIS_URL` and asks for explicit `yes` confirmation.
 
-## Local Development
+## Architecture overview
 
-```bash
-# Install dependencies
-npm install
+See [CLAUDE.md](CLAUDE.md) for the detailed architecture notes. The pedagogy intent for the quiz subsystem (five-question spine, weekly additions, trajectory tracking) is documented in [S1_2027_Handoff_Planned_Changes.md](S1_2027_Handoff_Planned_Changes.md).
 
-# Copy environment file
-cp .env.example .env.local
-# Then fill in ADMIN_PASSWORD and ANTHROPIC_API_KEY
+Key files when starting work:
 
-# Pull KV credentials from Vercel (requires vercel link first)
-vercel env pull .env.local
+- [lib/quizzes.js](lib/quizzes.js) — spine + per-week quiz definitions (source of truth).
+- [lib/quiz-core.js](lib/quiz-core.js) — pure validation, normalization, aggregation, `computeEffectiveStatus`.
+- [lib/quiz-store.js](lib/quiz-store.js) — Redis persistence (responses, aggregates, status overrides, student identity).
+- [app/group-formation/page.jsx](app/group-formation/page.jsx) — the survey form.
+- [app/api/generate-groups/route.js](app/api/generate-groups/route.js) — Claude prompt for AI group suggestions.
 
-# Run development server
-npm run dev
-```
-
-App runs at http://localhost:3000
-
----
-
-## Usage
-
-### Student survey
-- Share the root URL (e.g. `https://your-app.vercel.app`) with students before Week 1
-- Takes 5–7 minutes to complete
-- Students who re-submit with the same Student ID will have their response updated
-
-### Admin dashboard
-- Access at `/admin`
-- Enter your `ADMIN_PASSWORD`
-- View all responses, filter by AI experience level, expand individual profiles
-- Click **Generate Groups with AI** once responses are collected
-- AI suggests groups of 3–4 with rationale for each
-- Review flagged considerations before publishing to Canvas
-- Click **Export CSV** to download all responses
-
----
-
-## Group Formation Logic
-
-When "Generate Groups with AI" is clicked, the app sends all student profiles to Claude with instructions to:
-
-1. **Balance AI experience** — mix Beginners, Intermediate, Advanced, and Expert students
-2. **Complement roles** — ensure each group has a mix of Coordinators, Researchers, Creatives
-3. **Align availability** — group students with overlapping available times
-4. **Match industry interests** — group students with similar pitch ideas where possible
-5. **Respect peer preferences** — honour stated preferences where feasible
-
-The AI returns JSON with group assignments, rationale for each group, suggested industry focus, and any considerations for the lecturer to review.
-
----
-
-## File Structure
-
-```
-app/
-├── layout.jsx              # Root layout with AU header/footer
-├── globals.css             # AU brand colours and component styles
-├── page.jsx                # Student survey (4-step form)
-├── success/page.jsx        # Confirmation page after submission
-├── admin/page.jsx          # Admin dashboard
-└── api/
-    ├── submit/route.js     # POST — store survey submission
-    ├── responses/route.js  # GET — retrieve all submissions (admin)
-    ├── generate-groups/route.js  # POST — AI group generation; GET — retrieve saved groups
-    ├── verify-admin/route.js     # POST — verify admin password
-    └── export/route.js     # GET — export responses as CSV
-```
-
----
-
-## Adelaide University Brand Colours
+## Adelaide University brand colours
 
 | Colour | Hex |
 |---|---|

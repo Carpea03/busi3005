@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 10 Workshop — Future-Proofing Your AI Capability</title>
+<style>
+/* ── AU Brand Tokens ── */
+:root {
+  --au-navy:      #140F50;
+  --au-lavender:  #856BFF;
+  --au-blue:      #1449FF;
+  --au-sandstone: #F8EFE0;
+  --au-white:     #FFFFFF;
+  --au-slate:     #444466;
+  --au-red:       #DC2626;
+  --au-orange:    #D97706;
+  --au-green:     #16A34A;
+  --font-h: Arial, Helvetica, sans-serif;
+  --font-b: Georgia, 'Times New Roman', serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0e0b2a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:18px 10px 60px;}
+
+/* ── Slide System ── */
+.ss{position:relative;width:960px;max-width:100%;}
+.slide{display:none;width:960px;min-height:540px;position:relative;overflow:hidden;}
+.slide.active{display:flex;}
+
+/* ── Cover ── */
+.s-cover{background:var(--au-navy);align-items:flex-start;justify-content:flex-end;padding:52px;flex-direction:column;position:relative;}
+.s-cover .acc{position:absolute;top:0;right:0;width:420px;height:100%;background:linear-gradient(135deg,transparent 40%,rgba(133,107,255,.10) 70%,rgba(20,73,255,.12) 100%);pointer-events:none;}
+.s-cover .logo{position:absolute;top:26px;left:52px;font-family:var(--font-h);font-size:.82rem;font-weight:700;letter-spacing:.09em;color:rgba(255,255,255,.45);text-transform:uppercase;}
+.s-cover .label{font-family:var(--font-h);font-size:.8rem;font-weight:700;letter-spacing:.13em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:12px;}
+.s-cover .title{font-family:var(--font-h);font-size:2.85rem;font-weight:700;color:#fff;line-height:1.05;margin-bottom:16px;max-width:62%;letter-spacing:-.01em;}
+.s-cover .sub{font-family:var(--font-b);font-size:1.08rem;color:rgba(255,255,255,.72);max-width:58%;line-height:1.55;}
+.s-cover .meta{font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.45);margin-top:32px;letter-spacing:.06em;text-transform:uppercase;}
+
+/* ── White slide ── */
+.s-white{background:#fff;flex-direction:column;padding:46px 52px;}
+
+/* ── Sand slide ── */
+.s-sand{background:var(--au-sandstone);flex-direction:column;padding:46px 52px;}
+
+/* ── Divider slide ── */
+.s-div{background:var(--au-navy);flex-direction:column;align-items:flex-start;justify-content:center;padding:52px 64px;position:relative;}
+.s-div::before{content:"";position:absolute;left:0;top:0;width:6px;height:100%;background:var(--au-lavender);}
+.s-div .num{font-family:var(--font-h);font-size:.82rem;font-weight:700;letter-spacing:.16em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:18px;}
+.s-div .ttl{font-family:var(--font-h);font-size:2.6rem;font-weight:700;color:#fff;line-height:1.08;margin-bottom:18px;max-width:80%;}
+.s-div .desc{font-family:var(--font-b);font-size:1.05rem;color:rgba(255,255,255,.72);max-width:74%;line-height:1.55;}
+.s-div .dur{font-family:var(--font-h);font-size:.78rem;color:rgba(255,255,255,.45);margin-top:28px;letter-spacing:.06em;text-transform:uppercase;}
+
+/* ── Statement slide ── */
+.s-stmt{background:var(--au-navy);flex-direction:column;align-items:center;justify-content:center;padding:60px;text-align:center;}
+.s-stmt .quote{font-family:var(--font-b);font-size:1.95rem;font-weight:400;color:#fff;line-height:1.32;max-width:80%;font-style:italic;}
+.s-stmt .source{font-family:var(--font-h);font-size:.85rem;color:var(--au-lavender);margin-top:26px;letter-spacing:.08em;text-transform:uppercase;}
+
+/* ── Headers/Body ── */
+.hdr{font-family:var(--font-h);font-size:1.85rem;font-weight:700;color:var(--au-navy);line-height:1.12;margin-bottom:10px;letter-spacing:-.01em;}
+.hdr-sand{font-family:var(--font-h);font-size:1.85rem;font-weight:700;color:var(--au-navy);line-height:1.12;margin-bottom:10px;letter-spacing:-.01em;}
+.sub-hdr{font-family:var(--font-b);font-size:1rem;color:var(--au-slate);margin-bottom:24px;line-height:1.5;}
+.body{font-family:var(--font-b);font-size:1rem;color:#222;line-height:1.55;}
+
+/* ── Tags ── */
+.pill{display:inline-block;font-family:var(--font-h);font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:999px;}
+.pill-lav{background:var(--au-lavender);color:#fff;}
+.pill-navy{background:var(--au-navy);color:#fff;}
+.pill-sand{background:var(--au-sandstone);color:var(--au-navy);}
+.pill-orange{background:var(--au-orange);color:#fff;}
+.pill-red{background:var(--au-red);color:#fff;}
+.pill-green{background:var(--au-green);color:#fff;}
+.pill-blue{background:var(--au-blue);color:#fff;}
+.pill-outline{background:transparent;color:var(--au-navy);border:1.5px solid var(--au-navy);}
+
+/* ── Cards & Grids ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px;}
+.card{background:#fff;border:1.5px solid #e5e3f0;border-radius:8px;padding:18px;}
+.card-sand{background:var(--au-sandstone);border:1.5px solid #ead9b8;border-radius:8px;padding:18px;}
+.card-navy{background:var(--au-navy);color:#fff;border-radius:8px;padding:18px;}
+.card-lav{background:var(--au-lavender);color:#fff;border-radius:8px;padding:18px;}
+.card-blue{background:var(--au-blue);color:#fff;border-radius:8px;padding:18px;}
+.card h4{font-family:var(--font-h);font-size:.95rem;font-weight:700;color:var(--au-navy);margin-bottom:8px;letter-spacing:-.005em;}
+.card-sand h4{font-family:var(--font-h);font-size:.95rem;font-weight:700;color:var(--au-navy);margin-bottom:8px;}
+.card-navy h4,.card-lav h4,.card-blue h4{font-family:var(--font-h);font-size:.95rem;font-weight:700;color:#fff;margin-bottom:8px;}
+.card p,.card-sand p{font-family:var(--font-b);font-size:.85rem;color:#333;line-height:1.5;}
+.card-navy p,.card-lav p,.card-blue p{font-family:var(--font-b);font-size:.85rem;color:rgba(255,255,255,.88);line-height:1.5;}
+
+/* ── Numbered list ── */
+.numlist{list-style:none;padding:0;margin-top:8px;}
+.numlist li{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;}
+.numlist .n{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--au-lavender);color:#fff;font-family:var(--font-h);font-size:.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.numlist .txt{font-family:var(--font-b);font-size:.95rem;color:#222;line-height:1.5;}
+.numlist .txt strong{font-family:var(--font-h);font-weight:700;color:var(--au-navy);}
+
+/* ── Timer slide ── */
+.s-timer{background:var(--au-navy);flex-direction:column;align-items:center;justify-content:center;padding:50px;text-align:center;cursor:pointer;}
+.s-timer .label-t{font-family:var(--font-h);font-size:.85rem;font-weight:700;letter-spacing:.16em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:14px;}
+.s-timer .task{font-family:var(--font-h);font-size:1.85rem;font-weight:700;color:#fff;margin-bottom:24px;max-width:80%;line-height:1.18;}
+.s-timer .disp{font-family:var(--font-h);font-size:5rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1;}
+.s-timer .disp.warn{color:var(--au-orange);}
+.s-timer .disp.alert{color:var(--au-red);}
+.s-timer .disp.done{color:var(--au-green);}
+.s-timer .bar{margin-top:24px;width:340px;height:6px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden;}
+.s-timer .bar-fill{height:100%;background:var(--au-lavender);transition:width 1s linear;}
+.s-timer .bar-fill.warn{background:var(--au-orange);}
+.s-timer .bar-fill.alert{background:var(--au-red);}
+.s-timer .hint{font-family:var(--font-h);font-size:.7rem;color:rgba(255,255,255,.4);margin-top:24px;letter-spacing:.08em;text-transform:uppercase;}
+
+/* ── Quiz reveal slide ── */
+.s-quiz{background:var(--au-navy);flex-direction:column;padding:46px 52px;}
+.s-quiz .qhdr{font-family:var(--font-h);font-size:.78rem;font-weight:700;letter-spacing:.14em;color:var(--au-lavender);text-transform:uppercase;margin-bottom:8px;}
+.s-quiz .qttl{font-family:var(--font-h);font-size:1.85rem;font-weight:700;color:#fff;line-height:1.12;margin-bottom:24px;}
+.s-quiz .url-box{background:#fff;color:var(--au-navy);font-family:var(--font-h);font-size:1.6rem;font-weight:700;padding:18px 28px;border-radius:8px;margin:14px 0 22px;text-align:center;letter-spacing:-.01em;}
+.s-quiz .body-q{font-family:var(--font-b);font-size:1rem;color:rgba(255,255,255,.85);line-height:1.55;}
+.s-quiz .body-q strong{color:var(--au-lavender);}
+
+/* ── End slide ── */
+.s-end{background:var(--au-navy);flex-direction:column;align-items:center;justify-content:center;padding:60px;text-align:center;position:relative;}
+.s-end .acc{position:absolute;bottom:0;left:0;width:100%;height:8px;background:linear-gradient(90deg,var(--au-lavender),var(--au-blue));}
+.s-end h2{font-family:var(--font-h);font-size:2.4rem;font-weight:700;color:#fff;margin-bottom:14px;}
+.s-end p{font-family:var(--font-b);font-size:1rem;color:rgba(255,255,255,.72);max-width:540px;line-height:1.55;}
+.s-end .next{font-family:var(--font-h);font-size:.78rem;color:var(--au-lavender);margin-top:30px;letter-spacing:.1em;text-transform:uppercase;}
+
+/* ── Two-column generic ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px;}
+.two-col .col h4{font-family:var(--font-h);font-size:1rem;font-weight:700;color:var(--au-navy);margin-bottom:8px;}
+.two-col .col p{font-family:var(--font-b);font-size:.92rem;color:#333;line-height:1.5;}
+
+/* ── Stat block ── */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:14px;}
+.stat{text-align:left;}
+.stat .num{font-family:var(--font-h);font-size:2.6rem;font-weight:700;color:var(--au-navy);line-height:1;letter-spacing:-.02em;}
+.stat .lbl{font-family:var(--font-h);font-size:.7rem;font-weight:700;letter-spacing:.1em;color:var(--au-slate);text-transform:uppercase;margin-top:6px;}
+.stat .desc{font-family:var(--font-b);font-size:.82rem;color:#333;margin-top:6px;line-height:1.45;}
+
+/* ── Nav controls ── */
+.nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:100;background:rgba(255,255,255,.08);padding:8px 12px;border-radius:999px;backdrop-filter:blur(8px);}
+.nav button{background:var(--au-lavender);color:#fff;border:none;width:34px;height:34px;border-radius:50%;font-size:1rem;cursor:pointer;font-family:var(--font-h);display:flex;align-items:center;justify-content:center;}
+.nav button:hover{background:var(--au-blue);}
+.nav .counter{color:#fff;font-family:var(--font-h);font-size:.78rem;display:flex;align-items:center;padding:0 10px;font-weight:700;letter-spacing:.05em;}
+
+/* ── Progress bar ── */
+.progress{position:fixed;top:0;left:0;width:100%;height:3px;background:rgba(255,255,255,.08);z-index:200;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--au-lavender),var(--au-blue));transition:width .35s ease;}
+</style>
+</head>
+<body>
+
+<div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="ss" id="ss">
+
+<!-- ============ SLIDE 1 — COVER ============ -->
+<div class="slide s-cover active" data-title="Cover">
+  <div class="acc"></div>
+  <div class="logo">Adelaide University · Bachelor of Business</div>
+  <div class="label">Week 10 Workshop · Module 3 · Final Workshop</div>
+  <div class="title">Future-Proofing Your AI Capability</div>
+  <div class="sub">Three hours building the meta-skill: how to keep up with a field that won't sit still. Plus the data trail you've left over the last fortnight, returned to you.</div>
+  <div class="meta">3 Hours · Hour 1: Capability &amp; Hype · Hour 2: Emerging Governance · Hour 3: Trajectory &amp; Assignment 3</div>
+</div>
+
+<!-- ============ SLIDE 2 — UPDATE ============ -->
+<div class="slide s-white" data-title="The Update">
+  <span class="pill pill-lav" style="margin-bottom:14px;">Update from the Field · The Last Fortnight</span>
+  <h1 class="hdr">The capability frontier moved while you were studying it.</h1>
+  <p class="sub-hdr">A non-exhaustive list of what shipped or shifted between Week 9 and today. None of this was true when your Week 7 pitch decks were due.</p>
+
+  <div class="grid-2" style="margin-top:14px;">
+    <div class="card-sand">
+      <h4>Capability releases</h4>
+      <p>New frontier model launches across the major labs in the past month. Each generation closes some weaknesses and surfaces new ones. Your job today: read these as data points, not announcements.</p>
+    </div>
+    <div class="card-sand">
+      <h4>Agent deployment</h4>
+      <p>Autonomous agents — systems that act, not just suggest — are now in real production at scale. The Arup AU$25M deepfake fraud is now textbook, not edge case. Synthetic-media governance has moved from speculation to incident response.</p>
+    </div>
+    <div class="card-sand">
+      <h4>The capital story</h4>
+      <p>World Labs (Fei-Fei Li) and AMI Labs (LeCun) both cleared $1B in seed-stage capital chasing alternatives to LLMs. Sutskever has publicly conceded "the era of just add GPUs is over." The View 3 you dismissed in Week 8 is not a fringe position — it's a billion-dollar bet.</p>
+    </div>
+    <div class="card-sand">
+      <h4>The labour story</h4>
+      <p>OpenAI's policy paper proposed a robot-tax-funded 32-hour workweek. The Dallas Fed data on AI-exposed entry roles continues to widen. Anthropic overtook OpenAI on revenue. Adelaide's youth unemployment sits at 10.2%. None of this is unrelated.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 3 — DATA RETURNED ============ -->
+<div class="slide s-quiz" data-title="Your Data Returned">
+  <div class="qhdr">Before Anything Else</div>
+  <div class="qttl">You've been generating data for three weeks. Today it comes back to you.</div>
+
+  <p class="body-q" style="margin-bottom:14px;">In Week 8 you placed yourself across three views. In Week 9 you took the spine twice, with three hours of governance between. Today you'll take it a third time, then we'll show you your trajectory and the cohort's.</p>
+
+  <p class="body-q" style="margin-bottom:14px;">First — the same drill as last week. Open the URL. Use the same keyword. We'll wait.</p>
+
+  <div class="url-box">[QUIZ URL HERE]</div>
+
+  <p class="body-q"><strong>If you've forgotten your keyword:</strong> use the recovery option in the app. Don't make a new one — that breaks your trajectory.</p>
+</div>
+
+<!-- ============ SLIDE 4 — WEEK 10 BASELINE ============ -->
+<div class="slide s-quiz" data-title="Week 10 Baseline">
+  <div class="qhdr">Hour 0 · 5 Minutes</div>
+  <div class="qttl">The spine, third time. Plus three new questions.</div>
+
+  <p class="body-q" style="margin-bottom:14px;">Same five spine questions as Weeks 8 and 9. <strong>Don't review your previous answers</strong> — answer where you sit today.</p>
+
+  <p class="body-q" style="margin-bottom:14px;">Then three new Week 10 questions:</p>
+
+  <ol class="numlist" style="margin-top:6px;">
+    <li><span class="n" style="background:var(--au-lavender);">6</span><span class="txt" style="color:rgba(255,255,255,.92);"><strong style="color:#fff;">Hype detection confidence.</strong> If a vendor told you their AI agent could "fully replace your finance team within 12 months," how confident are you that you could evaluate that claim rigorously? (1–5)</span></li>
+    <li><span class="n" style="background:var(--au-lavender);">7</span><span class="txt" style="color:rgba(255,255,255,.92);"><strong style="color:#fff;">Agent comfort.</strong> Would you authorise an autonomous AI agent to send emails on your behalf, without per-message approval? (yes / yes-with-conditions / no)</span></li>
+    <li><span class="n" style="background:var(--au-lavender);">8</span><span class="txt" style="color:rgba(255,255,255,.92);"><strong style="color:#fff;">Adaptive capacity.</strong> If the dominant AI tool you use today were replaced by a fundamentally different paradigm in 2027, how prepared are you to adapt? (1–5)</span></li>
+  </ol>
+</div>
+
+<!-- ============ SLIDE 5 — TIMER: BASELINE ============ -->
+<div class="slide s-timer" data-title="Timer: Week 10 Baseline" data-duration="420">
+  <div class="label-t">Week 10 Baseline · Click To Start</div>
+  <div class="task">Five spine questions, three new ones. Same keyword. Honest answers.</div>
+  <div class="disp">7:00</div>
+  <div class="bar"><div class="bar-fill"></div></div>
+  <div class="hint">Click anywhere · Or press space</div>
+</div>
+
+<!-- ============ SLIDE 6 — THE LONG REVEAL ============ -->
+<div class="slide s-quiz" data-title="The Cohort Trajectory">
+  <div class="qhdr">Live · Three Weeks Of Data</div>
+  <div class="qttl">This is what your cohort thinks. And how it changed.</div>
+
+  <p class="body-q" style="margin-bottom:14px;">The dashboard now shows three data points per spine question: Week 8, Week 9 (start), Week 9 (end), Week 10. The shape of those four points is the cohort's trajectory.</p>
+
+  <p class="body-q" style="margin-bottom:14px;"><strong>What you're looking for:</strong></p>
+
+  <ol class="numlist" style="margin-top:6px;">
+    <li><span class="n" style="background:var(--au-lavender);">A</span><span class="txt" style="color:rgba(255,255,255,.92);">The questions where the cohort drifted in one direction across three weeks. Slow drift is more interesting than fast volatility — it suggests the content actually changed something.</span></li>
+    <li><span class="n" style="background:var(--au-lavender);">B</span><span class="txt" style="color:rgba(255,255,255,.92);">The questions where the cohort split sharply and stayed split. Those are the genuine fault lines — and the most defensible Assignment 3 territory.</span></li>
+    <li><span class="n" style="background:var(--au-lavender);">C</span><span class="txt" style="color:rgba(255,255,255,.92);">The questions where everyone agrees. Module 3's whole question is whether the agreement is conviction — or selection bias.</span></li>
+  </ol>
+</div>
+
+<!-- ============ SLIDE 7 — FRAMING THE COHORT ============ -->
+<div class="slide s-stmt" data-title="Framing the Cohort">
+  <p class="quote">A cohort that drifts in one direction is being persuaded. A cohort that splits is thinking. A cohort that agrees on everything has a selection problem we should name.</p>
+  <p class="source">Open Discussion · 10 Minutes</p>
+</div>
+
+<!-- ============ SLIDE 8 — HOUR 1 DIVIDER ============ -->
+<div class="slide s-div" data-title="Hour 1 Divider">
+  <div class="num">Hour One · 55 Minutes</div>
+  <div class="ttl">Capability claims, hype detection, and what scaling laws actually predict.</div>
+  <div class="desc">A vendor will pitch you something every month for the rest of your career. Today you build the framework for evaluating those pitches: what scaling laws can and can't tell you, where genuine capability ends and theatre begins, and how to do due diligence in 30 minutes when you have 30 minutes.</div>
+  <div class="dur">55 min · Frameworks → Vendor Evaluation → Debrief</div>
+</div>
+
+<!-- ============ SLIDE 9 — SCALING LAWS RECAP ============ -->
+<div class="slide s-white" data-title="Scaling Laws Recap">
+  <h1 class="hdr">What scaling laws actually say. And don't.</h1>
+  <p class="sub-hdr">Kaplan and the OpenAI scaling work showed that loss falls as a power law with compute, data, and parameters. That's the theorem. Below is what it does not give you.</p>
+
+  <div class="grid-2" style="margin-top:14px;">
+    <div class="card">
+      <h4>What scaling laws give you</h4>
+      <p>Predictable performance gains on well-defined benchmarks as compute increases. Reasonable forecasting of when a capability frontier will be crossed if scaling continues. A reason to disbelieve "this is the limit" claims.</p>
+    </div>
+    <div class="card">
+      <h4>What they don't give you</h4>
+      <p>A guarantee that scaling continues at the same rate. A prediction that benchmark performance translates to real-world capability. Anything about which capabilities emerge when. The Sutskever line is the inside admission: returns on raw scale are flattening.</p>
+    </div>
+    <div class="card-navy">
+      <h4>The strategic lesson</h4>
+      <p>Scaling laws give you a velocity, not a destination. Use them to disbelieve plateau claims. Don't use them to underwrite your business plan.</p>
+    </div>
+    <div class="card-lav">
+      <h4>The hype-detection move</h4>
+      <p>When a vendor implies their roadmap is "a scaling problem," ask: what specific benchmark improves predictably with scale? What's the fallback if that benchmark doesn't translate to your use case?</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 10 — VENDOR PITCH ============ -->
+<div class="slide s-sand" data-title="The Vendor Pitch">
+  <span class="pill pill-navy" style="margin-bottom:14px;">Group Activity · Real Vendor Materials</span>
+  <h1 class="hdr-sand">"Replace your entire mid-tier finance team with our agent stack."</h1>
+  <p class="sub-hdr">A composite based on real vendor pitches your future employers are receiving right now. Your group's job: tear it apart, professionally.</p>
+
+  <div class="grid-2" style="margin-top:8px;">
+    <div class="card">
+      <h4>The claim</h4>
+      <p>"Our autonomous agent platform handles AP, AR, reconciliation, month-end close, and management reporting end-to-end. Customers report 78% reduction in finance headcount within 12 months. Powered by [frontier model]. SOC 2 Type II. Available now."</p>
+    </div>
+    <div class="card">
+      <h4>The questions you'll answer in writing</h4>
+      <p>1. What three claims would you need to verify before believing this?<br>
+         2. What specific failure modes are most likely?<br>
+         3. What does the trust audit look like?<br>
+         4. What pilot would you run to falsify the claim cheaply?<br>
+         5. Which of the five trust dimensions is most likely understated?</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 11 — TIMER: VENDOR EVAL ============ -->
+<div class="slide s-timer" data-title="Timer: Vendor Evaluation" data-duration="1500">
+  <div class="label-t">Vendor Evaluation · Click To Start</div>
+  <div class="task">Groups of 4. Tear it apart. Document your reasoning. The point is the diligence, not the verdict.</div>
+  <div class="disp">25:00</div>
+  <div class="bar"><div class="bar-fill"></div></div>
+  <div class="hint">Click anywhere · Or press space</div>
+</div>
+
+<!-- ============ SLIDE 12 — DUE DILIGENCE PATTERNS ============ -->
+<div class="slide s-white" data-title="Due Diligence Patterns">
+  <h1 class="hdr">What strong evaluation sounds like.</h1>
+  <p class="sub-hdr">Patterns that come up across every group that does this seriously.</p>
+
+  <ol class="numlist">
+    <li><span class="n">1</span><span class="txt"><strong>"78% reduction" without denominator is theatre.</strong> 78% of what baseline? Over what period? With what error rate accepted? Replicated by which independent customer?</span></li>
+    <li><span class="n">2</span><span class="txt"><strong>"Powered by [frontier model]" tells you nothing about reliability.</strong> The frontier model is fine. The application layer, the prompt scaffolding, the retry logic, the human-in-the-loop fallbacks — that's where systems fail.</span></li>
+    <li><span class="n">3</span><span class="txt"><strong>The cheap pilot exists.</strong> Run the agent against last quarter's actual transactions. Compare to the human team's outputs. Measure error rate, error type, recoverability of errors. Sample size of one quarter beats every reference customer.</span></li>
+    <li><span class="n">4</span><span class="txt"><strong>The accountability question is the one that breaks pitches.</strong> When the agent posts a misclassified transaction that triggers an ATO inquiry, who is named on the demand letter? "The system" is not an answer.</span></li>
+    <li><span class="n">5</span><span class="txt"><strong>"Available now" + "frontier model" is a red flag, not a green light.</strong> The frontier model was different last month and will be different next month. What's your version-pinning strategy? What happens to your contracts when the underlying model deprecates?</span></li>
+  </ol>
+</div>
+
+<!-- ============ SLIDE 13 — HOUR 2 DIVIDER ============ -->
+<div class="slide s-div" data-title="Hour 2 Divider">
+  <div class="num">Hour Two · 55 Minutes</div>
+  <div class="ttl">When this week's frameworks become next week's problem.</div>
+  <div class="desc">Week 9's governance frameworks were designed for AI tools that recommend. They're already insufficient for AI agents that act, and AI media that fabricates. This hour: the two emerging gaps, what stakeholders are doing about them, and how your cohort's distribution maps onto the genuine fault lines.</div>
+  <div class="dur">55 min · Agent Governance → Synthetic Media → Cohort-Anchored Discussion</div>
+</div>
+
+<!-- ============ SLIDE 14 — TWO GAPS ============ -->
+<div class="slide s-white" data-title="Two Governance Gaps">
+  <h1 class="hdr">Two specific gaps. Both already operational.</h1>
+  <p class="sub-hdr">Week 9 gave you the architecture for governing AI that recommends. Here's what doesn't fit cleanly inside it.</p>
+
+  <div class="grid-2" style="margin-top:14px;">
+    <div class="card">
+      <span class="pill pill-orange" style="margin-bottom:10px;">Gap 1</span>
+      <h4>Autonomous agents</h4>
+      <p>Systems that act on the world without per-action human approval. Send the email. Make the booking. Execute the trade. The Week 9 trust dimensions still apply — but accountability collapses when there's no point of human approval in the loop. Robodebt scaled. This scales further.</p>
+    </div>
+    <div class="card">
+      <span class="pill pill-red" style="margin-bottom:10px;">Gap 2</span>
+      <h4>Synthetic media</h4>
+      <p>Generated images, voices, videos at fidelity humans can't reliably distinguish. Arup lost AU$25M to a deepfake video conference. The trust dimensions framework assumes there's a system to audit. What do you audit when the medium of evidence itself becomes unreliable?</p>
+    </div>
+  </div>
+
+  <p style="font-family:var(--font-b);font-size:.88rem;color:var(--au-slate);margin-top:18px;line-height:1.5;font-style:italic;">Week 9's frameworks aren't wrong — they're necessary but insufficient. Your job in this hour is to figure out what to add, not what to replace.</p>
+</div>
+
+<!-- ============ SLIDE 15 — STAKEHOLDER ROLE-PLAY ============ -->
+<div class="slide s-sand" data-title="Stakeholder Role-Play">
+  <span class="pill pill-navy" style="margin-bottom:14px;">Group Activity · Take One Role</span>
+  <h1 class="hdr-sand">An autonomous agent for procurement decisions.</h1>
+  <p class="sub-hdr">A mid-sized Australian manufacturer wants to deploy an AI agent that can autonomously place purchase orders up to AU$50,000 with approved suppliers. Your group takes one stakeholder role.</p>
+
+  <div class="grid-3" style="margin-top:8px;">
+    <div class="card"><h4>The CFO</h4><p>Wants the productivity gain. Wants the audit trail. Wants the limits enforced. Has personal liability if it goes wrong.</p></div>
+    <div class="card"><h4>The CIO</h4><p>Owns the technology. Wants version control, rollback, monitoring. Knows the model will change underneath them.</p></div>
+    <div class="card"><h4>Procurement staff</h4><p>Whose job functions are being automated. May still be needed for exceptions. May have institutional knowledge the agent can't access.</p></div>
+    <div class="card"><h4>The supplier</h4><p>Now negotiating with software, not a person. Wants to know what they're contracting with and who's accountable for disputes.</p></div>
+    <div class="card"><h4>Internal audit</h4><p>Has to sign off on financial controls. Cares about segregation of duties, exception handling, evidence trails for ASIC.</p></div>
+    <div class="card"><h4>The board</h4><p>Wants the upside. Has to disclose material risk. Has read about Arup. Has read about Robodebt.</p></div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 16 — TIMER: ROLE-PLAY ============ -->
+<div class="slide s-timer" data-title="Timer: Role-Play" data-duration="1200">
+  <div class="label-t">Stakeholder Negotiation · Click To Start</div>
+  <div class="task">Each group prepares its position (10 min). Then negotiate the deployment conditions with the other groups (10 min). What does everyone need to agree to?</div>
+  <div class="disp">20:00</div>
+  <div class="bar"><div class="bar-fill"></div></div>
+  <div class="hint">Click anywhere · Or press space</div>
+</div>
+
+<!-- ============ SLIDE 17 — COHORT-ANCHORED DISCUSSION ============ -->
+<div class="slide s-quiz" data-title="Cohort-Anchored Discussion">
+  <div class="qhdr">15 Minutes · Discussion Anchored In Your Data</div>
+  <div class="qttl">The agent comfort question. Where the room actually sits.</div>
+
+  <p class="body-q" style="margin-bottom:14px;">The dashboard now shows your distribution on Question 7: <em>"Would you authorise an autonomous AI agent to send emails on your behalf?"</em></p>
+
+  <p class="body-q" style="margin-bottom:14px;"><strong>The discussion frame:</strong></p>
+
+  <ol class="numlist" style="margin-top:6px;">
+    <li><span class="n" style="background:var(--au-lavender);">1</span><span class="txt" style="color:rgba(255,255,255,.92);">If you said <strong>no</strong>: what specific failure mode would have to be eliminated before you'd say yes-with-conditions?</span></li>
+    <li><span class="n" style="background:var(--au-lavender);">2</span><span class="txt" style="color:rgba(255,255,255,.92);">If you said <strong>yes-with-conditions</strong>: what are the conditions, specifically? Could you write them as a contract clause?</span></li>
+    <li><span class="n" style="background:var(--au-lavender);">3</span><span class="txt" style="color:rgba(255,255,255,.92);">If you said <strong>yes</strong>: are you willing to defend that publicly here? You'll be asked to.</span></li>
+  </ol>
+</div>
+
+<!-- ============ SLIDE 18 — HOUR 3 DIVIDER ============ -->
+<div class="slide s-div" data-title="Hour 3 Divider">
+  <div class="num">Hour Three · 60 Minutes</div>
+  <div class="ttl">Your trajectory. Your reflection. Your assignment.</div>
+  <div class="desc">The final hour returns the data you've generated to you personally. You'll see your own three-week trajectory across the spine. Then you'll do the work that becomes the spine of your Assignment 3 reflective analysis — including a structured prompt-test that produces raw material in the room.</div>
+  <div class="dur">60 min · Personal Trajectory → Adaptive Capacity → Assignment 3 Prompt-Test</div>
+</div>
+
+<!-- ============ SLIDE 19 — PERSONAL TRAJECTORY ============ -->
+<div class="slide s-quiz" data-title="Personal Trajectory">
+  <div class="qhdr">Individual · 10 Minutes</div>
+  <div class="qttl">Your trajectory has been emailed to you. Open it now.</div>
+
+  <p class="body-q" style="margin-bottom:14px;">The export shows your spine answers across Weeks 8, 9 and 10, alongside the cohort distribution at each point. <strong>Read it before doing anything else.</strong></p>
+
+  <p class="body-q" style="margin-bottom:14px;">Then write to two questions:</p>
+
+  <ol class="numlist" style="margin-top:6px;">
+    <li><span class="n" style="background:var(--au-lavender);">Q1</span><span class="txt" style="color:rgba(255,255,255,.92);"><strong style="color:#fff;">Where did you move?</strong> Identify the question where you shifted most. Write 80–100 words on what specifically caused that shift. A reading? A workshop activity? Someone else's argument? An external event?</span></li>
+    <li><span class="n" style="background:var(--au-lavender);">Q2</span><span class="txt" style="color:rgba(255,255,255,.92);"><strong style="color:#fff;">Where did you hold firm?</strong> Identify the question where you didn't move. Write 80–100 words on whether that's conviction or whether the question never connected with you.</span></li>
+  </ol>
+</div>
+
+<!-- ============ SLIDE 20 — TIMER: TRAJECTORY ============ -->
+<div class="slide s-timer" data-title="Timer: Personal Trajectory" data-duration="600">
+  <div class="label-t">Individual Writing · Click To Start</div>
+  <div class="task">Two paragraphs. ~80–100 words each. This is the spine of Assignment 3 Part 1.</div>
+  <div class="disp">10:00</div>
+  <div class="bar"><div class="bar-fill"></div></div>
+  <div class="hint">Click anywhere · Or press space</div>
+</div>
+
+<!-- ============ SLIDE 21 — ADAPTIVE CAPACITY ============ -->
+<div class="slide s-white" data-title="Adaptive Capacity">
+  <h1 class="hdr">The capability that outlasts every tool.</h1>
+  <p class="sub-hdr">Mollick and the Wharton work both land on the same idea: it's not the specific tool fluency that matters in five years. It's the meta-skill of integrating new tools faster than your peers.</p>
+
+  <div class="grid-3" style="margin-top:14px;">
+    <div class="card-sand">
+      <h4>The diagnostic</h4>
+      <p>When a new model drops: how long until you've tested it on a real workflow you care about? Days = adaptive. Months = at risk. Never = displaced.</p>
+    </div>
+    <div class="card-sand">
+      <h4>The discipline</h4>
+      <p>Maintain one workflow you deliberately refactor every quarter using whatever the current best tool is. The workflow is the fixed point. The tool rotates.</p>
+    </div>
+    <div class="card-sand">
+      <h4>The trap</h4>
+      <p>Specialising in a current tool's quirks. Today's prompt engineering tricks for today's models will be obsolete by your graduation. The transferable skill is the integration practice, not the prompt library.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 22 — ASSIGNMENT 3 PROMPT-TEST ============ -->
+<div class="slide s-quiz" data-title="Assignment 3 Prompt-Test">
+  <div class="qhdr">15 Minutes · The Last Question</div>
+  <div class="qttl">Free text. In the quiz. This becomes raw material for your reflection.</div>
+
+  <p class="body-q" style="margin-bottom:14px;">Open the quiz one final time. There's one open-text field. Write 200–300 words to this prompt:</p>
+
+  <div style="background:rgba(133,107,255,.15);border-left:4px solid var(--au-lavender);padding:18px 22px;border-radius:6px;margin:14px 0;">
+    <p style="font-family:var(--font-b);font-size:1rem;color:#fff;line-height:1.55;font-style:italic;">"Looking at your three-week trajectory and the cohort's, what does it tell you about how AI is shaping your thinking — and where you're most at risk of being shaped by AI claims you haven't tested? Be specific. Use one example from your trajectory and one from the cohort distribution."</p>
+  </div>
+
+  <p class="body-q">Your answer will be returned to you with your trajectory export. You can use it directly, edit it, or rewrite it for Assignment 3 Part 1 or Part 3. The point is that you write it now, before you're alone with the assignment brief.</p>
+</div>
+
+<!-- ============ SLIDE 23 — TIMER: PROMPT-TEST ============ -->
+<div class="slide s-timer" data-title="Timer: Prompt-Test" data-duration="900">
+  <div class="label-t">Free-Text Response · Click To Start</div>
+  <div class="task">200–300 words. In the quiz. Don't edit obsessively — first draft is the data.</div>
+  <div class="disp">15:00</div>
+  <div class="bar"><div class="bar-fill"></div></div>
+  <div class="hint">Click anywhere · Or press space</div>
+</div>
+
+<!-- ============ SLIDE 24 — A3 STRUCTURE WITH TRAJECTORY ============ -->
+<div class="slide s-white" data-title="Assignment 3 Structure">
+  <h1 class="hdr">Assignment 3, with the data you now have.</h1>
+  <p class="sub-hdr">The brief is unchanged from what you read in the Canvas module. Here's where your trajectory data slots in.</p>
+
+  <ol class="numlist">
+    <li><span class="n">1</span><span class="txt"><strong>Part 1 — My AI Journey (500–600 words).</strong> Use your spine trajectory directly. The export is evidence. Quote your own answer movement. The prompt-test response you just wrote is the spine of this section.</span></li>
+    <li><span class="n">2</span><span class="txt"><strong>Part 2 — Business Case Comparison (700–800 words).</strong> Pick a real business AI adoption case. Apply the trust audit method from Week 9. Compare its trajectory to yours. The audit framework is your analytical backbone.</span></li>
+    <li><span class="n">3</span><span class="txt"><strong>Part 3 — Critical Implications (600–700 words).</strong> Economic, ethical, social. The cohort distribution data gives you a defensible empirical anchor for your claims about how junior business professionals are positioning themselves.</span></li>
+    <li><span class="n">4</span><span class="txt"><strong>Part 4 — Lessons for Future Practice (400–500 words).</strong> Not generic advice. Specific, defensible, drawn from what you saw in your own trajectory and the room's.</span></li>
+  </ol>
+</div>
+
+<!-- ============ SLIDE 25 — INTEGRITY ============ -->
+<div class="slide s-sand" data-title="Integrity Note">
+  <span class="pill pill-navy" style="margin-bottom:14px;">A Note On Integrity For Assignment 3</span>
+  <h1 class="hdr-sand">AI use is expected. Reflection that isn't yours isn't reflection.</h1>
+  <p class="sub-hdr">The brief allows AI use with attribution. The cohort data raises the bar.</p>
+
+  <div class="grid-2" style="margin-top:8px;">
+    <div class="card">
+      <h4>What works</h4>
+      <p>Use Claude or whatever to structure, edit, sharpen prose. Use it to interrogate your own arguments. Document what you used in the prompt log.</p>
+    </div>
+    <div class="card">
+      <h4>What doesn't</h4>
+      <p>Reflective claims about your trajectory that don't match your trajectory. The data is there in the export. We can check. So can you. Don't write a Part 1 that contradicts the answers you actually gave.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SLIDE 26 — Q&A ============ -->
+<div class="slide s-stmt" data-title="Q&A">
+  <p class="quote">Open Q&amp;A. What's still unclear about Assignment 3? What's still unsettled in your thinking?</p>
+  <p class="source">Open Discussion · 10 Minutes</p>
+</div>
+
+<!-- ============ SLIDE 27 — END ============ -->
+<div class="slide s-end" data-title="End">
+  <div class="acc"></div>
+  <h2>That's the course.</h2>
+  <p>Ten weeks. Three modules. Three assignments. A cohort that started somewhere and moved somewhere. Your trajectory is yours now. So is your assignment. And the meta-skill that outlasts every tool you've used.</p>
+  <div class="next">Assignment 3 · Due End Of Week 10 · You Have The Data You Need</div>
+</div>
+
+</div>
+
+<div class="nav">
+  <button onclick="prevSlide()">‹</button>
+  <span class="counter" id="counter">1 / 27</span>
+  <button onclick="nextSlide()">›</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  const counter = document.getElementById('counter');
+  const progressFill = document.getElementById('progressFill');
+
+  function showSlide(i){
+    slides.forEach(s => s.classList.remove('active'));
+    slides[i].classList.add('active');
+    counter.textContent = `${i+1} / ${slides.length}`;
+    progressFill.style.width = `${((i+1)/slides.length)*100}%`;
+    current = i;
+    initTimerOn(slides[i]);
+  }
+  function nextSlide(){ if(current < slides.length-1) showSlide(current+1); }
+  function prevSlide(){ if(current > 0) showSlide(current-1); }
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key==='ArrowRight' || e.key===' ') { e.preventDefault(); nextSlide(); }
+    if(e.key==='ArrowLeft') { e.preventDefault(); prevSlide(); }
+  });
+
+  function initTimerOn(slide){
+    if(!slide.classList.contains('s-timer')) return;
+    if(slide.dataset.timerInit === '1') return;
+    slide.dataset.timerInit = '1';
+    slide.addEventListener('click', () => startTimer(slide));
+  }
+  function startTimer(slide){
+    if(slide.dataset.running === '1') return;
+    slide.dataset.running = '1';
+    const total = parseInt(slide.dataset.duration, 10);
+    let remaining = total;
+    const disp = slide.querySelector('.disp');
+    const bar = slide.querySelector('.bar-fill');
+    disp.classList.remove('warn','alert','done');
+    bar.classList.remove('warn','alert');
+    bar.style.width = '100%';
+    const tick = setInterval(() => {
+      remaining--;
+      const m = Math.floor(remaining/60);
+      const s = remaining % 60;
+      disp.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      const pct = (remaining/total)*100;
+      bar.style.width = `${pct}%`;
+      if(remaining <= 0){
+        clearInterval(tick);
+        disp.textContent = "Time";
+        disp.classList.add('done');
+        bar.style.width = '0%';
+      } else if (pct <= 10) {
+        disp.classList.add('alert');
+        bar.classList.add('alert');
+      } else if (pct <= 25) {
+        disp.classList.add('warn');
+        bar.classList.add('warn');
+      }
+    }, 1000);
+  }
+
+  showSlide(0);
+</script>
+</body>
+</html>
