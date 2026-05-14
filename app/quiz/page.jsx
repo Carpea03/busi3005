@@ -2,12 +2,30 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { STUDENT_IDENTITY_STORAGE_KEY } from '../../lib/quiz-core';
+import { STUDENT_IDENTITY_STORAGE_KEY, STUDENT_ONBOARDED_STORAGE_KEY } from '../../lib/quiz-core';
 
 const COHORT_OPTIONS = [
   { value: 'wednesday', label: 'Wednesday workshop' },
   { value: 'friday', label: 'Friday workshop' },
   { value: 'unspecified', label: 'Unspecified for now' },
+];
+
+const ONBOARDING_STEPS = [
+  {
+    kicker: 'Step 1 of 3',
+    title: 'Live workshop quizzes.',
+    body: 'Each week during your BUSI3005 workshop you will answer a short set of questions. Your answers stay connected across the semester so you can see how your own thinking changes — and so Alex can compare the room week to week.',
+  },
+  {
+    kicker: 'Step 2 of 3',
+    title: 'Pick one keyword and use it every week.',
+    body: 'Your keyword is your identity. There is no password. Anyone who knows your keyword can answer as you, so pick something only you would choose. 4–24 characters, lowercase letters, numbers, hyphens, and underscores only.',
+  },
+  {
+    kicker: 'Step 3 of 3',
+    title: 'You will get a recovery code. Keep it private.',
+    body: 'After you save your keyword you will see a recovery code. It is the only self-serve way to reclaim your keyword on a new device or after clearing your browser. Save it somewhere private — anyone with the code can take over your keyword.',
+  },
 ];
 
 function OpenQuizList({ quizzes }) {
@@ -45,6 +63,9 @@ function OpenQuizList({ quizzes }) {
 }
 
 export default function QuizLandingPage() {
+  const [view, setView] = useState('loading');
+  const [onboardingStep, setOnboardingStep] = useState(0);
+  const [identifyMode, setIdentifyMode] = useState('keyword');
   const [keyword, setKeyword] = useState('');
   const [cohort, setCohort] = useState('');
   const [recoveryCode, setRecoveryCode] = useState('');
@@ -81,19 +102,46 @@ export default function QuizLandingPage() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STUDENT_IDENTITY_STORAGE_KEY);
-      if (!stored) return;
-
-      const parsed = JSON.parse(stored);
-      if (parsed?.keyword) {
-        setKeyword(parsed.keyword);
-        setCohort(parsed.cohort || '');
-        setStudent(parsed);
-        void loadOpenQuizzes(parsed.keyword);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.keyword) {
+          setKeyword(parsed.keyword);
+          setCohort(parsed.cohort || '');
+          setStudent(parsed);
+          setView('authenticated');
+          void loadOpenQuizzes(parsed.keyword);
+          return;
+        }
       }
     } catch {
       localStorage.removeItem(STUDENT_IDENTITY_STORAGE_KEY);
     }
+
+    const onboarded = localStorage.getItem(STUDENT_ONBOARDED_STORAGE_KEY);
+    if (onboarded === '1') {
+      setView('identify');
+    } else {
+      setView('onboarding');
+      setOnboardingStep(0);
+    }
   }, []);
+
+  function handleAdvanceOnboarding() {
+    if (onboardingStep < ONBOARDING_STEPS.length - 1) {
+      setOnboardingStep((step) => step + 1);
+      return;
+    }
+    try {
+      localStorage.setItem(STUDENT_ONBOARDED_STORAGE_KEY, '1');
+    } catch {
+      // ignore storage errors — onboarding still continues for this session
+    }
+    setView('identify');
+  }
+
+  function handleBackOnboarding() {
+    setOnboardingStep((step) => Math.max(0, step - 1));
+  }
 
   async function handleIdentify(event) {
     event.preventDefault();
@@ -120,6 +168,7 @@ export default function QuizLandingPage() {
       setKeyword(data.student.keyword);
       setCohort(data.student.cohort || '');
       localStorage.setItem(STUDENT_IDENTITY_STORAGE_KEY, JSON.stringify(data.student));
+      setView('authenticated');
       await loadOpenQuizzes(data.student.keyword);
     } catch (identifyError) {
       setError(identifyError.message);
@@ -151,6 +200,7 @@ export default function QuizLandingPage() {
       setCohort(data.student.cohort || '');
       setRecoveryCode(data.student.recoveryCode || '');
       localStorage.setItem(STUDENT_IDENTITY_STORAGE_KEY, JSON.stringify(data.student));
+      setView('authenticated');
       await loadOpenQuizzes(data.student.keyword);
     } catch (recoverError) {
       setError(recoverError.message);
@@ -168,35 +218,117 @@ export default function QuizLandingPage() {
     setQuizzes([]);
     setNeedsCohort(false);
     setError('');
+    setIdentifyMode('keyword');
+    setView('identify');
   }
 
-  return (
-    <div className="quiz-shell quiz-shell-narrow">
-      <div className="quiz-hero">
-        <p className="quiz-kicker">Live workshop quiz</p>
-        <h1 className="quiz-title">Use one keyword every week.</h1>
-        <p className="quiz-subtitle">
-          Your keyword is your identity. Choose something only you would pick. There&apos;s no password: anyone who knows your keyword can answer as you, so save the recovery code shown below somewhere private.
-        </p>
+  function handleSwitchMode(nextMode) {
+    setIdentifyMode(nextMode);
+    setError('');
+  }
+
+  if (view === 'loading') {
+    return (
+      <div className="quiz-shell quiz-shell-narrow">
+        <div className="quiz-panel" style={{ padding: '1.5rem' }}>
+          <div className="quiz-empty-state">Loading...</div>
+        </div>
       </div>
+    );
+  }
 
-      <div className="quiz-grid">
+  if (view === 'onboarding') {
+    const step = ONBOARDING_STEPS[onboardingStep];
+    const isLast = onboardingStep === ONBOARDING_STEPS.length - 1;
+    return (
+      <div className="quiz-shell quiz-shell-narrow">
+        <div className="quiz-hero">
+          <p className="quiz-kicker">{step.kicker}</p>
+          <h1 className="quiz-title">{step.title}</h1>
+          <p className="quiz-subtitle">{step.body}</p>
+        </div>
+
         <div className="quiz-panel" style={{ padding: '1.4rem' }}>
-          <form className="quiz-stack" onSubmit={handleIdentify}>
-            <div>
-              <label className="quiz-question-label" htmlFor="keyword">Your keyword</label>
-              <input
-                id="keyword"
-                className="quiz-input"
-                value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
-                placeholder="e.g. river-fox"
-                autoComplete="off"
-              />
-              <p className="quiz-inline-note">4-24 characters. Lowercase letters, numbers, hyphens, and underscores only.</p>
-            </div>
+          <div className="quiz-pill-row" style={{ marginBottom: '1rem' }}>
+            {ONBOARDING_STEPS.map((_, index) => (
+              <span
+                key={index}
+                className={`quiz-pill ${index === onboardingStep ? 'quiz-pill-navy' : 'quiz-pill-sand'}`}
+              >
+                {index + 1}
+              </span>
+            ))}
+          </div>
+          <div className="quiz-button-row">
+            <button
+              type="button"
+              className="au-btn-primary"
+              onClick={handleAdvanceOnboarding}
+            >
+              {isLast ? 'Got it — let’s set my keyword' : 'Next'}
+            </button>
+            {onboardingStep > 0 && (
+              <button type="button" className="au-btn-secondary" onClick={handleBackOnboarding}>
+                Back
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-            {(needsCohort || !student) && (
+  if (view === 'identify') {
+    const isRecover = identifyMode === 'recover';
+    return (
+      <div className="quiz-shell quiz-shell-narrow">
+        <div className="quiz-hero">
+          <p className="quiz-kicker">Live workshop quiz</p>
+          <h1 className="quiz-title">
+            {isRecover ? 'Recover your keyword.' : 'Enter your keyword to continue.'}
+          </h1>
+          <p className="quiz-subtitle">
+            {isRecover
+              ? 'Paste the recovery code you saved last time to bring back your keyword on this device.'
+              : 'Your keyword is how we connect this week’s answers to your previous ones. Use the same one every workshop.'}
+          </p>
+        </div>
+
+        <div className="quiz-panel" style={{ padding: '1.4rem' }}>
+          <div className="quiz-pill-row" style={{ marginBottom: '1rem' }}>
+            <button
+              type="button"
+              className={`quiz-pill ${!isRecover ? 'quiz-pill-navy' : 'quiz-pill-sand'}`}
+              style={{ cursor: 'pointer', border: 'none' }}
+              onClick={() => handleSwitchMode('keyword')}
+            >
+              New or returning keyword
+            </button>
+            <button
+              type="button"
+              className={`quiz-pill ${isRecover ? 'quiz-pill-navy' : 'quiz-pill-sand'}`}
+              style={{ cursor: 'pointer', border: 'none' }}
+              onClick={() => handleSwitchMode('recover')}
+            >
+              Recover with code
+            </button>
+          </div>
+
+          {!isRecover && (
+            <form className="quiz-stack" onSubmit={handleIdentify}>
+              <div>
+                <label className="quiz-question-label" htmlFor="keyword">Your keyword</label>
+                <input
+                  id="keyword"
+                  className="quiz-input"
+                  value={keyword}
+                  onChange={(event) => setKeyword(event.target.value)}
+                  placeholder="e.g. river-fox"
+                  autoComplete="off"
+                />
+                <p className="quiz-inline-note">4-24 characters. Lowercase letters, numbers, hyphens, and underscores only.</p>
+              </div>
+
               <div>
                 <label className="quiz-question-label" htmlFor="cohort">Your workshop cohort</label>
                 <select
@@ -210,71 +342,78 @@ export default function QuizLandingPage() {
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
                 </select>
+                {needsCohort && (
+                  <p className="quiz-inline-note">First time on this keyword — please pick your workshop so we can group your answers.</p>
+                )}
               </div>
-            )}
 
-            {error && <p className="quiz-error">{error}</p>}
+              {error && <p className="quiz-error">{error}</p>}
 
-            <div className="quiz-button-row">
-              <button type="submit" className="au-btn-primary" disabled={loading || !keyword.trim()}>
-                {loading ? 'Checking...' : student ? 'Continue' : 'Save keyword'}
-              </button>
-              {student && (
-                <button type="button" className="au-btn-secondary" onClick={handleSignOut}>
-                  This is not my device
+              <div className="quiz-button-row">
+                <button type="submit" className="au-btn-primary" disabled={loading || !keyword.trim()}>
+                  {loading ? 'Checking...' : 'Save keyword and continue'}
                 </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        <div className="quiz-panel quiz-panel-soft" style={{ padding: '1.35rem' }}>
-          <h2 className="quiz-question-title" style={{ fontSize: '1.45rem' }}>Recover or confirm this identity</h2>
-          <p className="quiz-subtitle" style={{ marginTop: '0.55rem', fontSize: '0.95rem' }}>
-            Keep your recovery code private. Anyone with it can reclaim your saved quiz keyword on a new device.
-          </p>
-
-          <form className="quiz-stack" style={{ marginTop: '1rem' }} onSubmit={handleRecover}>
-            <div>
-              <label className="quiz-question-label" htmlFor="recovery-code">Recovery code</label>
-              <input
-                id="recovery-code"
-                className="quiz-input"
-                value={recoveryCode}
-                onChange={(event) => setRecoveryCode(event.target.value)}
-                placeholder="e.g. a7k2-m4pq-r8tw"
-                autoComplete="off"
-              />
-              <p className="quiz-inline-note">Enter this to recover your keyword if this device is lost or cleared.</p>
-            </div>
-
-            <div className="quiz-button-row">
-              <button type="submit" className="au-btn-secondary" disabled={recovering || !recoveryCode.trim()}>
-                {recovering ? 'Recovering...' : 'Recover with code'}
-              </button>
-            </div>
-          </form>
-
-          <div className="quiz-note" style={{ marginTop: '1rem' }}>
-            Use the same keyword every workshop so your answers stay connected over time.
-          </div>
-          {student && (
-            <div className="quiz-stack" style={{ marginTop: '1rem' }}>
-              <div className="quiz-pill-row">
-                <span className="quiz-pill quiz-pill-navy">Signed in as {student.keyword}</span>
-                <span className="quiz-pill quiz-pill-blue">{student.cohort || 'unspecified'}</span>
               </div>
-              <div className="quiz-note">
-                Recovery code: <strong>{student.recoveryCode}</strong>
-                <div className="quiz-inline-note">Save this privately. It is the only self-serve way to reclaim this identity.</div>
-              </div>
-            </div>
+            </form>
           )}
-          <div className="quiz-button-row" style={{ marginTop: '1rem' }}>
-            <Link href="/quiz/me" style={{ color: '#1449FF', fontFamily: 'Arial, sans-serif', fontWeight: 700 }}>
-              My trajectory
-            </Link>
+
+          {isRecover && (
+            <form className="quiz-stack" onSubmit={handleRecover}>
+              <div>
+                <label className="quiz-question-label" htmlFor="recovery-code">Recovery code</label>
+                <input
+                  id="recovery-code"
+                  className="quiz-input"
+                  value={recoveryCode}
+                  onChange={(event) => setRecoveryCode(event.target.value)}
+                  placeholder="e.g. a7k2-m4pq-r8tw"
+                  autoComplete="off"
+                />
+                <p className="quiz-inline-note">Anyone with this code can reclaim your keyword, so keep it private.</p>
+              </div>
+
+              {error && <p className="quiz-error">{error}</p>}
+
+              <div className="quiz-button-row">
+                <button type="submit" className="au-btn-primary" disabled={recovering || !recoveryCode.trim()}>
+                  {recovering ? 'Recovering...' : 'Recover identity'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="quiz-shell quiz-shell-narrow">
+      <div className="quiz-hero">
+        <p className="quiz-kicker">Live workshop quiz</p>
+        <h1 className="quiz-title">Welcome back, {student?.keyword}.</h1>
+        <p className="quiz-subtitle">
+          Use the same keyword every workshop so your answers stay connected over time.
+        </p>
+      </div>
+
+      <div className="quiz-panel quiz-panel-soft" style={{ padding: '1.35rem' }}>
+        <div className="quiz-pill-row">
+          <span className="quiz-pill quiz-pill-navy">Signed in as {student?.keyword}</span>
+          <span className="quiz-pill quiz-pill-blue">{student?.cohort || 'unspecified'}</span>
+        </div>
+        {student?.recoveryCode && (
+          <div className="quiz-note" style={{ marginTop: '1rem' }}>
+            Recovery code: <strong>{student.recoveryCode}</strong>
+            <div className="quiz-inline-note">Save this privately. It is the only self-serve way to reclaim this identity on a new device.</div>
           </div>
+        )}
+        <div className="quiz-button-row" style={{ marginTop: '1rem' }}>
+          <Link href="/quiz/me" className="au-btn-secondary" style={{ textDecoration: 'none' }}>
+            My trajectory
+          </Link>
+          <button type="button" className="au-btn-secondary" onClick={handleSignOut}>
+            This is not my device
+          </button>
         </div>
       </div>
 
@@ -286,6 +425,7 @@ export default function QuizLandingPage() {
           </div>
           {loadingQuizzes && <span className="quiz-pill quiz-pill-sand">Refreshing...</span>}
         </div>
+        {error && <p className="quiz-error" style={{ marginBottom: '0.9rem' }}>{error}</p>}
         <OpenQuizList quizzes={quizzes} />
       </div>
     </div>

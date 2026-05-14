@@ -29,7 +29,8 @@ export async function GET(request) {
 
     const headers = [
       'fullName',
-      'format',
+      'intent',
+      'matchStatus',
       'workshop',
       'aiExperience',
       'aiTools',
@@ -39,8 +40,12 @@ export async function GET(request) {
       'meetingPreference',
       'hustleDirection',
       'hustleConcept',
-      'peerPreference',
+      'members',
+      'confirmedGroup',
+      'email',
+      'consentShare',
       'submittedAt',
+      'updatedAt',
     ];
 
     const rows = submissions.map((submission) =>

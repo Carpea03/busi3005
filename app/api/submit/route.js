@@ -1,24 +1,20 @@
 import { NextResponse } from 'next/server';
 import { getRedisClient } from '../../../lib/redis';
+import {
+  createRecoveryCode,
+  normalizeRespondentId,
+  validateSubmission,
+} from '../../../lib/group-formation-core';
 
-const ALLOWED_WORKSHOPS = ['Wednesday 2–5pm', 'Friday 8–11am'];
-const ALLOWED_FORMATS = ['solo', 'pair', 'trio'];
+const RECOVERY_INDEX = 'group-formation:recovery';
 
-function validateSubmission(data) {
-  if (!data || typeof data !== 'object') return 'Invalid request payload.';
-  if (!ALLOWED_FORMATS.includes(data.format)) return 'Please choose solo, pair, or trio.';
-  if (!data.fullName?.trim()) return 'Please enter your full name.';
-  if (!ALLOWED_WORKSHOPS.includes(data.workshop)) return 'Please select your workshop.';
-  if (!data.aiExperience) return 'Please select your AI experience level.';
-  if (!Array.isArray(data.buildSkills) || data.buildSkills.length === 0) return 'Please pick at least one build skill.';
-  if (data.format !== 'solo') {
-    if (!Array.isArray(data.availability) || data.availability.length === 0) {
-      return 'Please select at least one availability window.';
-    }
-    if (!data.deadlineApproach) return 'Please rate your deadline approach.';
+async function allocateRecoveryCode(redis) {
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const code = createRecoveryCode();
+    const existing = await redis.hGet(RECOVERY_INDEX, code);
+    if (!existing) return code;
   }
-  if (!data.hustleDirection) return 'Please pick a hustle direction.';
-  return null;
+  throw new Error('Unable to allocate recovery code.');
 }
 
 export async function POST(request) {
@@ -30,29 +26,72 @@ export async function POST(request) {
     }
 
     const fullName = data.fullName.trim();
+    const respondentId = normalizeRespondentId(fullName);
+    const redis = await getRedisClient();
+
+    const existingRaw = await redis.hGet('submissions', respondentId);
+    const existing = existingRaw ? safeParse(existingRaw) : null;
+
+    let recoveryCode = existing?.recoveryCode || null;
+    if (data.intent === 'seeking' && !recoveryCode) {
+      recoveryCode = await allocateRecoveryCode(redis);
+    }
+
+    const matchStatusFromIntent = (() => {
+      if (data.intent === 'solo') return 'solo';
+      if (data.intent === 'declared-group') return 'declared';
+      return 'seeking';
+    })();
+
     const submission = {
       fullName,
-      respondentId: fullName.toLowerCase(),
-      format: data.format,
+      respondentId,
+      intent: data.intent,
       workshop: data.workshop,
       aiExperience: data.aiExperience,
       aiTools: Array.isArray(data.aiTools) ? data.aiTools : [],
       buildSkills: data.buildSkills,
-      availability: data.format === 'solo' ? [] : data.availability,
-      deadlineApproach: data.format === 'solo' ? null : data.deadlineApproach,
-      meetingPreference: data.format === 'solo' ? null : (data.meetingPreference || null),
+      availability: data.intent === 'seeking' ? data.availability : [],
+      deadlineApproach: data.intent === 'seeking' ? data.deadlineApproach : null,
+      meetingPreference: data.intent === 'seeking' ? (data.meetingPreference || null) : null,
       hustleDirection: data.hustleDirection,
       hustleConcept: data.hustleConcept?.trim() || '',
-      peerPreference: data.peerPreference?.trim() || '',
-      submittedAt: new Date().toISOString(),
+      members: data.intent === 'declared-group'
+        ? data.members.map((m) => String(m || '').trim()).filter(Boolean)
+        : [],
+      email: data.intent === 'seeking' ? data.email.trim() : '',
+      consentShare: data.intent === 'seeking' ? Boolean(data.consentShare) : false,
+      matchStatus: existing?.matchStatus && existing.intent === data.intent
+        ? existing.matchStatus
+        : matchStatusFromIntent,
+      confirmedGroup: existing?.confirmedGroup || [],
+      recoveryCode,
+      submittedAt: existing?.submittedAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    const redis = await getRedisClient();
-    await redis.hSet('submissions', submission.respondentId, JSON.stringify(submission));
+    const multi = redis.multi();
+    multi.hSet('submissions', respondentId, JSON.stringify(submission));
+    if (recoveryCode) {
+      multi.hSet(RECOVERY_INDEX, recoveryCode, respondentId);
+    }
+    await multi.exec();
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      respondentId,
+      recoveryCode: data.intent === 'seeking' ? recoveryCode : null,
+    });
   } catch (error) {
     console.error('Submit error:', error);
     return NextResponse.json({ error: 'Server error — please try again.' }, { status: 500 });
+  }
+}
+
+function safeParse(value) {
+  try {
+    return typeof value === 'string' ? JSON.parse(value) : value;
+  } catch {
+    return null;
   }
 }

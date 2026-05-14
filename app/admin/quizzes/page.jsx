@@ -29,6 +29,8 @@ export default function AdminQuizzesPage() {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [statusBusy, setStatusBusy] = useState({});
+  const [previewId, setPreviewId] = useState(null);
 
   useEffect(() => {
     if (!admin.authenticated) return;
@@ -66,6 +68,34 @@ export default function AdminQuizzesPage() {
       ignore = true;
     };
   }, [admin.authenticated, admin.getAdminHeaders]);
+
+  async function handleStatusChange(quizId, nextStatus) {
+    setStatusBusy((prev) => ({ ...prev, [quizId]: nextStatus }));
+    setError('');
+    try {
+      const response = await fetch(`/api/admin/quiz/${quizId}/status`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...admin.getAdminHeaders(),
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to change quiz status.');
+      }
+      setQuizzes((current) => current.map((quiz) => (quiz.quizId === quizId ? { ...quiz, ...data.quiz } : quiz)));
+    } catch (statusError) {
+      setError(statusError.message);
+    } finally {
+      setStatusBusy((prev) => {
+        const next = { ...prev };
+        delete next[quizId];
+        return next;
+      });
+    }
+  }
 
   if (admin.verifying && !admin.authenticated) {
     return <div className="quiz-empty-state">Checking admin access...</div>;
@@ -119,26 +149,92 @@ export default function AdminQuizzesPage() {
             Week {weekNumber}
           </h2>
           <div className="quiz-grid quiz-grid-2">
-            {weekQuizzes.map((quiz) => (
-              <div key={quiz.quizId} className="quiz-panel quiz-panel-soft" style={{ padding: '1.1rem' }}>
-                <div className="quiz-pill-row" style={{ marginBottom: '0.55rem' }}>
-                  <span className={`quiz-pill ${statusTone(quiz.status)}`}>{quiz.status}</span>
-                  <span className="quiz-pill quiz-pill-sand">{quiz.phase || 'poll'}</span>
-                  {quiz.statusOverride && (
-                    <span className="quiz-pill quiz-pill-blue">Override</span>
+            {weekQuizzes.map((quiz) => {
+              const busy = statusBusy[quiz.quizId];
+              const isPreviewing = previewId === quiz.quizId;
+              return (
+                <div key={quiz.quizId} className="quiz-panel quiz-panel-soft" style={{ padding: '1.1rem' }}>
+                  <div className="quiz-pill-row" style={{ marginBottom: '0.55rem' }}>
+                    <span className={`quiz-pill ${statusTone(quiz.status)}`}>{quiz.status}</span>
+                    <span className="quiz-pill quiz-pill-sand">{quiz.phase || 'poll'}</span>
+                    {quiz.statusOverride && (
+                      <span className="quiz-pill quiz-pill-blue">Override: {quiz.statusOverride}</span>
+                    )}
+                  </div>
+                  <h3 className="quiz-question-title" style={{ fontSize: '1.05rem' }}>{quiz.title}</h3>
+                  <div className="quiz-stat-row" style={{ marginTop: '0.5rem' }}>
+                    <span className="quiz-stat-chip">Responses: {quiz.responseCount}</span>
+                    <span className="quiz-stat-chip">Questions: {quiz.questions?.length || 0}</span>
+                  </div>
+                  <div className="quiz-button-row" style={{ marginTop: '0.85rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      className={quiz.statusOverride === 'open' ? 'au-btn-primary' : 'au-btn-secondary'}
+                      onClick={() => handleStatusChange(quiz.quizId, 'open')}
+                      disabled={Boolean(busy)}
+                    >
+                      {busy === 'open' ? 'Opening...' : 'Send live'}
+                    </button>
+                    <button
+                      type="button"
+                      className={quiz.statusOverride === 'closed' ? 'au-btn-primary' : 'au-btn-secondary'}
+                      onClick={() => handleStatusChange(quiz.quizId, 'closed')}
+                      disabled={Boolean(busy)}
+                    >
+                      {busy === 'closed' ? 'Closing...' : 'Force close'}
+                    </button>
+                    {quiz.statusOverride && (
+                      <button
+                        type="button"
+                        className="au-btn-secondary"
+                        onClick={() => handleStatusChange(quiz.quizId, 'auto')}
+                        disabled={Boolean(busy)}
+                      >
+                        {busy === 'auto' ? 'Clearing...' : 'Clear override'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="quiz-button-row" style={{ marginTop: '0.5rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    <button
+                      type="button"
+                      className="au-btn-secondary"
+                      onClick={() => setPreviewId(isPreviewing ? null : quiz.quizId)}
+                    >
+                      {isPreviewing ? 'Hide preview' : 'Preview questions'}
+                    </button>
+                    <Link href={`/admin/quizzes/${quiz.quizId}`} className="au-btn-secondary" style={{ textDecoration: 'none' }}>Details</Link>
+                    <Link href={`/admin/quizzes/${quiz.quizId}/live`} className="au-btn-primary" style={{ textDecoration: 'none' }}>Live view</Link>
+                  </div>
+                  {isPreviewing && (
+                    <div style={{ marginTop: '0.85rem', borderTop: '1px solid rgba(20, 15, 80, 0.12)', paddingTop: '0.85rem' }}>
+                      <ol style={{ paddingLeft: '1.1rem', margin: 0 }}>
+                        {(quiz.questions || []).map((question) => (
+                          <li key={question.questionId} style={{ marginBottom: '0.6rem' }}>
+                            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+                              <span className="quiz-pill quiz-pill-sand">{question.type}</span>
+                              {question.isSpine && <span className="quiz-pill quiz-pill-lavender">Spine</span>}
+                            </div>
+                            <p style={{ fontWeight: 600, margin: '0 0 0.25rem 0', fontSize: '0.92rem' }}>{question.prompt}</p>
+                            {Array.isArray(question.options) && question.options.length > 0 && (
+                              <ul style={{ paddingLeft: '1.1rem', margin: 0 }}>
+                                {question.options.map((option) => (
+                                  <li key={option.value} style={{ fontSize: '0.85rem', opacity: 0.85 }}>{option.label}</li>
+                                ))}
+                              </ul>
+                            )}
+                            {question.sliderConfig && (
+                              <p className="quiz-subtitle" style={{ fontSize: '0.82rem', margin: '0.2rem 0 0 0' }}>
+                                Slider {question.sliderConfig.min}–{question.sliderConfig.max} (step {question.sliderConfig.step})
+                              </p>
+                            )}
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
                   )}
                 </div>
-                <h3 className="quiz-question-title" style={{ fontSize: '1.05rem' }}>{quiz.title}</h3>
-                <div className="quiz-stat-row" style={{ marginTop: '0.5rem' }}>
-                  <span className="quiz-stat-chip">Responses: {quiz.responseCount}</span>
-                  <span className="quiz-stat-chip">Questions: {quiz.questions?.length || 0}</span>
-                </div>
-                <div className="quiz-button-row" style={{ marginTop: '0.85rem' }}>
-                  <Link href={`/admin/quizzes/${quiz.quizId}`} className="au-btn-secondary" style={{ textDecoration: 'none' }}>Status / preview</Link>
-                  <Link href={`/admin/quizzes/${quiz.quizId}/live`} className="au-btn-primary" style={{ textDecoration: 'none' }}>Live view</Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ))}

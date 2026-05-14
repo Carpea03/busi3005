@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-// Survey for Assignment 2 (AI Side Hustle Launch). Groups are 1 (solo), 2, or 3.
-// Wording reframed away from the old polished-pitch format.
+// Survey for Assignment 2 (AI Side Hustle Launch). Three intents:
+//   solo            — just me
+//   declared-group  — I already have my group (list members by name)
+//   seeking         — match me with classmates (I'll form the group myself)
 
 const HUSTLE_DIRECTIONS = [
   'E-commerce (store, product listing, marketplace)',
@@ -52,17 +54,24 @@ const AVAILABILITY = [
 
 const WORKSHOPS = ['Wednesday 2–5pm', 'Friday 8–11am'];
 
-const STEPS_BY_FORMAT = {
+const STEPS_BY_INTENT = {
   solo: [
     { number: 1, label: 'About you' },
     { number: 2, label: 'AI fluency' },
     { number: 3, label: 'Hustle direction' },
   ],
-  group: [
+  'declared-group': [
+    { number: 1, label: 'About you' },
+    { number: 2, label: 'AI fluency' },
+    { number: 3, label: 'Your group' },
+    { number: 4, label: 'Hustle direction' },
+  ],
+  seeking: [
     { number: 1, label: 'About you' },
     { number: 2, label: 'AI fluency' },
     { number: 3, label: 'Working style' },
     { number: 4, label: 'Hustle direction' },
+    { number: 5, label: 'Sharing' },
   ],
 };
 
@@ -174,44 +183,43 @@ export default function GroupFormationSurvey() {
   const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
-    // Step 0 — format choice (shown above the steps; not a navigated step)
-    format: '', // 'solo' | 'pair' | 'trio'
-    // Step 1
+    intent: '', // 'solo' | 'declared-group' | 'seeking'
     fullName: '',
     workshop: '',
-    // Step 2
     aiExperience: '',
     aiTools: [],
     buildSkills: [],
-    // Step 3 (group only)
     availability: [],
     deadlineApproach: null,
     meetingPreference: null,
-    // Step 4 (or Step 3 if solo)
     hustleDirection: '',
     hustleConcept: '',
-    peerPreference: '',
+    members: ['', ''],
+    email: '',
+    consentShare: false,
   });
 
-  const isSolo = form.format === 'solo';
-  const steps = isSolo ? STEPS_BY_FORMAT.solo : STEPS_BY_FORMAT.group;
+  const steps = form.intent ? STEPS_BY_INTENT[form.intent] : [];
   const finalStep = steps.length;
+  const isSolo = form.intent === 'solo';
+  const isDeclared = form.intent === 'declared-group';
+  const isSeeking = form.intent === 'seeking';
 
   const update = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
-  function pickFormat(format) {
-    setForm((prev) => ({ ...prev, format }));
+  function pickIntent(intent) {
+    setForm((prev) => ({ ...prev, intent }));
     setStep(1);
     setErrors({});
   }
 
   const validateStep = () => {
     const newErrors = {};
-    if (!form.format) {
-      newErrors.format = 'Please choose solo, pair, or trio.';
+    if (!form.intent) {
+      newErrors.intent = 'Please choose how you’re doing Assignment 2.';
       setErrors(newErrors);
       return false;
     }
@@ -224,12 +232,21 @@ export default function GroupFormationSurvey() {
       if (!form.aiExperience) newErrors.aiExperience = 'Please select your AI experience level.';
       if (form.buildSkills.length === 0) newErrors.buildSkills = 'Please pick at least one build skill.';
     }
-    if (!isSolo && step === 3) {
+    if (isDeclared && step === 3) {
+      const filled = form.members.map((m) => m.trim()).filter(Boolean);
+      if (filled.length < 1) newErrors.members = 'List the names of the 1–2 other people in your group.';
+    }
+    if (isSeeking && step === 3) {
       if (form.availability.length === 0) newErrors.availability = 'Please select at least one availability window.';
       if (!form.deadlineApproach) newErrors.deadlineApproach = 'Please rate your deadline approach.';
     }
     if (step === finalStep) {
       if (!form.hustleDirection) newErrors.hustleDirection = 'Please pick a hustle direction.';
+      if (isSeeking) {
+        if (!form.email.trim()) newErrors.email = 'Enter your uni email so matches can contact you.';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) newErrors.email = 'That email doesn’t look right.';
+        if (!form.consentShare) newErrors.consentShare = 'Please tick the consent box to use matchmaking.';
+      }
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -244,14 +261,34 @@ export default function GroupFormationSurvey() {
     if (!validateStep()) return;
     setSubmitting(true);
     try {
+      const payload = {
+        intent: form.intent,
+        fullName: form.fullName,
+        workshop: form.workshop,
+        aiExperience: form.aiExperience,
+        aiTools: form.aiTools,
+        buildSkills: form.buildSkills,
+        availability: form.availability,
+        deadlineApproach: form.deadlineApproach,
+        meetingPreference: form.meetingPreference,
+        hustleDirection: form.hustleDirection,
+        hustleConcept: form.hustleConcept,
+        members: isDeclared ? form.members.map((m) => m.trim()).filter(Boolean) : [],
+        email: isSeeking ? form.email.trim() : '',
+        consentShare: isSeeking ? form.consentShare : false,
+      };
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok) {
-        router.push('/group-formation/success');
+        if (data.recoveryCode) {
+          router.push(`/group-formation/success?code=${encodeURIComponent(data.recoveryCode)}`);
+        } else {
+          router.push('/group-formation/success');
+        }
       } else {
         alert(data.error || 'Something went wrong. Please try again.');
       }
@@ -262,17 +299,16 @@ export default function GroupFormationSurvey() {
     }
   };
 
-  // Format choice gate
-  if (!form.format) {
+  // Intent choice gate
+  if (!form.intent) {
     return (
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
+      <div className="quiz-shell quiz-shell-narrow">
+        <div className="quiz-hero">
           <p className="quiz-kicker">Assignment 2 — AI Side Hustle Launch</p>
-          <h1 className="text-3xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>
-            Group formation
-          </h1>
-          <p style={{ fontFamily: 'Georgia, serif', color: '#6B6490', fontSize: '1rem' }}>
-            Assignment 2 can be done individually or in groups of up to three. We use this form to confirm rosters in the Week 4 workshop. Takes about 4 minutes.
+          <h1 className="quiz-title">Group formation</h1>
+          <p className="quiz-subtitle">
+            Assignment 2 can be done individually or in groups of up to three. Tell us how you want
+            to approach it — takes about 4 minutes.
           </p>
         </div>
 
@@ -281,21 +317,26 @@ export default function GroupFormationSurvey() {
             How are you doing Assignment 2?
           </h2>
           <RadioGroup
-            selected={form.format}
-            onChange={pickFormat}
+            selected={form.intent}
+            onChange={pickIntent}
             options={[
               { value: 'solo', label: 'Solo', description: 'Just me. Skip the group-matching questions.' },
-              { value: 'pair', label: 'Pair', description: 'Two of us. The other person submits separately.' },
-              { value: 'trio', label: 'Trio', description: 'Three of us. Each member submits separately.' },
+              { value: 'declared-group', label: 'I already have my group', description: 'A pair or trio. List the other 1–2 members by name.' },
+              { value: 'seeking', label: 'Match me with classmates', description: 'I don’t have a group yet. Suggest up to five classmates I might work well with — I’ll reach out and form the group myself.' },
             ]}
           />
-          {errors.format && <p className="text-red-500 text-xs mt-2">{errors.format}</p>}
+          {errors.intent && <p className="text-red-500 text-xs mt-2">{errors.intent}</p>}
 
           <div className="mt-6 text-xs" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
             <p style={{ marginBottom: '0.4rem' }}>
               <strong>Reminder:</strong> the brief is founder-honest, not pitch-polished. A real but unsuccessful attempt counts.
             </p>
             <p>
+              <Link href="/group-formation/matches" style={{ color: '#1449FF' }}>
+                Already submitted with “match me”? Open your suggestions →
+              </Link>
+            </p>
+            <p style={{ marginTop: '0.4rem' }}>
               <Link href="/" style={{ color: '#1449FF' }}>Back to course hub</Link>
             </p>
           </div>
@@ -304,17 +345,21 @@ export default function GroupFormationSurvey() {
     );
   }
 
-  const progress = ((step - 1) / (finalStep - 1)) * 100;
+  const progress = ((step - 1) / Math.max(finalStep - 1, 1)) * 100;
+  const intentLabel = isSolo ? 'solo' : isDeclared ? 'declared group' : 'matchmaking';
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-6 text-center">
-        <p className="quiz-kicker">Assignment 2 — AI Side Hustle Launch · {form.format}</p>
-        <h1 className="text-3xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>
-          Group formation
-        </h1>
-        <button type="button" onClick={() => pickFormat('')} className="text-xs underline" style={{ color: '#6B6490' }}>
-          change format
+    <div className="quiz-shell quiz-shell-narrow">
+      <div className="quiz-hero" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <p className="quiz-kicker">Assignment 2 — AI Side Hustle Launch · {intentLabel}</p>
+        <h1 className="quiz-title">Group formation</h1>
+        <button
+          type="button"
+          onClick={() => pickIntent('')}
+          className="text-xs underline"
+          style={{ color: '#6B6490', marginTop: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Georgia, serif' }}
+        >
+          change choice
         </button>
       </div>
 
@@ -354,7 +399,7 @@ export default function GroupFormationSurvey() {
           <div>
             <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>About you</h2>
             <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-              Your name and workshop. No student ID or email collected here.
+              Your name and workshop. No student ID collected here.
             </p>
             <div className="space-y-5">
               <div>
@@ -391,7 +436,7 @@ export default function GroupFormationSurvey() {
               Your AI fluency
             </h2>
             <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-              We use this to match complementary skills and ensure no group is stranded without AI experience.
+              We use this to suggest complementary classmates and to plan workshop support.
             </p>
             <div className="space-y-6">
               <div>
@@ -437,11 +482,42 @@ export default function GroupFormationSurvey() {
           </div>
         )}
 
-        {!isSolo && step === 3 && (
+        {isDeclared && step === 3 && (
+          <div>
+            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Your group</h2>
+            <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
+              List the 1–2 other people in your group by full name. Each member submits their own
+              form — the lecturer cross-checks names in the Week 4 workshop.
+            </p>
+            <div className="space-y-3">
+              {[0, 1].map((idx) => (
+                <div key={idx}>
+                  <label className="block mb-1.5 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
+                    Member {idx + 2} {idx === 0 && <span style={{ color: '#856BFF' }}>*</span>}
+                  </label>
+                  <input
+                    className="au-input"
+                    type="text"
+                    placeholder={idx === 0 ? 'e.g. Jordan Lee' : 'Optional — third member'}
+                    value={form.members[idx]}
+                    onChange={(e) => {
+                      const next = [...form.members];
+                      next[idx] = e.target.value;
+                      update('members', next);
+                    }}
+                  />
+                </div>
+              ))}
+              {errors.members && <p className="text-red-500 text-xs mt-1">{errors.members}</p>}
+            </div>
+          </div>
+        )}
+
+        {isSeeking && step === 3 && (
           <div>
             <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Working style</h2>
             <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-              Helps us pair you with people whose schedule and deadline habits overlap with yours.
+              Helps us suggest classmates whose schedule and deadline habits overlap with yours.
             </p>
             <div className="space-y-6">
               <div>
@@ -482,7 +558,7 @@ export default function GroupFormationSurvey() {
           </div>
         )}
 
-        {step === finalStep && (
+        {((isSolo && step === 3) || (isDeclared && step === 4) || (isSeeking && step === 4)) && (
           <div>
             <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Hustle direction</h2>
             <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
@@ -516,24 +592,56 @@ export default function GroupFormationSurvey() {
                   style={{ resize: 'vertical' }}
                 />
               </div>
-              {!isSolo && (
-                <div>
-                  <label className="block mb-1.5 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
-                    Anyone you’d especially like to work with, or prefer not to? (Optional)
-                  </label>
-                  <p className="text-xs mb-2" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
-                    Considered where feasible. Not guaranteed.
-                  </p>
-                  <textarea
-                    className="au-input"
-                    rows={2}
-                    placeholder="Optional — names only if relevant…"
-                    value={form.peerPreference}
-                    onChange={(e) => update('peerPreference', e.target.value)}
-                    style={{ resize: 'vertical' }}
-                  />
-                </div>
-              )}
+            </div>
+          </div>
+        )}
+
+        {isSeeking && step === 5 && (
+          <div>
+            <h2 className="text-xl mb-1" style={{ color: '#140F50', fontFamily: 'Arial, sans-serif', fontWeight: 'bold' }}>Sharing</h2>
+            <p className="mb-6 text-sm" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
+              We’ll suggest up to five classmates in your workshop. To let them reach out to you (and
+              for you to reach out to them), we share first names and uni emails between matches only.
+            </p>
+            <div className="space-y-6">
+              <div>
+                <label className="block mb-1.5 text-sm font-bold" style={{ fontFamily: 'Arial, sans-serif', color: '#140F50' }}>
+                  Your uni email <span style={{ color: '#856BFF' }}>*</span>
+                </label>
+                <input
+                  className="au-input"
+                  type="email"
+                  placeholder="a1234567@adelaide.edu.au"
+                  value={form.email}
+                  onChange={(e) => update('email', e.target.value)}
+                />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              </div>
+              <label
+                className="flex items-start gap-3 p-3 rounded-md cursor-pointer transition-colors"
+                style={{
+                  backgroundColor: form.consentShare ? 'rgba(133,107,255,0.1)' : 'rgba(248,239,224,0.6)',
+                  border: form.consentShare ? '1.5px solid #856BFF' : '1.5px solid #E0D9F5',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  className="au-checkbox mt-0.5 shrink-0"
+                  checked={form.consentShare}
+                  onChange={(e) => update('consentShare', e.target.checked)}
+                />
+                <span style={{ fontFamily: 'Georgia, serif', fontSize: '0.9rem', color: '#140F50' }}>
+                  I’m OK with my first name and uni email being shown to up to five suggested
+                  classmates in my workshop so we can decide whether to form a group. Nothing else is
+                  shared, and my full name and email aren’t shown publicly.
+                </span>
+              </label>
+              {errors.consentShare && <p className="text-red-500 text-xs mt-1">{errors.consentShare}</p>}
+
+              <div className="text-xs p-3 rounded-md" style={{ background: 'rgba(20,73,255,0.05)', border: '1px solid rgba(20,73,255,0.15)', color: '#1449FF', fontFamily: 'Georgia, serif' }}>
+                After you submit, you’ll get a recovery code. Use it on the “Match me” page to view,
+                refresh, or switch your matches at any time.
+              </div>
             </div>
           </div>
         )}
@@ -559,7 +667,7 @@ export default function GroupFormationSurvey() {
       </div>
 
       <p className="text-center text-xs mt-6" style={{ fontFamily: 'Georgia, serif', color: '#9E97C4' }}>
-        Your responses are used only to confirm Assignment 2 rosters. They are not shared with other students.
+        Your responses are used only to confirm Assignment 2 rosters and {isSeeking ? 'to suggest classmates within your workshop' : 'to plan workshop support'}.
       </p>
     </div>
   );

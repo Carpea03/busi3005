@@ -31,11 +31,13 @@ This is a Next.js 14 (App Router) app deployed on Vercel. The landing page at `/
 
 ### Subsystem 1 — Group formation for Assignment 2 (AI Side Hustle Launch)
 
-Reworked from the older "AI Business Pitch" assignment. Format choice is solo / pair / trio (max 3, not 3–4). The brief is founder-honest, not pitch-polished.
+Reworked from the older "AI Business Pitch" assignment. Students self-select an `intent` on the form: `solo`, `declared-group` (they already have their group and list 1–2 other members by name), or `seeking` (matchmaking). There is no Claude-driven auto-grouping — `seeking` students get a deterministic top-5 same-workshop recommendation list and form their own group via email.
 
-- Student survey at `/group-formation` → `POST /api/submit` writes to the Redis hash `submissions` (keyed by lowercase `fullName`).
-- Admin dashboard at `/admin` reads via `GET /api/responses`, exports CSV via `GET /api/export`, and triggers Claude-AI group suggestions via `POST /api/generate-groups` (fetch-based; the Anthropic SDK is not a dependency).
-- The group-generation prompt honours `format=solo` (returns one-person groups), targets groups of 2–3, hard-requires same workshop, and prioritises complementary build skills + overlapping hustle direction. It does NOT optimise for balanced experience levels and does NOT invent industry interests.
+- Student survey at `/group-formation` → `POST /api/submit` writes to the Redis hash `submissions` (keyed by lowercase `fullName`). For `seeking` submissions a recovery code is allocated and indexed in the Redis hash `group-formation:recovery` (field = code, value = respondentId).
+- `/group-formation/matches` is the student-facing landing for matchmaking. Recovery-code lookup → up to 5 same-workshop suggestions with first name, uni email, and a one-line rationale. Same page lets the student confirm a group, switch to solo, or reset back to seeking.
+- Match scoring is pure and lives in [lib/group-formation-core.js](lib/group-formation-core.js): same workshop (hard requirement) + overlap on hustle direction + complementary build skills + experience balance + availability overlap. No LLM, no Anthropic SDK call on this path.
+- Admin dashboard at `/admin` reads via `GET /api/responses` and exports CSV via `GET /api/export`. Filters by status (`solo` / `declared` / `seeking` / `confirmed`) and workshop. No "generate groups" action — that path was removed.
+- `GET /api/group-formation/matches?code=...` returns the seeker's profile + matches. `PATCH` with `{ code, action: 'confirm'|'switch-to-solo'|'reset', members?: string[] }` updates the student's `matchStatus`.
 
 ### Subsystem 2 — Workshop quizzes (S1 2027 deployment model)
 
@@ -59,7 +61,8 @@ The quiz subsystem ran as a Weeks 9–10 trial in S1 2026. For S1 2027 it runs f
 
 - **Redis client** — [lib/redis.js](lib/redis.js) is the only place that constructs clients; reuse its factory for both regular commands and pub/sub. The connection URL comes from `REDIS_URL`, which Vercel injects when a Redis store is attached.
 - **Redis key layout** (Redis stores responses/aggregates/overrides only — never quiz definitions):
-  - `submissions` — hash of group-formation submissions, field = lowercase fullName.
+  - `submissions` — hash of group-formation submissions, field = lowercase fullName. Submission shape includes `intent`, `matchStatus`, `members[]` (declared), `confirmedGroup[]` (matchmaking), `email`, `consentShare`, `recoveryCode`.
+  - `group-formation:recovery` — hash of recovery codes → respondentId, for matchmaking lookups.
   - `response:{quizId}:{keyword}` — one student's quiz response.
   - `aggregate:{quizId}:{questionId}` — live tallies updated on each submission.
   - `quiz:status-override:{quizId}` — admin's manual `open`/`closed` override (absent = use date gate).
@@ -71,6 +74,8 @@ The quiz subsystem ran as a Weeks 9–10 trial in S1 2026. For S1 2027 it runs f
 - No online quiz builder. The `/admin/quizzes/new` route and the `quiz-editor.jsx` component were deleted. Quizzes are code, not data.
 - No leaderboards, prizes, gamification, AI-generated insights on the projector, or email notifications. These are explicitly rejected in the handoff doc.
 - No zod or other schema library — validation in [lib/quiz-core.js](lib/quiz-core.js) is hand-rolled.
+- No auto-generated groups. The `/api/generate-groups` route and the Anthropic-fetch path for group formation were removed; matchmaking is deterministic and lives in [lib/group-formation-core.js](lib/group-formation-core.js).
+- No server-side email send. Matched students contact each other directly from their `/group-formation/matches` page via `mailto:` links.
 
 ## Embedding a quiz in a workshop deck (Change 4 reference)
 
@@ -97,7 +102,7 @@ Use these (via the existing CSS variables / utility classes) rather than introdu
 
 - **Australian English** in all user-facing strings: organise, behaviour, analyse, favourite, optimise.
 - New surveys and quizzes go through the existing question schema in [lib/quiz-core.js](lib/quiz-core.js) (`single_select`, `multi_select`, `likert_5`, `slider`, `free_text`).
-- The student `format` field on group-formation submissions takes only `'solo' | 'pair' | 'trio'`. Solo submissions skip availability/deadline-approach/meeting-preference.
+- The student `intent` field on group-formation submissions takes only `'solo' | 'declared-group' | 'seeking'`. Solo submissions skip availability/deadline/meeting questions. Declared-group submissions add a `members[]` list of the 1–2 other members. Seeking submissions add `email`, `consentShare`, and a `recoveryCode`.
 
 ## Environment
 
