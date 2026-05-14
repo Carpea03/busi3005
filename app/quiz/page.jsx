@@ -245,10 +245,10 @@ export default function QuizLandingPage() {
         <div className="quiz-hero">
           <p className="quiz-kicker">{step.kicker}</p>
           <h1 className="quiz-title">{step.title}</h1>
-          <p className="quiz-subtitle">{step.body}</p>
         </div>
 
         <div className="quiz-panel" style={{ padding: '1.4rem' }}>
+          <p className="quiz-subtitle" style={{ margin: '0 0 1.25rem', maxWidth: '56rem' }}>{step.body}</p>
           <div className="quiz-pill-row" style={{ marginBottom: '1rem' }}>
             {ONBOARDING_STEPS.map((_, index) => (
               <span
