@@ -132,7 +132,7 @@ export default function AdminQuizzesPage() {
       {loading && <div className="quiz-empty-state">Loading quizzes...</div>}
       {error && <div className="quiz-note" style={{ color: '#8a1c12' }}>{error}</div>}
 
-      {!loading && grouped.length === 0 && (
+      {!loading && !error && grouped.length === 0 && (
         <div className="quiz-panel" style={{ padding: '1.35rem' }}>
           <div className="quiz-empty-state">No quizzes defined. Edit lib/quizzes.js to add them.</div>
         </div>

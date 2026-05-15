@@ -14,6 +14,15 @@ export async function GET(request) {
     return NextResponse.json({ quizzes });
   } catch (error) {
     console.error('Admin quiz list error:', error);
-    return NextResponse.json({ error: 'Server error — please try again.' }, { status: 500 });
+
+    const message = error instanceof Error && (
+      error.message === 'Missing REDIS_URL environment variable' ||
+      error.message === 'Unable to resolve the Redis host from REDIS_URL.' ||
+      error.message === 'Unable to connect to Redis at the configured REDIS_URL.'
+    )
+      ? 'Redis is unavailable. Check REDIS_URL and confirm the Redis host is live.'
+      : 'Server error — please try again.';
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
