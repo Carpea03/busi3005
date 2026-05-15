@@ -90,7 +90,8 @@ export default function AdminStudentsPage() {
           <p className="quiz-subtitle">Each keyword acts as the student’s identity for workshop polling and the later Assignment 3 trajectory review.</p>
         </div>
         <div className="quiz-button-row">
-          <Link href="/admin/quizzes" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Back to quiz control room</Link>
+          <Link href="/admin" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Admin home</Link>
+          <Link href="/admin/quizzes" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Quiz control room</Link>
         </div>
       </div>
 

@@ -62,7 +62,8 @@ export default function AdminExportPage() {
           <p className="quiz-subtitle">Responses export is row-based. Trajectory export is wide, with one row per student and spine question IDs spread across weeks.</p>
         </div>
         <div className="quiz-button-row">
-          <Link href="/admin/quizzes" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Back to quiz control room</Link>
+          <Link href="/admin" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Admin home</Link>
+          <Link href="/admin/quizzes" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Quiz control room</Link>
           <Link href="/admin/students" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Student trajectories</Link>
         </div>
       </div>

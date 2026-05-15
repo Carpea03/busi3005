@@ -141,6 +141,7 @@ export default function AdminQuizDetailPage({ params }) {
           <p className="quiz-subtitle">Quiz wording lives in <code>lib/quizzes.js</code>. Use this page to force-open, force-close, or revert to the scheduled date gate.</p>
         </div>
         <div className="quiz-button-row">
+          <Link href="/admin" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Admin home</Link>
           <Link href="/admin/quizzes" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Back to quiz list</Link>
           {quiz && <Link href={`/admin/quizzes/${quiz.quizId}/live`} className="au-btn-primary" style={{ textDecoration: 'none' }}>Open live view</Link>}
         </div>

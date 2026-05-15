@@ -470,6 +470,7 @@ export default function AdminQuizLivePage({ params }) {
           <p className="quiz-subtitle">Designed for the workshop screen. Live updates stream in automatically, released questions appear on the student done page, and free-text stays projector-only with a filterable moderation queue.</p>
         </div>
         <div className="quiz-button-row">
+          <Link href="/admin" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Admin home</Link>
           <Link href={`/admin/quizzes/${params.quizId}`} className="au-btn-secondary" style={{ textDecoration: 'none' }}>Back to quiz</Link>
           <span className="quiz-pill quiz-pill-navy">Status: {quiz?.status || '...'}</span>
           <span className="quiz-pill quiz-pill-sand">Responses: {quiz?.responseCount || 0}</span>

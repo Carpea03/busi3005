@@ -120,8 +120,9 @@ export default function AdminQuizzesPage() {
           <p className="quiz-subtitle">All quizzes are defined in <code>lib/quizzes.js</code>. Use the schedule, or force-open during the workshop.</p>
         </div>
         <div className="quiz-button-row">
+          <Link href="/admin" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Admin home</Link>
           <Link href="/" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Course hub</Link>
-          <Link href="/admin" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Group formation</Link>
+          <Link href="/admin/group-formation" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Group formation</Link>
           <Link href="/admin/students" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Students</Link>
           <Link href="/admin/export" className="au-btn-secondary" style={{ textDecoration: 'none' }}>Exports</Link>
           <button type="button" className="au-btn-secondary" onClick={admin.logout}>Sign out</button>
