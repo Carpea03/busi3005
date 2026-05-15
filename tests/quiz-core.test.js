@@ -20,11 +20,13 @@ import {
 } from '../lib/quiz-core.js';
 
 import {
+  buildQuizScopedKeyCounts,
   buildResponseAggregateSnapshots,
   buildResponsesExportRows as buildResponsesExportRowsFromStore,
   buildTextResponseQueueByQuestion,
   buildTrajectoryExportTable as buildTrajectoryExportTableFromStore,
   buildTrajectorySnapshot as buildTrajectorySnapshotFromStore,
+  parseQuizIdFromScopedKey,
 } from '../lib/quiz-store.js';
 
 const sampleQuiz = {
@@ -580,6 +582,26 @@ test('trajectory and response exports produce stable Phase 2 output shapes', () 
   const blueFinchRow = trajectoryTable.rows.find((row) => row.keyword === 'blue-finch');
   assert.equal(blueFinchRow['spine.career-confidence__week_1'], '');
 });
+
+test('quiz-scoped key counting extracts quiz IDs without per-quiz scans', () => {
+  assert.equal(parseQuizIdFromScopedKey('response:week1-baseline:river-fox', 'response'), 'week1-baseline');
+  assert.equal(parseQuizIdFromScopedKey('release:week2-reflect:spine.career-confidence', 'release'), 'week2-reflect');
+  assert.equal(parseQuizIdFromScopedKey('aggregate:week1-baseline:spine.career-confidence', 'response'), null);
+
+  assert.deepEqual(
+    buildQuizScopedKeyCounts([
+      'response:week1-baseline:river-fox',
+      'response:week1-baseline:blue-finch',
+      'response:week1-reflect:river-fox',
+      'ignore-me',
+    ], 'response'),
+    {
+      'week1-baseline': 2,
+      'week1-reflect': 1,
+    },
+  );
+});
+
 test('computeEffectiveStatus — manual override wins regardless of dates', () => {
   const now = new Date('2026-08-03T14:00:00+09:30');
   assert.equal(
