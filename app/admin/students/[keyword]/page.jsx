@@ -22,10 +22,7 @@ export default function AdminStudentDetailPage({ params }) {
     async function loadStudent() {
       setLoading(true);
       try {
-        const response = await fetch(`/api/admin/students/${encodeURIComponent(params.keyword)}`, {
-          headers: admin.getAdminHeaders(),
-          cache: 'no-store',
-        });
+        const response = await fetch(`/api/admin/students/${encodeURIComponent(params.keyword)}`, { cache: 'no-store' });
         const data = await response.json();
 
         if (!response.ok) {
@@ -51,7 +48,7 @@ export default function AdminStudentDetailPage({ params }) {
     return () => {
       ignore = true;
     };
-  }, [admin.authenticated, admin.getAdminHeaders, params.keyword]);
+  }, [admin.authenticated, params.keyword]);
 
   if (admin.verifying && !admin.authenticated) {
     return <div className="quiz-empty-state">Checking admin access...</div>;

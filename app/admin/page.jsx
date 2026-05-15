@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import useAdminPassword from '../../components/admin/use-admin-password';
 
 const EXPERIENCE_COLOURS = {
   Beginner: { bg: '#FFF0E0', text: '#B35A00' },
@@ -53,10 +54,7 @@ function StatCard({ label, value, accent }) {
 }
 
 export default function AdminPage() {
-  const [password, setPassword] = useState('');
-  const [authenticated, setAuthenticated] = useState(false);
-  const [authError, setAuthError] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
+  const admin = useAdminPassword();
 
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -67,34 +65,11 @@ export default function AdminPage() {
   const [filterWorkshop, setFilterWorkshop] = useState('All');
   const [expandedStudent, setExpandedStudent] = useState(null);
 
-  const handleLogin = async () => {
-    setAuthLoading(true);
-    setAuthError('');
-    try {
-      const res = await fetch('/api/verify-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-      if (res.ok) {
-        localStorage.setItem('au.quiz.admin.password', password);
-        setAuthenticated(true);
-        loadData(password);
-      } else {
-        setAuthError('Incorrect password. Please try again.');
-      }
-    } catch {
-      setAuthError('Connection error.');
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const loadData = useCallback(async (pwd) => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/responses', { headers: { 'x-admin-password': pwd || password } });
+      const res = await fetch('/api/responses');
       if (!res.ok) throw new Error('Failed to load responses');
       const data = await res.json();
       setSubmissions(data.submissions || []);
@@ -103,10 +78,18 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [password]);
+  }, []);
+
+  useEffect(() => {
+    if (!admin.authenticated) {
+      return;
+    }
+
+    void loadData();
+  }, [admin.authenticated, loadData]);
 
   const handleExport = () => {
-    fetch('/api/export', { headers: { 'x-admin-password': password } })
+    fetch('/api/export')
       .then(r => r.blob())
       .then(blob => {
         const url = URL.createObjectURL(blob);
@@ -137,7 +120,15 @@ export default function AdminPage() {
   }, {});
 
   // ── LOGIN SCREEN ──────────────────────────────────────────────────────────
-  if (!authenticated) {
+  if (admin.verifying && !admin.authenticated) {
+    return (
+      <div className="max-w-sm mx-auto py-20 text-center" style={{ color: '#6B6490', fontFamily: 'Georgia, serif' }}>
+        Checking admin access...
+      </div>
+    );
+  }
+
+  if (!admin.authenticated) {
     return (
       <div className="max-w-sm mx-auto py-20">
         <div className="card text-center">
@@ -158,22 +149,22 @@ export default function AdminPage() {
             className="au-input mb-3"
             type="password"
             placeholder="Enter admin password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+            value={admin.password}
+            onChange={(e) => admin.setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && admin.login()}
           />
 
-          {authError && (
-            <p className="text-red-500 text-sm mb-3" style={{ fontFamily: 'Georgia, serif' }}>{authError}</p>
+          {admin.authError && (
+            <p className="text-red-500 text-sm mb-3" style={{ fontFamily: 'Georgia, serif' }}>{admin.authError}</p>
           )}
 
           <button
             className="au-btn-primary w-full"
-            onClick={handleLogin}
-            disabled={authLoading || !password}
-            style={{ opacity: authLoading ? 0.7 : 1 }}
+            onClick={() => void admin.login()}
+            disabled={admin.verifying || !admin.password}
+            style={{ opacity: admin.verifying ? 0.7 : 1 }}
           >
-            {authLoading ? 'Verifying...' : 'Enter Dashboard'}
+            {admin.verifying ? 'Verifying...' : 'Enter Dashboard'}
           </button>
         </div>
       </div>
@@ -206,6 +197,13 @@ export default function AdminPage() {
             style={{ padding: '0.5rem 1rem' }}
           >
             ↻ Refresh
+          </button>
+          <button
+            className="au-btn-secondary text-sm"
+            onClick={() => admin.logout()}
+            style={{ padding: '0.5rem 1rem' }}
+          >
+            Sign out
           </button>
           <button
             className="au-btn-primary text-sm"

@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ADMIN_PASSWORD_STORAGE_KEY } from '../../lib/quiz-core';
+
+async function readResponseJson(response) {
+  try {
+    return await response.json();
+  } catch {
+    return {};
+  }
+}
 
 export default function useAdminPassword() {
   const [password, setPassword] = useState('');
@@ -9,10 +16,35 @@ export default function useAdminPassword() {
   const [authError, setAuthError] = useState('');
   const [verifying, setVerifying] = useState(true);
 
-  const verifyPassword = useCallback(async (candidate, { persist } = {}) => {
-    if (!candidate) {
+  const verifySession = useCallback(async () => {
+    setVerifying(true);
+
+    try {
+      const response = await fetch('/api/verify-admin', {
+        cache: 'no-store',
+      });
+      const data = await readResponseJson(response);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to verify admin session.');
+      }
+
+      setAuthenticated(Boolean(data.authenticated));
+      setAuthError('');
+      return Boolean(data.authenticated);
+    } catch (error) {
       setAuthenticated(false);
+      setAuthError(error.message || 'Connection error.');
+      return false;
+    } finally {
       setVerifying(false);
+    }
+  }, []);
+
+  const login = useCallback(async () => {
+    if (!password) {
+      setAuthenticated(false);
+      setAuthError('Enter the admin password.');
       return false;
     }
 
@@ -23,55 +55,38 @@ export default function useAdminPassword() {
       const response = await fetch('/api/verify-admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: candidate }),
+        body: JSON.stringify({ password }),
       });
+      const data = await readResponseJson(response);
 
       if (!response.ok) {
-        throw new Error('Incorrect password. Please try again.');
+        throw new Error(data.error || 'Incorrect password. Please try again.');
       }
 
-      setPassword(candidate);
       setAuthenticated(true);
-      if (persist) {
-        localStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, candidate);
-      }
+      setPassword('');
       return true;
     } catch (error) {
       setAuthenticated(false);
       setAuthError(error.message || 'Connection error.');
-      localStorage.removeItem(ADMIN_PASSWORD_STORAGE_KEY);
       return false;
     } finally {
       setVerifying(false);
     }
-  }, []);
+  }, [password]);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(ADMIN_PASSWORD_STORAGE_KEY);
-      if (!stored) {
-        setVerifying(false);
-        return;
-      }
-
-      setPassword(stored);
-      void verifyPassword(stored);
-    } catch {
-      localStorage.removeItem(ADMIN_PASSWORD_STORAGE_KEY);
-      setVerifying(false);
-    }
-  }, [verifyPassword]);
-
-  const login = useCallback(async () => verifyPassword(password, { persist: true }), [password, verifyPassword]);
+    void verifySession();
+  }, [verifySession]);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(ADMIN_PASSWORD_STORAGE_KEY);
-    setPassword('');
-    setAuthenticated(false);
-    setAuthError('');
+    void fetch('/api/verify-admin', { method: 'DELETE' }).finally(() => {
+      setPassword('');
+      setAuthenticated(false);
+      setAuthError('');
+      setVerifying(false);
+    });
   }, []);
-
-  const getAdminHeaders = useCallback((candidate) => ({ 'x-admin-password': candidate || password }), [password]);
 
   return {
     password,
@@ -81,6 +96,6 @@ export default function useAdminPassword() {
     verifying,
     login,
     logout,
-    getAdminHeaders,
+    verifySession,
   };
 }

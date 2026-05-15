@@ -15,7 +15,7 @@ export default function AdminExportPage() {
     setError('');
 
     try {
-      const response = await fetch(path, { headers: admin.getAdminHeaders() });
+      const response = await fetch(path);
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || 'Unable to download export.');

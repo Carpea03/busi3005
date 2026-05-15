@@ -225,7 +225,7 @@ export default function AdminQuizLivePage({ params }) {
 
   const streamStatus = useLiveQuizStream({
     enabled: admin.authenticated,
-    url: `/api/quiz/${params.quizId}/events/admin?password=${encodeURIComponent(admin.password)}`,
+    url: `/api/quiz/${params.quizId}/events/admin`,
     fallbackIntervalMs: 12000,
     load: async ({ silent } = {}) => {
       try {
@@ -233,10 +233,7 @@ export default function AdminQuizLivePage({ params }) {
           setLoading(true);
         }
 
-        const response = await fetch(`/api/quiz/${params.quizId}/aggregate/admin`, {
-          headers: admin.getAdminHeaders(),
-          cache: 'no-store',
-        });
+        const response = await fetch(`/api/quiz/${params.quizId}/aggregate/admin`, { cache: 'no-store' });
         const data = await response.json();
 
         if (!response.ok) {
@@ -307,10 +304,7 @@ export default function AdminQuizLivePage({ params }) {
     try {
       const response = await fetch(`/api/admin/quiz/${params.quizId}/release`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...admin.getAdminHeaders(),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ questionId, released }),
       });
       const data = await response.json();
@@ -347,10 +341,7 @@ export default function AdminQuizLivePage({ params }) {
     try {
       const response = await fetch(`/api/admin/quiz/${params.quizId}/text-release`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...admin.getAdminHeaders(),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
           ids.length === 1
             ? { questionId, responseId: ids[0], released }

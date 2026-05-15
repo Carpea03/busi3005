@@ -39,7 +39,7 @@ export default function useLiveQuizStream({ enabled, url, load, fallbackInterval
     }
 
     setConnectionState('connecting');
-    source = new window.EventSource(url);
+    source = new window.EventSource(url, { withCredentials: true });
 
     source.addEventListener('ready', () => {
       if (!active) {

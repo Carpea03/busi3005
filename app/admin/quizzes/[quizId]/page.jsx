@@ -64,10 +64,7 @@ export default function AdminQuizDetailPage({ params }) {
     async function loadQuiz() {
       setLoading(true);
       try {
-        const response = await fetch(`/api/admin/quizzes/${params.quizId}`, {
-          headers: admin.getAdminHeaders(),
-          cache: 'no-store',
-        });
+        const response = await fetch(`/api/admin/quizzes/${params.quizId}`, { cache: 'no-store' });
         const data = await response.json();
 
         if (!response.ok) {
@@ -93,7 +90,7 @@ export default function AdminQuizDetailPage({ params }) {
     return () => {
       ignore = true;
     };
-  }, [admin.authenticated, admin.getAdminHeaders, params.quizId]);
+  }, [admin.authenticated, params.quizId]);
 
   async function handleStatusChange(nextStatus) {
     setStatusLoading(nextStatus);
@@ -101,10 +98,7 @@ export default function AdminQuizDetailPage({ params }) {
     try {
       const response = await fetch(`/api/admin/quiz/${params.quizId}/status`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...admin.getAdminHeaders(),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: nextStatus }),
       });
       const data = await response.json();

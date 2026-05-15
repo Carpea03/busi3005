@@ -22,10 +22,7 @@ export default function AdminStudentsPage() {
     async function loadStudents() {
       setLoading(true);
       try {
-        const response = await fetch('/api/admin/students', {
-          headers: admin.getAdminHeaders(),
-          cache: 'no-store',
-        });
+        const response = await fetch('/api/admin/students', { cache: 'no-store' });
         const data = await response.json();
 
         if (!response.ok) {
@@ -51,7 +48,7 @@ export default function AdminStudentsPage() {
     return () => {
       ignore = true;
     };
-  }, [admin.authenticated, admin.getAdminHeaders]);
+  }, [admin.authenticated]);
 
   const filteredStudents = useMemo(() => {
     if (!searchTerm) {

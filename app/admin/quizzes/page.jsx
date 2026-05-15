@@ -40,10 +40,7 @@ export default function AdminQuizzesPage() {
     async function loadQuizzes() {
       setLoading(true);
       try {
-        const response = await fetch('/api/admin/quizzes', {
-          headers: admin.getAdminHeaders(),
-          cache: 'no-store',
-        });
+        const response = await fetch('/api/admin/quizzes', { cache: 'no-store' });
         const data = await response.json();
         if (!response.ok) {
           throw new Error(data.error || 'Unable to load quizzes.');
@@ -67,7 +64,7 @@ export default function AdminQuizzesPage() {
     return () => {
       ignore = true;
     };
-  }, [admin.authenticated, admin.getAdminHeaders]);
+  }, [admin.authenticated]);
 
   async function handleStatusChange(quizId, nextStatus) {
     setStatusBusy((prev) => ({ ...prev, [quizId]: nextStatus }));
@@ -75,10 +72,7 @@ export default function AdminQuizzesPage() {
     try {
       const response = await fetch(`/api/admin/quiz/${quizId}/status`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...admin.getAdminHeaders(),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: nextStatus }),
       });
       const data = await response.json();
